@@ -13,15 +13,37 @@ More information on Multigraph Plugins can be found in the [Munin Wiki](http://m
 * [Multigraph Plugin Protocol](http://munin-monitoring.org/wiki/protocol-multigraph)
 
 The plugins consist of the following components:
+
 * The _pymunin_ module _(/pymunin/pymunin)_ implements the base classes for developing Munin plugins.
 * The plugin logic is implemented in the plugin scripts in _/pymunin_.
-* The actual data retrieval logic is separated from the plugins to facilitate code reuse. Individual modules
-in _/pymunin/pysysinfo/_ implement classes for getting the monitoring data and returning them in dictionary
-objects. The separation of the data retrieval logic should facilitate the use of the same code in other 
-monitoring solutions.
+* The actual data retrieval logic is separated from the plugins to facilitate code reuse.
+  Individual modules in _/pymunin/pysysinfo/_ implement classes for getting the monitoring data and
+  returning them in dictionary objects. The separation of the data retrieval logic should facilitate 
+  the use of the same code in other monitoring solution.
 
-The initial design was inspired by [python-munin](https://github.com/samuel/python-munin) 
-of [samuel](https://github.com/samuel) (Samuel Stauffer).
+Although the solution is focused on implementing _Multigraph Plugins_ the 
+
+The initial design of the solution was inspired by [python-munin](https://github.com/samuel/python-munin) 
+by [samuel](https://github.com/samuel) (Samuel Stauffer).
+
+
+Plugin Development
+------------------
+
+The first step for implementing a new _Multigraph Munin Plugin_ is developing a new module in _pysysinfo_ for
+retrieving the monitoring data.
+
+The steps for developing the actual plugin script are as follows:
+
+- The new plugin can be implemented by extending the the _MuninPlugin_ class in _pymunin_.
+- The _plugin_name_ property of _MuninPlugin_ class must be set to the name of the plugin.
+- Graph Objects are registered to the plugin in the constructor of the plugin class.
+-- Graph objects are created using the _MuninGraph_ class.
+--  _MuninGraph_ class implements methods for adding fields (data points) to the Graph Object.
+
+*  in _pymunin_ and added to the plugin in the constructor of the plugin class.
+* in the constructor of the plugins class.
+* The _retrieveVals_ method of the 
 
 
 Munin Plugins
