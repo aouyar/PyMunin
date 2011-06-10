@@ -35,15 +35,16 @@ retrieving the monitoring data.
 
 The steps for developing the actual plugin script are as follows:
 
-- The new plugin can be implemented by extending the the _MuninPlugin_ class in _pymunin_.
-- The _plugin_name_ property of _MuninPlugin_ class must be set to the name of the plugin.
-- Graph Objects are registered to the plugin in the constructor of the plugin class.
--- Graph objects are created using the _MuninGraph_ class.
---  _MuninGraph_ class implements methods for adding fields (data points) to the Graph Object.
-
-*  in _pymunin_ and added to the plugin in the constructor of the plugin class.
-* in the constructor of the plugins class.
-* The _retrieveVals_ method of the 
+* The new plugin can be implemented by extending the the _MuninPlugin_ class in _pymunin_.
+* The _plugin_name_ property of _MuninPlugin_ class must be set to the name of the plugin.
+* Graph Objects are registered to the plugin in the constructor of the plugin class.
+* Code for creating graph objects using the _MuninGraph_ class is placed in the constructor.
+* Code for adding fields to the graph using the _addField_ method of _MuninGraph_ class 
+  is placed in the constructor.
+* The _retrieveVals_ method of the plugin class is overwritten to retrieve data points and to associate values
+  with the graph fields.
+* The _muninMain_ function in _pymunin_ is called with the plugin class as argument for initializing the main
+  method of plugin. 
 
 
 Munin Plugins
