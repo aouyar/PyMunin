@@ -56,12 +56,12 @@ included:
 * Apache Tomcat
 * Apache Web Server
 * Asterisk Telephony Server
-* Asterisk Wanpipe Telephony Interface
 * Disk Usage
 * Memcached
 * Network Interface Traffic and Errors
 * NTP - Time Server
 * PostgreSQL Database
+* Sangoma Wanpipe Telephony Interfaces
 
 Classes for retrieving stats are available, but no plugins have been developed
 yet for the following:
