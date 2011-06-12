@@ -79,7 +79,7 @@ yet for the following:
 The Future
 ----------
 
-I would happy to receive suggestions on improving the code for developing Munin Plugins.
+I would be happy to receive suggestions on improving the code for developing Munin Plugins.
 
 I hope that by sharing the code, the existing plugins will get more testing and receive improvements, and
 many more Multigraph plugins will be developed collaboratively.
