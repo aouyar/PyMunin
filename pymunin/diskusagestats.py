@@ -33,7 +33,7 @@
 #
 #
 # Munin  - Magic Markers
-#%# family=manual
+#%# family=auto
 #%# capabilities=noautoconf nosuggest
 
 __author__="Ali Onur Uyar"

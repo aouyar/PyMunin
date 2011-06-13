@@ -7,14 +7,16 @@ __date__ ="$Oct 29, 2010 4:08:41 PM$"
 
 
 import re
+import os
 import platform
 
 
 # Defaults
 uptimeFile = '/proc/uptime'
 loadavgFile = '/proc/loadavg'
-meminfoFile = '/proc/meminfo'
 cpustatFile = '/proc/stat'
+meminfoFile = '/proc/meminfo'
+vmstatFile = '/proc/vmstat'
 
 
 
@@ -68,11 +70,12 @@ class SystemInfo:
             return None
         
     def getCPUuse(self):
-        """Return stats for memory utilization.
+        """Return cpu time utilization in seconds.
         
         @return: Dictionary of stats.
         
         """
+        hz = os.sysconf('SC_CLK_TCK')
         info_dict = {}
         try:
             fp = open(cpustatFile, 'r')
@@ -83,7 +86,7 @@ class SystemInfo:
         headers = ['user', 'nice', 'system', 'idle', 'iowait', 'irq', 'softirq', 'steal', 'guest']
         arr = line.split()
         if len(arr) > 1 and arr[0] == 'cpu':
-            return dict(zip(headers[0:len(arr)], arr[1:]))
+            return dict(zip(headers[0:len(arr)], [(float(t) / hz) for t in arr[1:]]))
         return info_dict
     
     def getProcessStats(self):
@@ -127,4 +130,23 @@ class SystemInfo:
                 else:
                     mult = 1
                 info_dict[mobj.group(1)] = int(mobj.group(2)) * mult
+        return info_dict
+    
+    def getVMstats(self):
+        """Return stats for Virtual Memory Subsystem.
+        
+        @return: Dictionary of stats.
+        
+        """
+        info_dict = {}
+        try:
+            fp = open(vmstatFile, 'r')
+            data = fp.read()
+            fp.close()
+        except:
+            raise Exception('Failed reading stats from file: %s' % vmstatFile)
+        for line in data.splitlines():
+            cols = line.split()
+            if len(cols) == 2:
+                info_dict[cols[0]] = cols[1]
         return info_dict
