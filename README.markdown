@@ -76,6 +76,13 @@ yet for the following:
 * System - Memory Usage
 
 
+Licensing
+_________
+
+PyMunin is copyrighted free software made available under the terms of the GPL License Version 3 or later.
+See the file COPYING that acompanies the code for full licensing information.
+
+
 The Future
 ----------
 
@@ -83,4 +90,3 @@ I would be happy to receive suggestions on improving the code for developing Mun
 
 I hope that by sharing the code, the existing plugins will get more testing and receive improvements, and
 many more Multigraph plugins will be developed collaboratively.
-

@@ -5,15 +5,20 @@
     - The muninMain function implements the entry point for Munin Plugins.
 
 """
-__author__="Ali Onur Uyar"
-__date__ ="$Oct 18, 2010 2:55:43 PM$"
-
 
 import os.path
 import sys
 import re
 import cPickle as pickle
 
+__author__ = "Ali Onur Uyar"
+__copyright__ = "Copyright 2011, Ali Onur Uyar"
+__credits__ = ["Samuel Stauffer"]
+__license__ = "GPL"
+__version__ = "0.9"
+__maintainer__ = "Ali Onur Uyar"
+__email__ = "aouyar at gmail.com"
+__status__ = "Development"
 
 
 class MuninAttrFilter:

@@ -33,12 +33,18 @@
 #%# family=manual
 #%# capabilities=noautoconf nosuggest
 
-__author__="Ali Onur Uyar"
-__date__ ="$Dic 29, 2010 10:58:22 PM$"
-
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
 from pysysinfo.apache import ApacheInfo
+
+__author__ = "Ali Onur Uyar"
+__copyright__ = "Copyright 2011, Ali Onur Uyar"
+__credits__ = []
+__license__ = "GPL"
+__version__ = "0.9"
+__maintainer__ = "Ali Onur Uyar"
+__email__ = "aouyar at gmail.com"
+__status__ = "Development"
 
 
 class MuninApachePlugin(MuninPlugin):

@@ -3,13 +3,18 @@ Telephony Interfaces.
 
 """
 
-__author__="Ali Onur Uyar"
-__date__ ="$Oct 25, 2010 4:08:41 PM$"
-
-
 import re
 import commands
 import netiface
+
+__author__ = "Ali Onur Uyar"
+__copyright__ = "Copyright 2011, Ali Onur Uyar"
+__credits__ = []
+__license__ = "GPL"
+__version__ = "0.9"
+__maintainer__ = "Ali Onur Uyar"
+__email__ = "aouyar at gmail.com"
+__status__ = "Development"
 
 
 # Defaults

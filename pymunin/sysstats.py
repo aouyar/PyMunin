@@ -29,14 +29,18 @@
 #%# family=auto
 #%# capabilities=noautoconf nosuggest
 
-__author__="Ali Onur Uyar"
-__date__ ="$Jun 12, 2011 14:51:57 PM$"
-
-
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
 from pysysinfo.system import SystemInfo
 
+__author__ = "Ali Onur Uyar"
+__copyright__ = "Copyright 2011, Ali Onur Uyar"
+__credits__ = []
+__license__ = "GPL"
+__version__ = "0.9"
+__maintainer__ = "Ali Onur Uyar"
+__email__ = "aouyar at gmail.com"
+__status__ = "Development"
 
 
 class MuninSysStatsPlugin(MuninPlugin):

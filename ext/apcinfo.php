@@ -1,4 +1,12 @@
 <?php
+# __author__ = "Ali Onur Uyar"
+# __copyright__ = "Copyright 2011, Ali Onur Uyar"
+# __credits__ = []
+# __license__ = "GPL"
+# __version__ = "0.9"
+# __maintainer__ = "Ali Onur Uyar"
+# __email__ = "aouyar at gmail.com"
+# __status__ = "Development"
 
 header("Content-type: text/plain");
 

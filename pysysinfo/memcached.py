@@ -4,12 +4,18 @@
 The statistics are obtained by connecting to and querying the Memcached. 
 
 """
-__author__="Ali Onur Uyar"
-__date__ ="$Nov 16, 2010 10:58:22 PM$"
-
 
 import socket
 import re
+
+__author__ = "Ali Onur Uyar"
+__copyright__ = "Copyright 2011, Ali Onur Uyar"
+__credits__ = []
+__license__ = "GPL"
+__version__ = "0.9"
+__maintainer__ = "Ali Onur Uyar"
+__email__ = "aouyar at gmail.com"
+__status__ = "Development"
 
 
 class MemcachedInfo:
