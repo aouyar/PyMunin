@@ -77,7 +77,7 @@ yet for the following:
 
 
 Licensing
-_________
+---------
 
 PyMunin is copyrighted free software made available under the terms of the GPL License Version 3 or later.
 See the file COPYING that acompanies the code for full licensing information.
