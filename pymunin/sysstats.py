@@ -16,6 +16,8 @@
 #    - sys_processes
 #    - sys_forks
 #    - sys_intr_ctxt
+#    - sys_vm_paging
+#    - sys_vm_swapping
 #
 #
 # Environment Variables
@@ -68,6 +70,7 @@ class MuninSysStatsPlugin(MuninPlugin):
         self._cpustats = None
         self._memstats = None
         self._procstats = None
+        self._vmstats = None
 
         if self.graphEnabled('sys_loadavg'):
             graph = MuninGraph('Load Average', 'System',
@@ -146,7 +149,7 @@ class MuninSysStatsPlugin(MuninPlugin):
             
         if self.graphEnabled('sys_forks'):
             graph = MuninGraph('Process Forks per Second', 'System',
-                info='Process Forks per Second..',
+                info='Process Forks per Second.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('forks', 'forks', type='DERIVE', min=0, draw='LINE2')
             self.appendGraph('sys_forks', graph)
@@ -168,6 +171,24 @@ class MuninSysStatsPlugin(MuninPlugin):
                                    draw='LINE2', info=infos[idx])
                     idx += 1
             self.appendGraph('sys_intr_ctxt', graph)
+        
+        if self.graphEnabled('sys_vm_paging'):
+            graph = MuninGraph('VM - Paging', 'System',
+                info='Virtual Memory Paging: Pages In (-) / Out (+) per Second.',
+                args='--base 1000 --lower-limit 0',
+                vlabel='pages in (-) / out (+) per second')
+            graph.addField('in', 'in', type='DERIVE', min=0, draw='LINE2', graph=False)
+            graph.addField('out', 'out', type='DERIVE', min=0, draw='LINE2', negative='in')
+            self.appendGraph('sys_vm_paging', graph)
+        
+        if self.graphEnabled('sys_vm_swapping'):
+            graph = MuninGraph('VM - Swapping', 'System',
+                info='Virtual Memory Swapping: Pages In (-) / Out (+) per Second.',
+                args='--base 1000 --lower-limit 0',
+                vlabel='pages in (-) / out (+) per second')
+            graph.addField('in', 'in', type='DERIVE', min=0, draw='LINE2', graph=False)
+            graph.addField('out', 'out', type='DERIVE', min=0, draw='LINE2', negative='in')
+            self.appendGraph('sys_vm_swapping', graph)
 
     def retrieveVals(self):
         """Retrive values for graphs."""
@@ -210,6 +231,19 @@ class MuninSysStatsPlugin(MuninPlugin):
             if self._procstats:
                 for field in self.getGraphFieldList('sys_intr_ctxt'):
                     self.setGraphVal('sys_intr_ctxt', field, self._procstats[field])
+        if self.hasGraph('sys_vm_paging'):
+            if self._vmstats is None:
+                self._vmstats = self._sysinfo.getVMstats()
+            if self._vmstats:
+                self.setGraphVal('sys_vm_paging', 'in', self._vmstats['pgpgin'])
+                self.setGraphVal('sys_vm_paging', 'out', self._vmstats['pgpgout'])
+        if self.hasGraph('sys_vm_swapping'):
+            if self._vmstats is None:
+                self._vmstats = self._sysinfo.getVMstats()
+            if self._vmstats:
+                self.setGraphVal('sys_vm_swapping', 'in', self._vmstats['pswpin'])
+                self.setGraphVal('sys_vm_swapping', 'out', self._vmstats['pswpout'])
+
 
 if __name__ == "__main__":
     sys.exit(muninMain(MuninSysStatsPlugin))

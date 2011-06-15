@@ -61,7 +61,7 @@ included:
 * Network Interface Traffic and Errors
 * NTP - Time Server
 * PostgreSQL Database
-* System Resources (Load, CPU, Memory, Processes, Interrupts, etc.)
+* System Resources (Load, CPU, Memory, Processes, Interrupts, Paging, Swapping, etc.)
 * Sangoma Wanpipe Telephony Interfaces
 
 Classes for retrieving stats are available, but no plugins have been developed
