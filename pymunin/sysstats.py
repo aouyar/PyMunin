@@ -10,8 +10,10 @@
 #
 # Multigraph Plugin - Graph Structure
 #    - sys_loadavg
-#    - sys_cpu
-#    - sys_memory
+#    - sys_cpu_util
+#    - sys_memory_util
+#    - sys_memory_avail
+#    - sys_processes
 #
 #
 # Environment Variables
@@ -60,8 +62,10 @@ class MuninSysStatsPlugin(MuninPlugin):
         MuninPlugin.__init__(self, argv, env)
         
         self._sysinfo = SystemInfo()
+        self._loadstats = None
         self._cpustats = None
         self._memstats = None
+        self._procstats = None
 
         if self.graphEnabled('sys_loadavg'):
             graph = MuninGraph('Load Average', 'System',
@@ -130,35 +134,80 @@ class MuninSysStatsPlugin(MuninPlugin):
                         graph.addField(field, field, type='GAUGE', draw='AREASTACK')
                 self.appendGraph('sys_mem_huge', graph)
         
+        if self.graphEnabled('sys_processes'):
+            graph = MuninGraph('Processes', 'System',
+                info='Number of processes in running and blocked state.',
+                args='--base 1000 --lower-limit 0')
+            graph.addField('running', 'running', type='GAUGE', draw='AREASTACK')
+            graph.addField('blocked', 'blocked', type='GAUGE', draw='AREASTACK')
+            self.appendGraph('sys_processes', graph)
+            
+        if self.graphEnabled('sys_forks'):
+            graph = MuninGraph('Process Forks per Second', 'System',
+                info='Process Forks per Second..',
+                args='--base 1000 --lower-limit 0')
+            graph.addField('forks', 'forks', type='DERIVE', min=0, draw='LINE2')
+            self.appendGraph('sys_forks', graph)
+            
+        if self.graphEnabled('sys_intr_ctxt'):
+            if self._procstats is None:
+                self._procstats = self._sysinfo.getProcessStats()
+            graph = MuninGraph('Interrupts and Context Switches per Second', 'System',
+                info='Interrupts and Context Switches per Second',
+                args='--base 1000 --lower-limit 0')
+            labels = ['irq', 'softirq', 'ctxt']
+            infos = ['Hardware Interrupts per second',
+                    'Software Interrupts per second.',
+                    'Context Switches per second.']
+            idx = 0
+            for field in ['intr', 'softirq', 'ctxt']:
+                if self._procstats.has_key(field):
+                    graph.addField(field, labels[idx], type='DERIVE', min=0,
+                                   draw='LINE2', info=infos[idx])
+                    idx += 1
+            self.appendGraph('sys_intr_ctxt', graph)
 
     def retrieveVals(self):
         """Retrive values for graphs."""
-        stats = self._sysinfo.getLoadAvg()
-        if stats:
-            if self.graphEnabled('sys_loadavg'):
-                self.setGraphVal('sys_loadavg', 'load15min', stats[2])
-                self.setGraphVal('sys_loadavg', 'load5min', stats[1])
-                self.setGraphVal('sys_loadavg', 'load1min', stats[0])
-        if self._cpustats:
-            for field in ['system', 'user', 'nice', 'idle', 'iowait', 'irq', 'softirq', 'steal', 'guest']:
-                if self._cpustats.has_key(field):
-                    self.setGraphVal('sys_cpu_util', field, int(self._cpustats[field] * 1000))
+        if self.hasGraph('sys_loadavg'):
+            self._loadstats = self._sysinfo.getLoadAvg()
+            if self._loadstats:
+                self.setGraphVal('sys_loadavg', 'load15min', self._loadstats[2])
+                self.setGraphVal('sys_loadavg', 'load5min', self._loadstats[1])
+                self.setGraphVal('sys_loadavg', 'load1min', self._loadstats[0])
+        if self._cpustats and self.hasGraph('sys_cpu_util'):
+            for field in self.getGraphFieldList('sys_cpu_util'):
+                self.setGraphVal('sys_cpu_util', field, int(self._cpustats[field] * 1000))
         if self._memstats:
-            if self.graphEnabled('sys_mem_util'):
-                for field in ['MemUsed', 'SwapCached', 'Buffers', 'Cached', 'MemFree', 'SwapUsed']:
-                    if self._memstats.has_key(field):
-                        self.setGraphVal('sys_mem_util', field, self._memstats[field])
-            if self.graphEnabled('sys_mem_avail'):
-                for field in ['MemKernel', 'MemHugePages', 'Active', 'Inactive', 'MemFree']:
-                    if self._memstats.has_key(field):
-                        self.setGraphVal('sys_mem_avail', field, self._memstats[field])
-            if self._memstats.has_key('Hugepagesize') and self._memstats['HugePages_Total'] > 0:
+            if self.hasGraph('sys_mem_util'):
+                for field in self.getGraphFieldList('sys_mem_util'):
+                    self.setGraphVal('sys_mem_util', field, self._memstats[field])
+            if self.hasGraph('sys_mem_avail'):
+                for field in self.getGraphFieldList('sys_mem_avail'):
+                    self.setGraphVal('sys_mem_avail', field, self._memstats[field])
+            if self.hasGraph('sys_mem_huge'):
                 for field in ['Rsvd', 'Surp', 'Free']:
                     fkey = 'HugePages_' + field
                     if self._memstats.has_key(fkey):
                         self.setGraphVal('sys_mem_huge', field, 
                                          self._memstats[fkey] * self._memstats['Hugepagesize'])
-                
+        if self.hasGraph('sys_processes'):
+            if self._procstats is None:
+                self._procstats = self._sysinfo.getProcessStats()
+            if self._procstats:
+                self.setGraphVal('sys_processes', 'running', self._procstats['procs_running'])
+                self.setGraphVal('sys_processes', 'blocked', self._procstats['procs_blocked'])
+        if self.hasGraph('sys_forks'):
+            if self._procstats is None:
+                self._procstats = self._sysinfo.getProcessStats()
+            if self._procstats:
+                self.setGraphVal('sys_forks', 'forks', self._procstats['processes'])
+        if self.hasGraph('sys_intr_ctxt'):
+            if self._procstats is None:
+                self._procstats = self._sysinfo.getProcessStats()
+            if self._procstats:
+                for field in self.getGraphFieldList('sys_intr_ctxt'):
+                    self.setGraphVal('sys_intr_ctxt', field, self._procstats[field])
 
 if __name__ == "__main__":
     sys.exit(muninMain(MuninSysStatsPlugin))
