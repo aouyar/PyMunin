@@ -95,7 +95,8 @@ class SystemInfo:
         return info_dict
     
     def getProcessStats(self):
-        """Return stats for forks, context switches and interrupts.
+        """Return stats for running and blocked processes, forks, 
+        context switches and interrupts.
         
         @return: Dictionary of stats.
         
