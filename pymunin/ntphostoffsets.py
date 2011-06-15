@@ -111,11 +111,11 @@ class MuninNTPhostOffsetsPlugin(MuninPlugin):
                 hostkey = re.sub('\.', '_', host)
                 hoststats = ntpstats.get(host)
                 if hoststats:
-                    if self.graphEnabled('ntp_host_stratums'):
+                    if self.hasGraph('ntp_host_stratums'):
                         self.setGraphVal('ntp_host_stratums', hostkey, hoststats.get('stratum'))
-                    if self.graphEnabled('ntp_host_offsets'):
+                    if self.hasGraph('ntp_host_offsets'):
                         self.setGraphVal('ntp_host_offsets', hostkey, hoststats.get('offset'))
-                    if self.graphEnabled('ntp_host_delays'):
+                    if self.hasGraph('ntp_host_delays'):
                         self.setGraphVal('ntp_host_delays', hostkey, hoststats.get('delay'))
 
 

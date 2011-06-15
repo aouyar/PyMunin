@@ -90,10 +90,10 @@ class MuninNTPhostOffsetPlugin(MuninPlugin):
         ntpinfo = NTPinfo()
         stats = ntpinfo.getHostOffset(self._remoteHost)
         if stats:
-            if self.graphEnabled('ntp_host_stratum'):
+            if self.hasGraph('ntp_host_stratum'):
                 stratumGraphName = 'ntp_host_stratum_%s' % self._remoteHost
                 self.setGraphVal(stratumGraphName, 'stratum', stats.get('stratum'))
-            if self.graphEnabled('ntp_host_offset'):
+            if self.hasGraph('ntp_host_offset'):
                 offsetGraphName = 'ntp_host_offset_%s' % self._remoteHost
                 self.setGraphVal(offsetGraphName, 'offset', stats.get('offset'))
                 self.setGraphVal(offsetGraphName, 'delay', stats.get('delay'))

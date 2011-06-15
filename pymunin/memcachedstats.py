@@ -144,18 +144,18 @@ class MuninMemcachedPlugin(MuninPlugin):
         serverInfo = MemcachedInfo(self._host,  self._port)
         stats = serverInfo.getStats()
         if stats:
-            if self.graphEnabled('memcached_connections'):
+            if self.hasGraph('memcached_connections'):
                 self.setGraphVal('memcached_connections', 'conn', stats.get('curr_connections'))
-            if self.graphEnabled('memcached_items'):
+            if self.hasGraph('memcached_items'):
                 self.setGraphVal('memcached_items', 'items', stats.get('curr_items'))
-            if self.graphEnabled('memcached_storage'):
+            if self.hasGraph('memcached_storage'):
                 self.setGraphVal('memcached_storage', 'bytes', stats.get('bytes'))
-            if self.graphEnabled('memcached_traffic'):
+            if self.hasGraph('memcached_traffic'):
                 self.setGraphVal('memcached_traffic', 'rxbytes', stats.get('bytes_read'))
                 self.setGraphVal('memcached_traffic', 'txbytes', stats.get('bytes_written'))
-            if self.graphEnabled('memcached_connrate'):
+            if self.hasGraph('memcached_connrate'):
                 self.setGraphVal('memcached_connrate', 'conn', stats.get('total_connections'))
-            if self.graphEnabled('memcached_reqrate'):
+            if self.hasGraph('memcached_reqrate'):
                 self.setGraphVal('memcached_reqrate', 'set', stats.get('cmd_set'))
                 self.setGraphVal('memcached_reqrate', 'get', stats.get('cmd_get'))
                 self.setGraphVal('memcached_reqrate', 'del',
@@ -166,7 +166,7 @@ class MuninMemcachedPlugin(MuninPlugin):
                     stats.get('incr_hits') + stats.get('incr_misses'))
                 self.setGraphVal('memcached_reqrate', 'decr',
                     stats.get('decr_hits') + stats.get('decr_misses'))
-            if self.graphEnabled('memcached_hitpct'):
+            if self.hasGraph('memcached_hitpct'):
                 stats['set_hits'] = stats.get('total_items')
                 stats['set_misses'] = stats.get('cmd_set') - stats.get('total_items')
                 prev_stats = self.restoreState()

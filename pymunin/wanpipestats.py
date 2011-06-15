@@ -134,27 +134,27 @@ class MuninWanpipePlugin(MuninPlugin):
         """Retrive values for graphs."""
         for iface in self._ifaceList:
             if self._reqIfaceList is None or iface in self._reqIfaceList:
-                if self.graphEnabled('wanpipe_traffic') or self.graphEnabled('wanpipe_errors'):
+                if self.hasGraph('wanpipe_traffic') or self.hasGraph('wanpipe_errors'):
                     stats = self._ifaceStats.get(iface)
                     if stats:
-                        if self.graphEnabled('wanpipe_traffic'):
+                        if self.hasGraph('wanpipe_traffic'):
                             for field in ('rxpackets', 'txpackets'):
                                 self.setGraphVal('wanpipe_traffic_%s' % iface, field, stats.get(field))
-                        if self.graphEnabled('wanpipe_errors'):
+                        if self.hasGraph('wanpipe_errors'):
                             for field in ('rxerrs', 'txerrs', 'rxframe', 'txcarrier',
                                 'rxdrop', 'txdrop', 'rxfifo', 'txfifo'):
                                 self.setGraphVal('wanpipe_errors_%s' % iface, field, stats.get(field))
-                if self.graphEnabled('wanpipe_pri_errors') or self.graphEnabled('wanpipe_rxlevel'):
+                if self.hasGraph('wanpipe_pri_errors') or self.hasGraph('wanpipe_rxlevel'):
                     try:
                         stats = self._wanpipeInfo.getPRIstats(iface)
                     except:
                         stats = None
                     if stats:
-                        if self.graphEnabled('wanpipe_pri_errors'):
+                        if self.hasGraph('wanpipe_pri_errors'):
                             for field in ('linecodeviolation', 'farendblockerrors',
                                 'crc4errors', 'faserrors'):
                                 self.setGraphVal('wanpipe_pri_errors_%s' % iface, field, stats.get(field))
-                        if self.graphEnabled('wanpipe_rxlevel'):
+                        if self.hasGraph('wanpipe_rxlevel'):
                             self.setGraphVal('wanpipe_pri_rxlevel', iface, stats.get('rxlevel'))
 
 

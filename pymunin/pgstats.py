@@ -240,28 +240,28 @@ class MuninPgPlugin(MuninPlugin):
         databases = stats.get('databases')
         totals = stats.get('totals')
         if databases and len(databases) > 0:
-            if self.graphEnabled('pg_connections'):
+            if self.hasGraph('pg_connections'):
                 limit = self._pgConn.getParam('max_connections')
                 self.setGraphVal('pg_connections', 'max_conn', limit)
                 for (db, dbstats) in databases.iteritems():
                     if self.dbIncluded(db):
                         self.setGraphVal('pg_connections', db, dbstats['numbackends'])
                 self.setGraphVal('pg_connections', 'total', totals['numbackends'])
-            if self.graphEnabled('pg_diskspace'):
+            if self.hasGraph('pg_diskspace'):
                 for (db, dbstats) in databases.iteritems():
                     if self.dbIncluded(db):
                         self.setGraphVal('pg_diskspace', db, dbstats['disk_size'])
                 self.setGraphVal('pg_diskspace', 'total', totals['disk_size'])
-        if self.graphEnabled('pg_blockreads'):
+        if self.hasGraph('pg_blockreads'):
             self.setGraphVal('pg_blockreads', 'blk_hit', totals['blks_hit'])
             self.setGraphVal('pg_blockreads', 'blk_read', totals['blks_read'])
-        if self.graphEnabled('pg_xact'):
+        if self.hasGraph('pg_xact'):
             self.setGraphVal('pg_xact', 'commits', totals['xact_commit'])
             self.setGraphVal('pg_xact', 'rollbacks', totals['xact_rollback'])
-        if self.graphEnabled('pg_tup_read'):
+        if self.hasGraph('pg_tup_read'):
             self.setGraphVal('pg_tup_read', 'fetch', totals['tup_fetched'])
             self.setGraphVal('pg_tup_read', 'return', totals['tup_returned'])
-        if self.graphEnabled('pg_tup_write'):
+        if self.hasGraph('pg_tup_write'):
             self.setGraphVal('pg_tup_write', 'delete', totals['tup_deleted'])
             self.setGraphVal('pg_tup_write', 'update', totals['tup_updated'])
             self.setGraphVal('pg_tup_write', 'insert', totals['tup_inserted'])
@@ -269,7 +269,7 @@ class MuninPgPlugin(MuninPlugin):
         if self._detailGraphs:
             for (db, dbstats) in databases.iteritems():
                 if self.dbIncluded(db):
-                    if self.graphEnabled('pg_blockread_detail'):
+                    if self.hasGraph('pg_blockread_detail'):
                         self.setGraphVal('pg_blockread_detail', db, 
                             dbstats['blks_hit'] + dbstats['blks_read'])
                     for (graph_name, attr_name) in (
@@ -281,7 +281,7 @@ class MuninPgPlugin(MuninPlugin):
                             ('pg_tup_update_detail', 'tup_updated'),
                             ('pg_tup_insert_detail', 'tup_inserted'),
                         ):
-                        if self.graphEnabled(graph_name):
+                        if self.hasGraph(graph_name):
                             self.setGraphVal(graph_name, db, dbstats[attr_name])
     
     def dbIncluded(self, name):

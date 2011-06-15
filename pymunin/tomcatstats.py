@@ -160,7 +160,7 @@ class MuninTomcatPlugin(MuninPlugin):
         
     def retrieveVals(self):
         """Retrive values for graphs."""
-        if self.graphEnabled('tomcat_memory'):
+        if self.hasGraph('tomcat_memory'):
             stats = self._tomcatInfo.getMemoryStats()
             self.setGraphVal('tomcat_memory', 'used', stats['total'] - stats['free'])
             self.setGraphVal('tomcat_memory', 'free', stats['free'])
@@ -169,23 +169,23 @@ class MuninTomcatPlugin(MuninPlugin):
             thrstats = stats['threadInfo']
             reqstats = stats['requestInfo']
             if self.portIncluded(port):
-                if self.graphEnabled('tomcat_threads'):
+                if self.hasGraph('tomcat_threads'):
                     name = "tomcat_threads_%d" % port
                     self.setGraphVal(name, 'busy', thrstats['currentThreadsBusy'])
                     self.setGraphVal(name, 'idle', 
                         thrstats['currentThreadCount'] - thrstats['currentThreadsBusy'])
                     self.setGraphVal(name, 'max', thrstats['maxThreads'])
-                if self.graphEnabled('tomcat_access'):
+                if self.hasGraph('tomcat_access'):
                     name = "tomcat_access_%d" % port
                     self.setGraphVal(name, 'reqs', reqstats['requestCount'])
-                if self.graphEnabled('tomcat_error'):
+                if self.hasGraph('tomcat_error'):
                     name = "tomcat_error_%d" % port
                     self.setGraphVal(name, 'errors', reqstats['errorCount'])
-                if self.graphEnabled('tomcat_traffic'):
+                if self.hasGraph('tomcat_traffic'):
                     name = "tomcat_traffic_%d" % port
                     self.setGraphVal(name, 'rx', reqstats['bytesReceived'])
                     self.setGraphVal(name, 'tx', reqstats['bytesSent'])
-#                if self.graphEnabled('tomcat_cputime'):
+#                if self.hasGraph('tomcat_cputime'):
 #                    name = "tomcat_cputime_%d" % port
 #                    self.setGraphVal(name, 'cpu', int(reqstats['processingTime'] * 1000))
     

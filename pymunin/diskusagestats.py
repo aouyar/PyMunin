@@ -102,13 +102,13 @@ class MuninDiskUsagePlugin(MuninPlugin):
     def retrieveVals(self):
         """Retrive values for graphs."""
         name = 'diskspace'
-        if self.graphEnabled(name):
+        if self.hasGraph(name):
             for (fspath, stats) in self._statsSpace.iteritems():
                 if self.fsPathEnabled(fspath) and self.fsTypeEnabled(stats['type']):
                     fname = self._getFieldName(fspath)
                     self.setGraphVal(name, fname, stats['inuse_pcent'])
         name = 'diskinode'
-        if self.graphEnabled(name):
+        if self.hasGraph(name):
             for (fspath, stats) in self._statsInode.iteritems():
                 if self.fsPathEnabled(fspath) and self.fsTypeEnabled(stats['type']):
                     fname = self._getFieldName(fspath)
