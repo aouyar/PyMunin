@@ -169,24 +169,24 @@ class MuninTomcatPlugin(MuninPlugin):
             thrstats = stats['threadInfo']
             reqstats = stats['requestInfo']
             if self.portIncluded(port):
-                if self.hasGraph('tomcat_threads'):
-                    name = "tomcat_threads_%d" % port
+                name = "tomcat_threads_%d" % port
+                if self.hasGraph(name):
                     self.setGraphVal(name, 'busy', thrstats['currentThreadsBusy'])
                     self.setGraphVal(name, 'idle', 
                         thrstats['currentThreadCount'] - thrstats['currentThreadsBusy'])
                     self.setGraphVal(name, 'max', thrstats['maxThreads'])
-                if self.hasGraph('tomcat_access'):
-                    name = "tomcat_access_%d" % port
+                name = "tomcat_access_%d" % port
+                if self.hasGraph(name):
                     self.setGraphVal(name, 'reqs', reqstats['requestCount'])
-                if self.hasGraph('tomcat_error'):
-                    name = "tomcat_error_%d" % port
+                name = "tomcat_error_%d" % port
+                if self.hasGraph(name):
                     self.setGraphVal(name, 'errors', reqstats['errorCount'])
-                if self.hasGraph('tomcat_traffic'):
-                    name = "tomcat_traffic_%d" % port
+                name = "tomcat_traffic_%d" % port
+                if self.hasGraph(name):
                     self.setGraphVal(name, 'rx', reqstats['bytesReceived'])
                     self.setGraphVal(name, 'tx', reqstats['bytesSent'])
-#                if self.hasGraph('tomcat_cputime'):
-#                    name = "tomcat_cputime_%d" % port
+#                name = "tomcat_cputime_%d" % port
+#                if self.hasGraph(name):
 #                    self.setGraphVal(name, 'cpu', int(reqstats['processingTime'] * 1000))
     
     def portIncluded(self, port):

@@ -110,13 +110,15 @@ class MuninNetIfacePlugin(MuninPlugin):
         """Retrive values for graphs."""
         for iface in self._ifaceList:
             stats = self._ifaceStats.get(iface)
-            if self.hasGraph('netiface_traffic'):
-                self.setGraphVal('netiface_traffic_%s' % iface, 'rx', stats.get('rxbytes') * 8)
-                self.setGraphVal('netiface_traffic_%s' % iface, 'tx', stats.get('txbytes') * 8)
-            if self.hasGraph('netiface_errors'):
+            graph_name = 'netiface_traffic_%s' % iface
+            if self.hasGraph(graph_name):
+                self.setGraphVal(graph_name, 'rx', stats.get('rxbytes') * 8)
+                self.setGraphVal(graph_name, 'tx', stats.get('txbytes') * 8)
+            graph_name = 'netiface_errors_%s' % iface
+            if self.hasGraph(graph_name):
                 for field in ('rxerrs', 'txerrs', 'rxframe', 'txcarrier',
                     'rxdrop', 'txdrop', 'rxfifo', 'txfifo'):
-                    self.setGraphVal('netiface_errors_%s' % iface, field, stats.get(field))
+                    self.setGraphVal(graph_name, field, stats.get(field))
 
 
 if __name__ == "__main__":
