@@ -88,7 +88,7 @@ class MuninPlugin:
             
         """
         self._graphDict = {}
-        self._graphList = []
+        self._graphNames = []
         self._subGraphDict = {}
         self.nestedGraphs = True
         self._filters = {}
@@ -214,8 +214,8 @@ class MuninPlugin:
 
         """
         self._graphDict[name] = graph
-        self._graphList.append((name, graph))
-        if not self.isMultigraph  and len(self._graphList) > 1:
+        self._graphNames.append(name)
+        if not self.isMultigraph  and len(self._graphNames) > 1:
             raise AttributeError("Simple Munin Plugins cannot have more than one graph.")
         
     def appendSubgraph(self, parent_name,  graph_name, graph):
@@ -272,6 +272,38 @@ class MuninPlugin:
         else:
             raise Exception("Invalid parent graph name %s used for setting value for subgraph %s."
                 % (parent_name, graph_name))
+    
+    def hasGraph(self, name):
+        """Return true if graph with name is registered to plugin.
+        
+        @return: Boolean
+        
+        """
+        return self._graphDict.has_key(name)
+            
+    def getGraphList(self):
+        """Returns list of names of graphs registered to plugin.
+        
+        @return - List of graph names.
+        
+        """
+        return self._graphNames
+
+    def graphHasField(self, graph_name, field_name):
+        """Return true if graph with name graph_name has field with name field_name.
+        
+        @return: Boolean
+        
+        """
+        return self._graphDict[graph_name].hasField(field_name)
+            
+    def getGraphFieldList(self, graph_name):
+        """Returns list of names of fields for graph with name graph_name.
+        
+        @return - List of field names for graph.
+        
+        """
+        return self._graphDict[graph_name].getFieldList()
         
     def retrieveVals(self):
         """Initialize measured values for Graphs.
@@ -300,7 +332,8 @@ class MuninPlugin:
         will work correctly as long as the Munin Graph objects have been populated.
 
         """
-        for (name, graph) in self._graphList:
+        for name in self._graphNames:
+            graph = self._graphDict[name]
             if self.isMultigraph:
                 print "multigraph %s" % name
             print graph.getConfig()
@@ -329,7 +362,8 @@ class MuninPlugin:
 
         """
         self.retrieveVals()
-        for (name, graph) in self._graphList:
+        for name in self._graphNames:
+            graph = self._graphDict[name]
             if self.isMultigraph:
                 print "multigraph %s" % name
             print graph.getVals()
@@ -397,9 +431,10 @@ class MuninGraph:
         @param height:       Graph height in pixels.
             .
         """
-        self._graph_attrs = locals()
-        self._fields = []
-        self._valDict = {}
+        self._graphAttrDict = locals()
+        self._fieldNameList = []
+        self._fieldAttrDict = {}
+        self._fieldValDict = {}
 
     def addField(self, name, label, type=None,  draw=None, info=None,
         extinfo=None, colour=None, negative=None, graph=None, min=None, max=None,
@@ -424,10 +459,27 @@ class MuninGraph:
             
         """
         attrs = locals()
-        self._fields.append((name, attrs))
+        self._fieldNameList.append(name)
+        self._fieldAttrDict[name] = attrs
 
+    def hasField(self, field_name):
+        """Returns true if field with field_name exists.
+        
+        @return: Boolean
+        
+        """
+        return self._fieldAttrDict.has_key(field_name)
+    
+    def getFieldList(self):
+        """Returns list of field names registered to Munin Graph.
+        
+        @return: List of field names registered to Munin Graph.
+        
+        """
+        return self._fieldNameList
+    
     def getConfig(self):
-        """Returns config entries for Munin Graph
+        """Returns config entries for Munin Graph.
         
         @return: Multi-line text output with Munin Graph configuration. 
         
@@ -437,7 +489,7 @@ class MuninGraph:
         # Process Graph Attributes
         for key in ('title', 'category', 'vlabel', 'info', 'args', 'period', 'scale',
                     'total', 'order', 'printfformat', 'width', 'height'):
-            val = self._graph_attrs.get(key)
+            val = self._graphAttrDict.get(key)
             if val is not None:
                 if isinstance(val, bool):
                     if val:
@@ -447,7 +499,8 @@ class MuninGraph:
                 conf.append("graph_%s %s" % (key,val))
 
         # Process Field Attributes
-        for (field_name, field_attrs) in self._fields:
+        for field_name in self._fieldNameList:
+            field_attrs = self._fieldAttrDict.get(field_name)
             for key in ('label', 'type', 'draw', 'info', 'extinfo', 'colour',
                 'negative', 'graph', 'min', 'max', 'cdef', 'line', 'warning', 'critical'):
                 val = field_attrs.get(key)
@@ -467,7 +520,7 @@ class MuninGraph:
         @param value  : Value for field. 
         
         """
-        self._valDict[name] = val
+        self._fieldValDict[name] = val
 
     def getVals(self):
         """Returns value entries for Munin Graph
@@ -476,9 +529,8 @@ class MuninGraph:
         
         """
         vals = []
-        for field in self._fields:
-            field_name = field[0]
-            val = self._valDict.get(field_name)
+        for field_name in self._fieldNameList:
+            val = self._fieldValDict.get(field_name)
             if val is not None:
                 if isinstance(val, float):
                     vals.append("%s.value %f" % (field_name, val))
