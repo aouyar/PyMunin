@@ -61,7 +61,7 @@ included:
 * Network Interface Traffic and Errors
 * NTP - Time Server
 * PostgreSQL Database
-* System Resources (CPU, Memory, Processes, Interrupts, etc.)
+* System Resources (Load, CPU, Memory, Processes, Interrupts, etc.)
 * Sangoma Wanpipe Telephony Interfaces
 
 Classes for retrieving stats are available, but no plugins have been developed
@@ -71,10 +71,6 @@ yet for the following:
 * Disk I/O
 * MySQL Database
 * Squid Web Proxy
-* System - Processor Utilization
-* System - Load Average
-* System - Processes
-* System - Memory Usage
 
 
 Licensing
