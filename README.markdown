@@ -20,7 +20,7 @@ The plugins consist of the following components:
   developing Munin plugins.
 * The plugin logic is implemented in the plugin scripts in _/pymunin_.
 * The actual data retrieval logic is separated from the plugins to facilitate
-  code reuse. Individual modules in the folder _./pysysinfo_ implement classes 
+  code reuse. Individual modules in the directory _./pysysinfo_ implement classes 
   for getting the monitoring data and returning them in dictionary objects. 
   The separation of the data retrieval logic should facilitate the use of the 
   same code in other monitoring solution.
@@ -64,11 +64,22 @@ Installation
 
 ### Installation of the Libraries ###
 
-* The _pysysinfo_ folder should be placed in _PYTHON_ search path or in the 
-  _Munin Plugins_ directory (ex. _/usr/share/munin/plugins_)
-* The contents of the _plugins/pymunin_ folder should be placed in _PYTHON_ 
-  search path or in the _Munin Plugins_ directory 
-  (ex. _/usr/share/munin/plugins_)
+* The _pysysinfo_ directory should be placed in _PYTHON_ search path or in the 
+  _Munin Plugins_ directory (ex. _/usr/share/munin/plugins_).
+* The _plugins/pymunin_ directory should be placed in _PYTHON_ search path or in 
+  the _Munin Plugins_ directory (ex. _/usr/share/munin/plugins_).
+  
+### Installation of the Plugins ###
+
+* Copy the plugin scripts in the directory _plugins_ to the _Munin Plugins_ 
+  directory (ex. _/usr/share/munin/plugins_) and remove the file extension
+  '_py_'.
+* Enable the plugins just like the standard plugins by creating a symbolic links 
+  in the _Munin Plugins Configuration Directory_ (_/etc/munin/plugins_).
+* Configuration files for plugins can be created in the _Munin Plugins
+  Configuration Directory_ (_/etc/munin/plugin-conf.d_). The environment 
+  variables used by the plugin scripts are documented in the header part of the
+  script code.
 
 
 Plugin Development
