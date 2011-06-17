@@ -39,7 +39,7 @@ class ApacheInfo:
         @param password: Password. (Not needed unless authentication is required 
                              to access server-status page.
         @param ssl:      Use SSL if True. (Default: False)
-        @param autoInit: If True connect to Apache Web Server on creation.
+        @param autoInit: If True connect to Apache Web Server on instantiation.
             
         """
         if host is not None:

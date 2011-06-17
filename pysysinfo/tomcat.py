@@ -43,7 +43,7 @@ class TomcatInfo:
         @param user:     Apache Tomcat Manager User.
         @param password: Apache Tomcat Manager Password.
         @param ssl:      Use SSL if True. (Default: False)
-        @param autoInit: If True connect to Apache Tomcat Server on creation.
+        @param autoInit: If True connect to Apache Tomcat Server on instantiation.
             
         """
         if host is not None:

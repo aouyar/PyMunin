@@ -33,7 +33,7 @@ class MySQLinfo:
         @param database: MySQL Database
         @param user:     MySQL User
         @param password: MySQL Password
-        @param autoInit: If True connect to MySQL Database on creation.
+        @param autoInit: If True connect to MySQL Database on instantiation.
             
         """
         self._connParams = {}

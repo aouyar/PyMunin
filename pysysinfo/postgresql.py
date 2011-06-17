@@ -34,7 +34,7 @@ class PgInfo:
         @param database: PostgreSQL Schema
         @param user:     PostgreSQL User
         @param password: PostgreSQL Password
-        @param autoInit: If True connect to PostgreSQL Database on creation.
+        @param autoInit: If True connect to PostgreSQL Database on instantiation.
             
         """
         self._connParams = {}

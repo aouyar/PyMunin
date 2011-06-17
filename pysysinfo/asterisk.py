@@ -1,7 +1,7 @@
 """Implements AsteriskInfo Class for gathering stats from the Asterisk Manager 
 Interface (AMI). The AsteriskInfo Class relies on two alternative mechanisms
 for  obtaining the connection parameters for AMI:
-    - Connection parameters be passed to AsteriskInfo on instance creation.
+    - Connection parameters be passed to AsteriskInfo on instance instantiation.
     - AsteriskInfo implements autoconfiguration for the following setups:
         - FreePBX:        The configuration file /etc/amportal.conf is parsed.
         - Plain Asterisk: The configuration file /etc/asterisk/manager.conf 

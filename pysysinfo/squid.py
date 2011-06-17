@@ -62,7 +62,7 @@ class SquidInfo:
         @param port:     Squid Proxy Port. (Default: 3128)
         @param user:     Squid Proxy Manager User.
         @param password: Squid Proxy Manager Password.
-        @param autoInit: If True connect to Apache Tomcat Server on creation.
+        @param autoInit: If True connect to Apache Tomcat Server on instantiation.
             
         """
         if host is not None:

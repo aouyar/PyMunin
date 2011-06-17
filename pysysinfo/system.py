@@ -111,7 +111,8 @@ class SystemInfo:
         for line in data.splitlines():
             arr = line.split()
             if len(arr) > 1 and arr[0] in ('ctxt', 'intr', 'softirq',
-                                           'processes', 'procs_running', 'procs_blocked'):
+                                           'processes', 'procs_running', 
+                                           'procs_blocked'):
                 info_dict[arr[0]] = arr[1]
         return info_dict
         
