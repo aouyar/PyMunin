@@ -47,7 +47,8 @@ class NestedDict(dict):
             curr_dict = self
             last_key = keys.pop()
             for key in keys:
-                if not curr_dict.has_key(key) or not isinstance(curr_dict[key], NestedDict):
+                if not curr_dict.has_key(key) or not isinstance(curr_dict[key], 
+                                                                NestedDict):
                     curr_dict[key] = type(self)()
                 curr_dict = curr_dict[key]
             curr_dict[last_key] = value

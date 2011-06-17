@@ -54,7 +54,8 @@ class DiskUsageInfo:
         """
         stats = {}
         try:
-            out = subprocess.Popen([dfCmd, "-Pk"], stdout=subprocess.PIPE).communicate()[0]
+            out = subprocess.Popen([dfCmd, "-Pk"], 
+                                   stdout=subprocess.PIPE).communicate()[0]
         except:
             raise Exception('Execution of command %s failed.' % dfCmd)
         lines = out.splitlines()
@@ -79,7 +80,8 @@ class DiskUsageInfo:
         """
         stats = {}
         try:
-            out = subprocess.Popen([dfCmd, "-i", "-Pk"], stdout=subprocess.PIPE).communicate()[0]
+            out = subprocess.Popen([dfCmd, "-i", "-Pk"], 
+                                   stdout=subprocess.PIPE).communicate()[0]
         except:
             raise Exception('Execution of command %s failed.' % dfCmd)
         lines = out.splitlines()

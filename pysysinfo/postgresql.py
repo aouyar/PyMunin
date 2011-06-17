@@ -184,17 +184,18 @@ class PgInfo:
             return {}
         
     def getDatabaseStats(self):
-        """Returns database block read, transaction and tuple stats for each database.
+        """Returns database block read, transaction and tuple stats for each 
+        database.
         
         @return: Nested dictionary of stats.
         
         """
-        headers = ('datname', 'numbackends', 'xact_commit', 'xact_rollback', 'blks_read', 'blks_hit',
-            'tup_returned', 'tup_fetched', 'tup_inserted', 'tup_updated', 'tup_deleted',
-            'disk_size')
+        headers = ('datname', 'numbackends', 'xact_commit', 'xact_rollback', 
+                   'blks_read', 'blks_hit', 'tup_returned', 'tup_fetched', 
+                   'tup_inserted', 'tup_updated', 'tup_deleted', 'disk_size')
         cur = self._conn.cursor()
         cur.execute("SELECT %s, pg_database_size(datname) FROM pg_stat_database;" 
-            % ",".join(headers[:-1]))
+                    % ",".join(headers[:-1]))
         rows = cur.fetchall()
         dbstats = self._createStatsDict(headers, rows)
         totals = self._createTotalsDict(headers, rows)
@@ -217,7 +218,8 @@ class PgInfo:
                 true,
                 pg_last_xlog_receive_location(),
                 pg_last_xlog_replay_location();""")
-            headers = ('in_recovery', 'xlog_receive_location', 'xlog_replay_location')
+            headers = ('in_recovery', 'xlog_receive_location', 
+                       'xlog_replay_location')
         else:
             cur.execute("""SELECT
                 false,

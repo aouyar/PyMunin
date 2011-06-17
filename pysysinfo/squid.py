@@ -54,7 +54,8 @@ def parse_value(val):
 class SquidInfo:
     """Class to retrieve stats from Squid Proxy Server."""
 
-    def __init__(self, host=None, port=None, user=None, password=None, autoInit=True):
+    def __init__(self, host=None, port=None, user=None, password=None, 
+                 autoInit=True):
         """Initialize Squid Proxy Manager access.
         
         @param host:     Squid Proxy Host. (Default: 127.0.0.1)
@@ -108,8 +109,10 @@ class SquidInfo:
             data = rp.read()
             return data
         else:
-            raise Exception("""Retrieval of stats from Squid Proxy Server on host %s and port %s failed.
-HTTP - Status: %s    Reason: %s""" % (self._host, self._port, rp.status, rp.reason))
+            raise Exception("Retrieval of stats from Squid Proxy Server"
+                            "on host %s and port %s failed.\n"
+                            "HTTP - Status: %s    Reason: %s" 
+                            % (self._host, self._port, rp.status, rp.reason))
     
     def _parseCounters(self, data):
         """Parse simple stats list of key, value pairs.

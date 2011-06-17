@@ -61,7 +61,9 @@ class NTPinfo:
         (retval, output) = commands.getstatusoutput("%s %s" % (ntpdateCmd, host))
         if retval == 0:
             for line in output.splitlines():
-                mobj = re.match('server.*,\s*stratum\s+(\d),.*offset\s+([\d\.-]+),.*delay\s+([\d\.]+)\s*$', line)
+                mobj = re.match('server.*,\s*stratum\s+(\d),.*'
+                                'offset\s+([\d\.-]+),.*delay\s+([\d\.]+)\s*$', 
+                                line)
                 if mobj:
                     info_dict['stratum'] = int(mobj.group(1))
                     info_dict['delay'] = float(mobj.group(3))
@@ -78,10 +80,13 @@ class NTPinfo:
 
         """
         info_dict = {}
-        (retval, output) = commands.getstatusoutput("%s %s" % (ntpdateCmd, " ".join(hosts)))
+        (retval, output) = commands.getstatusoutput("%s %s" % (ntpdateCmd, 
+                                                               " ".join(hosts)))
         if retval == 0:
             for line in output.splitlines():
-                mobj = re.match('server\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}),\s*stratum\s+(\d),.*offset\s+([\d\.-]+),.*delay\s+([\d\.]+)\s*$', line)
+                mobj = re.match('server\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}),'
+                                '\s*stratum\s+(\d),.*offset\s+([\d\.-]+),'
+                                '.*delay\s+([\d\.]+)\s*$', line)
                 if mobj:
                     host_dict = {}
                     host = mobj.group(1)

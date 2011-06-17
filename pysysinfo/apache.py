@@ -70,7 +70,8 @@ class ApacheInfo:
                 urllib.quote(self._user), urllib.quote(self._password), 
                 self._host, self._port)
         else:
-            url = "%s://%s:%d/server-status?auto" % (self._proto, self._host, self._port)
+            url = ("%s://%s:%d/server-status?auto" 
+                   % (self._proto, self._host, self._port))
         fp = urllib.urlopen(url)
         response = ''
         oldlen = 0

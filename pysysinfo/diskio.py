@@ -69,8 +69,9 @@ class DiskIOinfo:
                         self._dmMajorNum = major
     
     def _initDMinfo(self):
-        """Check files in /dev/mapper to initialize data sctructures for
-        mappings between device-mapper devices, minor device numbers, VGs and LVs.
+        """Check files in /dev/mapper to initialize data sctructures for 
+        mappings between device-mapper devices, minor device numbers, VGs 
+        and LVs.
         
         """
         self._mapMinorDmName = {}

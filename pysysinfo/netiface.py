@@ -60,7 +60,8 @@ class NetIfaceInfo:
         """
         conf = {}
         try:
-            out = subprocess.Popen([ipCmd, "addr", "show"], stdout=subprocess.PIPE).communicate()[0]
+            out = subprocess.Popen([ipCmd, "addr", "show"], 
+                                   stdout=subprocess.PIPE).communicate()[0]
         except:
             raise Exception('Execution of command %s failed.' % ipCmd)
         for line in out.splitlines():
@@ -100,7 +101,8 @@ class NetIfaceInfo:
         """
         routes = []
         try:
-            out = subprocess.Popen([routeCmd, "-n"], stdout=subprocess.PIPE).communicate()[0]
+            out = subprocess.Popen([routeCmd, "-n"], 
+                                   stdout=subprocess.PIPE).communicate()[0]
         except:
             raise Exception('Execution of command %s failed.' % ipCmd)
         lines = out.splitlines()

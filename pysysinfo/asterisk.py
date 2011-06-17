@@ -40,14 +40,16 @@ class AsteriskInfo:
 
     """
 
-    def __init__(self, host='127.0.0.1', port=5038, user=None, password=None, autoInit=True):
+    def __init__(self, host='127.0.0.1', port=5038, user=None, password=None, 
+                 autoInit=True):
         """Initialize connection to Asterisk Manager Interface.
         
         @param host:     Asterisk Host
         @param port:     Asterisk Manager Port
         @param user:     Asterisk Manager User
         @param password: Asterisk Manager Password
-        @param autoInit: If True connect to Asterisk Manager Interface on creation.
+        @param autoInit: If True connect to Asterisk Manager Interface on 
+                         instantiation.
 
         """
         # Set Connection Parameters
@@ -117,7 +119,8 @@ class AsteriskInfo:
             except:
                 raise Exception('Failed reading FreePBX configuration file: %s'
                     % confFileAMI)
-            mobj = re.search('^\[(\w+)\]\s*\r{0,1}\nsecret\s*=\s*(\S+)\s*$', data, re.MULTILINE)
+            mobj = re.search('^\[(\w+)\]\s*\r{0,1}\nsecret\s*=\s*(\S+)\s*$', 
+                             data, re.MULTILINE)
             if mobj:
                 self._amiuser = mobj.group(1)
                 self._amipass = mobj.group(2)
@@ -128,12 +131,14 @@ class AsteriskInfo:
         """Connect to Asterisk Manager Interface."""
         try:
             if sys.version_info[:2] >= (2,6):
-                self._conn = telnetlib.Telnet(self._amihost, self._amiport, conn_timeout)
+                self._conn = telnetlib.Telnet(self._amihost, self._amiport, 
+                                              conn_timeout)
             else:
                 self._conn = telnetlib.Telnet(self._amihost, self._amiport)
         except:
             raise Exception(
-                "Connection to Asterisk Manager Interface on host %s and port %d failed."
+                "Connection to Asterisk Manager Interface on "
+                "host %s and port %d failed."
                 % (self._amihost, self._amiport)
                 )
 
@@ -228,7 +233,8 @@ class AsteriskInfo:
         if resp.get("Response") == "Follows":
             return resp.get('command_response')
         else:
-            raise Exception('Execution of Asterisk Manager Interface Command failed: %s' % command)
+            raise Exception('Execution of Asterisk Manager Interface Command'
+                            'failed: %s' % command)
 
     def getAsteriskVersion(self):
         """Query Asterisk Manager Interface for Asterisk Version.
@@ -264,7 +270,8 @@ class AsteriskInfo:
             dahdi = 0, sip = 0, iax2 = 0, misdn = 0, local = 0, mix = 0,
             active_calls = 0, active_channels = 0, calls_processed = 0)
         for line in cmdresp.splitlines():
-            mobj = re.match('(sip|iax2|zap|dahdi|local|misdn)\/(\w+)[-\s]', line, re.IGNORECASE)
+            mobj = re.match('(sip|iax2|zap|dahdi|local|misdn)\/(\w+)[-\s]', 
+                            line, re.IGNORECASE)
             if mobj:
                 chan_type = mobj.group(1).lower()
                 chan_id = mobj.group(2).lower()
@@ -277,7 +284,8 @@ class AsteriskInfo:
                     info_dict[chan_type] += 1
                 continue
 
-            mobj = re.match('(\d+)\s+(active channel|active call|calls processed)', line, re.IGNORECASE)
+            mobj = re.match('(\d+)\s+(active channel|active call|calls processed)', 
+                            line, re.IGNORECASE)
             if mobj:
                 if mobj.group(2) == 'active channel':
                     info_dict['active_channels'] = int(mobj.group(1))
@@ -305,12 +313,14 @@ class AsteriskInfo:
         cmdresp = self.executeCommand(cmd)
         
         info_dict = dict(
-            online = 0, unreachable = 0, lagged = 0, unknown = 0, unmonitored = 0)
+            online = 0, unreachable = 0, lagged = 0, 
+            unknown = 0, unmonitored = 0)
         for line in cmdresp.splitlines():
             if re.search('ok\s+\(\d+\s+ms\)\s*$', line, re.IGNORECASE):
                 info_dict['online'] += 1
             else:
-                mobj = re.search('(unreachable|lagged|unknown|unmonitored)\s*$', line, re.IGNORECASE)
+                mobj = re.search('(unreachable|lagged|unknown|unmonitored)\s*$', 
+                                 line, re.IGNORECASE)
                 if mobj:
                     info_dict[mobj.group(1).lower()] += 1
                 
@@ -341,7 +351,8 @@ class AsteriskInfo:
             except:
                 raise Exception("Error in parsing header line of Channel Stats.")
         if idx is not None:
-            info_dict = dict(ulaw = 0, alaw = 0, gsm = 0, g729 = 0, other = 0, none = 0)
+            info_dict = dict(ulaw = 0, alaw = 0, gsm = 0, g729 = 0, 
+                             other = 0, none = 0)
             for line in lines[1:-1]:
                 codec = None
                 cols = re.split('\s\s+', line)
@@ -393,7 +404,8 @@ class AsteriskInfo:
             cmd = "voicemail show users"
         cmdresp = self.executeCommand(cmd)
 
-        info_dict = dict(accounts = 0, avg_messages = 0, max_messages = 0, total_messages = 0)
+        info_dict = dict(accounts = 0, avg_messages = 0, max_messages = 0, 
+                         total_messages = 0)
         for line in cmdresp.splitlines():
             mobj = re.match('\w+\s+\w+\s+.*\s+(\d+)\s*$', line)
             if mobj:
@@ -403,7 +415,8 @@ class AsteriskInfo:
                 if msgs > info_dict['max_messages']:
                     info_dict['max_messages'] = msgs
         if info_dict['accounts'] > 0:
-            info_dict['avg_messages'] = float(info_dict['total_messages']) / info_dict['accounts']
+            info_dict['avg_messages'] = (float(info_dict['total_messages']) 
+                                         / info_dict['accounts'])
             
         return info_dict
 
