@@ -31,7 +31,7 @@ class ApacheInfo:
         """Initialize Apache server-status URL access.
         
         @param host:     Apache Web Server Host. (Default: 127.0.0.1)
-        @param port:     Apache Web Server Port. (Default: 8080, SSL: 8443)
+        @param port:     Apache Web Server Port. (Default: 80, SSL: 443)
         @param user:     Username. (Not needed unless authentication is required 
                          to access server-status page.
         @param password: Password. (Not needed unless authentication is required 
