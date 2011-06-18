@@ -19,8 +19,8 @@ __email__ = "aouyar at gmail.com"
 __status__ = "Development"
 
 
-defaultApachePort = 80
-defaultApacheSSLport = 443
+defaultHTTPport = 80
+defaultHTTPSport = 443
 
 buffSize = 4096
 
@@ -51,9 +51,9 @@ class ApacheInfo:
             self._port = port
         else:
             if ssl:
-                self._port = defaultApacheSSLport
+                self._port = defaultHTTPSport
             else:
-                self._port = defaultApachePort
+                self._port = defaultHTTPport
         self._user = user
         self._password = password
         if statuspath is not None:
@@ -71,12 +71,12 @@ class ApacheInfo:
     def initStats(self):
         """Query and parse Apache Web Server Status Page."""
         if self._user is not None and self._password is not None:
-            url = "%s://%s:%s@%s:%d/%s?auto" % (self._proto,
-                urllib.quote(self._user), urllib.quote(self._password), 
-                self._host, self._port, self._statuspath)
+            url = "%s://%s:%s@%s:%d/%s?auto" % (self._proto, 
+                      urllib.quote(self._user), urllib.quote(self._password), 
+                      self._host, self._port, self._statuspath)
         else:
-            url = ("%s://%s:%d/server-status?auto" 
-                   % (self._proto, self._host, self._port))
+            url = "%s://%s:%d/%s?auto"  % (self._proto, self._host, self._port, 
+                                           self._statuspath)
         fp = urllib.urlopen(url)
         response = ''
         oldlen = 0
