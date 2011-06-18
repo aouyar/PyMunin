@@ -45,6 +45,7 @@ included:
 * Disk Usage
 * Memcached
 * Network Interface Traffic and Errors
+* Nginx Web Server
 * NTP - Time Server
 * PostgreSQL Database
 * System Resources 
