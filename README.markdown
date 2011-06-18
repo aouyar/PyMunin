@@ -40,6 +40,7 @@ included:
 
 * Apache Tomcat
 * Apache Web Server
+* APC - PHP Cache
 * Asterisk Telephony Server
 * Disk Usage
 * Memcached
@@ -53,7 +54,6 @@ included:
 Classes for retrieving stats are available, but no plugins have been developed
 yet for the following:
 
-* APC - PHP Cache
 * Disk I/O
 * MySQL Database
 * Squid Web Proxy

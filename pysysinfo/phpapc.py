@@ -1,7 +1,7 @@
-"""Implements APCinfo Class for gathering stats from Alternative PGP Accelerator.
+"""Implements APCinfo Class for gathering stats from Alternative PHP Accelerator.
 
 The statistics are obtained through a request to custom apcinfo.php script
-that must be placed in the Apache Web Server Document Root Directory.
+that must be placed in the Web Server Document Root Directory.
 
 """
 
@@ -18,28 +18,28 @@ __email__ = "aouyar at gmail.com"
 __status__ = "Development"
 
 
-defaultApachePort = 80
-defaultApacheSSLport = 443
+defaultHTTPport = 80
+defaultHTTPSport = 443
 
 buffSize = 4096
 
 
 class APCinfo:
-    """Class to retrieve stats from APC on Apache Web Server."""
+    """Class to retrieve stats from APC from Web Server."""
 
     def __init__(self, host=None, port=None, user=None, password=None,
-                 relurl=None, ssl=False, autoInit=True):
+                 monpath=None, ssl=False, autoInit=True):
         """Initialize URL for APC stats access.
         
-        @param host:     Apache Web Server Host. (Default: 127.0.0.1)
-        @param port:     Apache Web Server Port. (Default: 8080, SSL: 8443)
+        @param host:     Web Server Host. (Default: 127.0.0.1)
+        @param port:     Web Server Port. (Default: 8080, SSL: 8443)
         @param user:     Username. (Not needed unless authentication is required 
                          to access status page.
         @param password: Password. (Not needed unless authentication is required 
                          to access status page.
-        @param relurl:   URL of APC status script relative to Document Root.
+        @param monpath:  APC status script path relative to Document Root.
         @param ssl:      Use SSL if True. (Default: False)
-        @param autoInit: If True connect to Apache Web Server on creation.
+        @param autoInit: If True connect to Web Server on instantiation.
             
         """
         if host is not None:
@@ -50,33 +50,34 @@ class APCinfo:
             self._port = port
         else:
             if ssl:
-                self._port = defaultApacheSSLport
+                self._port = defaultHTTPSport
             else:
-                self._port = defaultApachePort
+                self._port = defaultHTTPport
         self._user = user
         self._password = password
         if ssl:
             self._proto = 'https'
         else:
             self._proto = 'http'
-        if relurl:
-            self._relurl = relurl
+        if monpath:
+            self._monpath = monpath
         else:
-            self._relurl = 'apcinfo.php'
+            self._monpath = 'apcinfo.php'
         self._statusDict = None 
         if autoInit:
             self.initStats()
 
     def initStats(self):
-        """Query and parse Apache Web Server Status Page.
+        """Query and parse Web Server Status Page.
         
         """
         if self._user is not None and self._password is not None:
             url = "%s://%s:%s@%s:%d/%s" % (self._proto,
                 urllib.quote(self._user), urllib.quote(self._password), 
-                self._host, self._port, self._relurl)
+                self._host, self._port, self._monpath)
         else:
-            url = "%s://%s:%d/%s" % (self._proto, self._host, self._port, self._relurl)
+            url = "%s://%s:%d/%s" % (self._proto, self._host, self._port, 
+                                     self._monpath)
         fp = urllib.urlopen(url)
         response = ''
         oldlen = 0

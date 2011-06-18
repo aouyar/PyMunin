@@ -16,10 +16,15 @@ $memory=apc_sma_info();
 unset($mem['block_lists']);
 
 foreach ($cache_sys as $key => $val) {
-  printf("%s:%s:%s\n",'cache_sys', $key, $val); }
+  printf("%s:%s:%s\n",'cache_sys', $key, $val); 
+}
 foreach ($cache_user as $key => $val) {
-  printf("%s:%s:%s\n",'cache_user', $key, $val); }
+  printf("%s:%s:%s\n",'cache_user', $key, $val); 
+}
 foreach ($memory as $key => $val) {
-  printf("%s:%s:%s\n",'memory', $key, $val); }
+  if (! is_array($val)) {
+    printf("%s:%s:%s\n",'memory', $key, $val); 
+  } 
+}
 
 ?>
