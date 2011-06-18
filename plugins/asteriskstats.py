@@ -1,44 +1,44 @@
 #!/usr/bin/python
-#
-# asteriskstats - Munin Plugin to monitor Asterisk through Manager Interface
-#
-# Requirements
-#   - Access to Asterisk Manager Interface
-#
-# Wild Card Plugin - No
-#
-# Multigraph Plugin - Graph Structure
-#    - asterisk_calls
-#    - asterisk_channels
-#    - asterisk_peers_sip
-#    - asterisk_peers_iax2
-#    - asterisk_voip_codecs
-#    - asterisk_conferences
-#    - asterisk_voicemail
-#    - asterisk_trunks
-#
-#
-# Environment Variables
-#
-#   include_graphs: Comma separated list of enabled graphs. (All graphs enabled by default.)
-#   exclude_graphs: Comma separated list of disabled graphs.
-#   amihost:        IP of Asterisk Server (Default: 127.0.0.1)
-#   amiport:        Asterisk Manager Interface Port (Default: 5038)
-#   amiuser:        Asterisk Manager Interface User
-#   amipass:        Asterisk Manager Interface Password
-#   trunks:         Comma separated search expressions of the following formats:
-#                   - "Trunk Name"="Regular Expression"
-#                   - "Trunk Name"="Regular Expression /w Named Group num"="MIN"-"MAX"
-#
-#   Example:
-#       [asteriskstats]
-#         env.amihost 192.168.1.10
-#         env.amiport 5038
-#         env.amiuser manager
-#         env.amipass secret
-#         env.trunks PSTN=    Zap\/(?P<num>\d+)=1-3,VoIP=SIP\/(net2phone|skype)
-#
-#
+"""asteriskstats - Munin Plugin to monitor Asterisk through Manager Interface
+
+Requirements
+  - Access to Asterisk Manager Interface
+
+Wild Card Plugin - No
+
+Multigraph Plugin - Graph Structure
+   - asterisk_calls
+   - asterisk_channels
+   - asterisk_peers_sip
+   - asterisk_peers_iax2
+   - asterisk_voip_codecs
+   - asterisk_conferences
+   - asterisk_voicemail
+   - asterisk_trunks
+
+
+Environment Variables
+
+  include_graphs: Comma separated list of enabled graphs.
+                  (All graphs enabled by default.)
+  exclude_graphs: Comma separated list of disabled graphs.
+  amihost:        IP of Asterisk Server (Default: 127.0.0.1)
+  amiport:        Asterisk Manager Interface Port (Default: 5038)
+  amiuser:        Asterisk Manager Interface User
+  amipass:        Asterisk Manager Interface Password
+  trunks:         Comma separated search expressions of the following formats:
+                  - "Trunk Name"="Regular Expr"
+                  - "Trunk Name"="Regular Expr with Named Group num"="MIN"-"MAX"
+
+  Example:
+      [asteriskstats]
+        env.amihost 192.168.1.10
+        env.amiport 5038
+        env.amiuser manager
+        env.amipass secret
+        env.trunks PSTN=    Zap\/(?P<num>\d+)=1-3,VoIP=SIP\/(net2phone|skype)
+
+"""
 # Munin  - Magic Markers
 #%# family=manual
 #%# capabilities=noautoconf nosuggest
@@ -83,7 +83,8 @@ class MuninAsteriskPlugin(MuninPlugin):
         if self._env.has_key('trunks'):
             strtrunks = re.sub('[\s]',  '',  self._env.get('trunks'))
             for trunk_entry in strtrunks.split(','):
-                mobj = (re.match('(.*)=(.*)=(\d+)-(\d+)',  trunk_entry,  re.IGNORECASE) 
+                mobj = (re.match('(.*)=(.*)=(\d+)-(\d+)',  
+                                 trunk_entry, re.IGNORECASE) 
                         or re.match('(.*)=(.*)',  trunk_entry,  re.IGNORECASE))
                 if mobj:
                     self._trunkList.append(mobj.groups())
@@ -111,7 +112,8 @@ class MuninAsteriskPlugin(MuninPlugin):
             graph = MuninGraph('Asterisk - VoIP Peers - SIP', 'Asterisk',
                 info = 'Asterisk - Information on SIP VoIP Peers.',
                 args = '--base 1000 --lower-limit 0')
-            for field in ('online', 'unmonitored', 'unreachable', 'lagged', 'unknown'):
+            for field in ('online', 'unmonitored', 'unreachable', 
+                          'lagged', 'unknown'):
                 graph.addField(field, field, type='GAUGE', draw='AREASTACK')
             self.appendGraph('asterisk_peers_sip', graph)
 
@@ -119,12 +121,14 @@ class MuninAsteriskPlugin(MuninPlugin):
             graph = MuninGraph('Asterisk - VoIP Peers - IAX2', 'Asterisk',
                 info = 'Asterisk - Information on IAX2 VoIP Peers.',
                 args = '--base 1000 --lower-limit 0')
-            for field in ('online', 'unmonitored', 'unreachable', 'lagged', 'unknown'):
+            for field in ('online', 'unmonitored', 'unreachable', 
+                          'lagged', 'unknown'):
                 graph.addField(field, field, type='GAUGE', draw='AREASTACK')
             self.appendGraph('asterisk_peers_iax2', graph)
 
         if self.graphEnabled('asterisk_voip_codecs'):
-            graph = MuninGraph('Asterisk - VoIP Codecs for Active Channels', 'Asterisk',
+            graph = MuninGraph('Asterisk - VoIP Codecs for Active Channels', 
+                'Asterisk',
                 info = 'Asterisk - Codecs for Active VoIP Channels (SIP/IAX2)',
                 args = '--base 1000 --lower-limit 0')
             for field in ('alaw', 'ulaw', 'gsm', 'g729', 'other'):
@@ -166,28 +170,36 @@ class MuninAsteriskPlugin(MuninPlugin):
 
     def retrieveVals(self):
         """Retrive values for graphs."""
-        ami = AsteriskInfo(self._amihost, self._amiport, self._amiuser, self._amipass)
+        ami = AsteriskInfo(self._amihost, self._amiport, 
+                           self._amiuser, self._amipass)
 
         if self.hasGraph('asterisk_calls') or self.hasGraph('asterisk_channels'):
             stats = ami.getChannelStats()
             if  self.hasGraph('asterisk_calls')  and stats:
-                self.setGraphVal('asterisk_calls', 'active_calls', stats.get('active_calls'))
-                self.setGraphVal('asterisk_calls', 'calls_per_min', stats.get('calls_processed'))
+                self.setGraphVal('asterisk_calls', 'active_calls', 
+                                 stats.get('active_calls'))
+                self.setGraphVal('asterisk_calls', 'calls_per_min', 
+                                 stats.get('calls_processed'))
             if  self.hasGraph('asterisk_channels')  and stats:
                 for field in ('sip', 'iax2', 'dahdi', 'misdn', 'local', 'mix'):
-                    self.setGraphVal('asterisk_channels', field, stats.get(field))
+                    self.setGraphVal('asterisk_channels', 
+                                     field, stats.get(field))
 
         if self.hasGraph('asterisk_peers_sip'):
             stats = ami.getPeerStats('sip')
             if stats:
-                for field in ('online', 'unmonitored', 'unreachable', 'lagged', 'unknown'):
-                    self.setGraphVal('asterisk_peers_sip', field, stats.get(field))
+                for field in ('online', 'unmonitored', 'unreachable', 
+                              'lagged', 'unknown'):
+                    self.setGraphVal('asterisk_peers_sip', 
+                                     field, stats.get(field))
         
         if self.hasGraph('asterisk_peers_iax2'):
             stats = ami.getPeerStats('iax2')
             if stats:
-                for field in ('online', 'unmonitored', 'unreachable', 'lagged', 'unknown'):
-                    self.setGraphVal('asterisk_peers_iax2', field, stats.get(field))
+                for field in ('online', 'unmonitored', 'unreachable', 
+                              'lagged', 'unknown'):
+                    self.setGraphVal('asterisk_peers_iax2', 
+                                     field, stats.get(field))
         
         if self.hasGraph('asterisk_voip_codecs'):
             sipstats = ami.getVoIPchanStats('sip')
@@ -200,21 +212,28 @@ class MuninAsteriskPlugin(MuninPlugin):
         if self.hasGraph('asterisk_conferences'):
             stats = ami.getConferenceStats()
             if stats:
-                self.setGraphVal('asterisk_conferences', 'rooms', stats.get('active_conferences'))
-                self.setGraphVal('asterisk_conferences', 'users', stats.get('conference_users'))
+                self.setGraphVal('asterisk_conferences', 'rooms', 
+                                 stats.get('active_conferences'))
+                self.setGraphVal('asterisk_conferences', 'users', 
+                                 stats.get('conference_users'))
 
         if self.hasGraph('asterisk_voicemail'):
             stats = ami.getVoicemailStats()
             if stats:
-                self.setGraphVal('asterisk_voicemail', 'accounts', stats.get('accounts'))
-                self.setGraphVal('asterisk_voicemail', 'msg_avg', stats.get('avg_messages'))
-                self.setGraphVal('asterisk_voicemail', 'msg_max', stats.get('max_messages'))
-                self.setGraphVal('asterisk_voicemail', 'msg_total', stats.get('total_messages'))
+                self.setGraphVal('asterisk_voicemail', 'accounts', 
+                                 stats.get('accounts'))
+                self.setGraphVal('asterisk_voicemail', 'msg_avg', 
+                                 stats.get('avg_messages'))
+                self.setGraphVal('asterisk_voicemail', 'msg_max', 
+                                 stats.get('max_messages'))
+                self.setGraphVal('asterisk_voicemail', 'msg_total', 
+                                 stats.get('total_messages'))
 
         if self.hasGraph('asterisk_trunks') and len(self._trunkList) > 0:
             stats = ami.getTrunkStats(self._trunkList)
             for trunk in self._trunkList:
-                self.setGraphVal('asterisk_trunks', trunk[0], stats.get(trunk[0]))
+                self.setGraphVal('asterisk_trunks', trunk[0], 
+                                 stats.get(trunk[0]))
 
 
 if __name__ == "__main__":

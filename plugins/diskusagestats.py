@@ -1,37 +1,39 @@
 #!/usr/bin/python
-#
-# diskusagestats - Munin Plugin to monitor disk space and inode usage of filesystems.
-#
-# Requirements
-#   - Root user privileges may be requiered to access stats for filesystems without
-#   any read access for munin user.
-# 
-#
-# Wild Card Plugin - No
-#
-#
-# Multigraph Plugin - Graph Structure
-#    - diskspace
-#    - diskinode
-#
-#    
-# Environment Variables
-#   include_graphs:  Comma separated list of enabled graphs. (All graphs enabled by default.)
-#   exclude_graphs:  Comma separated list of disabled graphs.
-#   include_fspaths: Comma separated list of filesystems to include in monitoring.
-#                    (All enabled by default.)
-#   exclude_fspaths: Comma separated list of filesystems to exclude from monitoring.
-#   include_fstypes: Comma separated list of filesystem types to include in monitoring.
-#                    (All enabled by default.)
-#   exclude_fstypes: Comma separated list of filesystem types to exclude from monitoring.
+"""diskusagestats - Munin Plugin to monitor disk space and inode usage of 
+filesystems.
 
-#
-#   Example:
-#     [diskusagestats]
-#         env.exclude_graphs diskinode
-#         env.exclude_fstype tmpfs
-#
-#
+Requirements
+  - Root user privileges may be requiered to access stats for filesystems 
+  without any read access for munin user.
+
+
+Wild Card Plugin - No
+
+
+Multigraph Plugin - Graph Structure
+   - diskspace
+   - diskinode
+
+   
+Environment Variables
+  include_graphs:  Comma separated list of enabled graphs. 
+                   (All graphs enabled by default.)
+  exclude_graphs:  Comma separated list of disabled graphs.
+  include_fspaths: Comma separated list of filesystems to include in monitoring.
+                   (All enabled by default.)
+  exclude_fspaths: Comma separated list of filesystems to exclude from monitoring.
+  include_fstypes: Comma separated list of filesystem types to include in 
+                   monitoring. (All enabled by default.)
+  exclude_fstypes: Comma separated list of filesystem types to exclude from 
+                   monitoring.
+
+
+  Example:
+    [diskusagestats]
+        env.exclude_graphs diskinode
+        env.exclude_fstype tmpfs
+
+"""
 # Munin  - Magic Markers
 #%# family=auto
 #%# capabilities=noautoconf nosuggest

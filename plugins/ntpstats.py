@@ -1,29 +1,28 @@
 #!/usr/bin/python
-#
-# ntpstats - Munin Plugin to monitor stats of active synchronization peer.
-#
-# Requirements
-#   - Requires ntpd running on local host and ntpq utility.
-#
-# Wild Card Plugin - No
-#
-#
-# Multigraph Plugin - Graph Structure
-#    - ntp_peer_stratum
-#    - ntp_peer_stats
-#
-#
-# Environment Variables
-#
-#   include_graphs: Comma separated list of enabled graphs.
-#                   (All graphs enabled by default.)
-#   exclude_graphs: Comma separated list of disabled graphs.
-#
-#   Example:
-#     [ntpstats]
-#         env.exclude_graphs ntp_peer_stratum
-#
-#
+"""ntpstats - Munin Plugin to monitor stats of active synchronization peer.
+
+Requirements
+  - Requires ntpd running on local host and ntpq utility.
+
+Wild Card Plugin - No
+
+
+Multigraph Plugin - Graph Structure
+   - ntp_peer_stratum
+   - ntp_peer_stats
+
+
+Environment Variables
+
+  include_graphs: Comma separated list of enabled graphs.
+                  (All graphs enabled by default.)
+  exclude_graphs: Comma separated list of disabled graphs.
+
+  Example:
+    [ntpstats]
+        env.exclude_graphs ntp_peer_stratum
+
+"""
 # Munin  - Magic Markers
 #%# family=manual
 #%# capabilities=noautoconf nosuggest
@@ -83,11 +82,15 @@ class MuninNTPstatsPlugin(MuninPlugin):
         stats = ntpinfo.getPeerStats()
         if stats:
             if self.hasGraph('ntp_peer_stratum'):
-                self.setGraphVal('ntp_peer_stratum', 'stratum', stats.get('stratum'))
+                self.setGraphVal('ntp_peer_stratum', 'stratum', 
+                                 stats.get('stratum'))
             if self.hasGraph('ntp_peer_stats'):
-                self.setGraphVal('ntp_peer_stats', 'offset', stats.get('offset'))
-                self.setGraphVal('ntp_peer_stats', 'delay', stats.get('delay'))
-                self.setGraphVal('ntp_peer_stats', 'jitter', stats.get('jitter'))
+                self.setGraphVal('ntp_peer_stats', 'offset', 
+                                 stats.get('offset'))
+                self.setGraphVal('ntp_peer_stats', 'delay', 
+                                 stats.get('delay'))
+                self.setGraphVal('ntp_peer_stats', 'jitter', 
+                                 stats.get('jitter'))
 
 
 if __name__ == "__main__":

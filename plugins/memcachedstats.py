@@ -1,34 +1,33 @@
 #!/usr/bin/python
-#
-# memcachedstats - Munin Plugin to monitor stats for Memcached Server.
-#
-# Requirements
-# 
-#
-# Wild Card Plugin - No
-#
-#
-# Multigraph Plugin - Graph Structure
-#    - memcached_connections
-#    - memcached_items
-#    - memcached_storage
-#    - memcached_traffic
-#    - memcached_connrate
-#    - memcached_reqrate
-#    - memcached_hitpct
-#
-# Environment Variables
-#   host:           Memcached Server IP. (127.0.0.1 by default.)
-#   port:           Memcached Server Port (11211 by default.)
-#   include_graphs: Comma separated list of enabled graphs.
-#                   (All graphs enabled by default.)
-#   exclude_graphs: Comma separated list of disabled graphs.
-#
-#   Example:
-#     [memcachedstats]
-#         env.exclude_graphs ntp_peer_stratum
-#
-#
+"""memcachedstats - Munin Plugin to monitor stats for Memcached Server.
+
+Requirements
+
+
+Wild Card Plugin - No
+
+
+Multigraph Plugin - Graph Structure
+   - memcached_connections
+   - memcached_items
+   - memcached_storage
+   - memcached_traffic
+   - memcached_connrate
+   - memcached_reqrate
+   - memcached_hitpct
+
+Environment Variables
+  host:           Memcached Server IP. (127.0.0.1 by default.)
+  port:           Memcached Server Port (11211 by default.)
+  include_graphs: Comma separated list of enabled graphs.
+                  (All graphs enabled by default.)
+  exclude_graphs: Comma separated list of disabled graphs.
+
+  Example:
+    [memcachedstats]
+        env.exclude_graphs ntp_peer_stratum
+
+"""
 # Munin  - Magic Markers
 #%# family=manual
 #%# capabilities=noautoconf nosuggest
@@ -92,19 +91,23 @@ class MuninMemcachedPlugin(MuninPlugin):
                 info='Bytes sent (+) / received (-)  by Memcached per ${graph_period}.',
                 args='--base 1024 --lower-limit 0',
                 vlabel='bytes in (-) / out (+) per second')
-            graph.addField('rxbytes', 'bytes', draw='LINE2', type='DERIVE', min=0, graph=False)
-            graph.addField('txbytes', 'bytes', draw='LINE2', type='DERIVE', min=0, negative='rxbytes')
+            graph.addField('rxbytes', 'bytes', draw='LINE2', type='DERIVE', 
+                           min=0, graph=False)
+            graph.addField('txbytes', 'bytes', draw='LINE2', type='DERIVE', 
+                           min=0, negative='rxbytes')
             self.appendGraph('memcached_traffic', graph)
             
         if self.graphEnabled('memcached_connrate'):
-            graph = MuninGraph('Memcached - Throughput - Connections', 'Memcached',
+            graph = MuninGraph('Memcached - Throughput - Connections', 
+                'Memcached',
                 info='Connections per ${graph_period}.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('conn', 'conn', draw='LINE2', type='DERIVE', min=0)
             self.appendGraph('memcached_connrate', graph)
             
         if self.graphEnabled('memcached_reqrate'):
-            graph = MuninGraph('Memcached - Throughput - Request Rate', 'Memcached',
+            graph = MuninGraph('Memcached - Throughput - Request Rate', 
+                'Memcached',
                 info='Requests per ${graph_period}.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('set', 'set', draw='AREASTACK', type='DERIVE', min=0, 
@@ -145,30 +148,40 @@ class MuninMemcachedPlugin(MuninPlugin):
         stats = serverInfo.getStats()
         if stats:
             if self.hasGraph('memcached_connections'):
-                self.setGraphVal('memcached_connections', 'conn', stats.get('curr_connections'))
+                self.setGraphVal('memcached_connections', 'conn', 
+                                 stats.get('curr_connections'))
             if self.hasGraph('memcached_items'):
-                self.setGraphVal('memcached_items', 'items', stats.get('curr_items'))
+                self.setGraphVal('memcached_items', 'items', 
+                                 stats.get('curr_items'))
             if self.hasGraph('memcached_storage'):
-                self.setGraphVal('memcached_storage', 'bytes', stats.get('bytes'))
+                self.setGraphVal('memcached_storage', 'bytes', 
+                                 stats.get('bytes'))
             if self.hasGraph('memcached_traffic'):
-                self.setGraphVal('memcached_traffic', 'rxbytes', stats.get('bytes_read'))
-                self.setGraphVal('memcached_traffic', 'txbytes', stats.get('bytes_written'))
+                self.setGraphVal('memcached_traffic', 'rxbytes', 
+                                 stats.get('bytes_read'))
+                self.setGraphVal('memcached_traffic', 'txbytes', 
+                                 stats.get('bytes_written'))
             if self.hasGraph('memcached_connrate'):
-                self.setGraphVal('memcached_connrate', 'conn', stats.get('total_connections'))
+                self.setGraphVal('memcached_connrate', 'conn', 
+                                 stats.get('total_connections'))
             if self.hasGraph('memcached_reqrate'):
-                self.setGraphVal('memcached_reqrate', 'set', stats.get('cmd_set'))
-                self.setGraphVal('memcached_reqrate', 'get', stats.get('cmd_get'))
+                self.setGraphVal('memcached_reqrate', 'set', 
+                                 stats.get('cmd_set'))
+                self.setGraphVal('memcached_reqrate', 'get', 
+                                 stats.get('cmd_get'))
                 self.setGraphVal('memcached_reqrate', 'del',
                     stats.get('delete_hits') + stats.get('delete_misses'))
                 self.setGraphVal('memcached_reqrate', 'cas',
-                    stats.get('cas_hits') + stats.get('cas_misses') + stats.get('cas_badval'))
+                                 stats.get('cas_hits') + stats.get('cas_misses') 
+                                 + stats.get('cas_badval'))
                 self.setGraphVal('memcached_reqrate', 'incr',
                     stats.get('incr_hits') + stats.get('incr_misses'))
                 self.setGraphVal('memcached_reqrate', 'decr',
                     stats.get('decr_hits') + stats.get('decr_misses'))
             if self.hasGraph('memcached_hitpct'):
                 stats['set_hits'] = stats.get('total_items')
-                stats['set_misses'] = stats.get('cmd_set') - stats.get('total_items')
+                stats['set_misses'] = (stats.get('cmd_set') 
+                                       - stats.get('total_items'))
                 prev_stats = self.restoreState()
                 for (field_name,  field_hits,  field_misses) in (
                         ('set',  'set_hits',  'set_misses'),
@@ -180,12 +193,14 @@ class MuninMemcachedPlugin(MuninPlugin):
                     ):
                     val = float(100)
                     if prev_stats: 
-                        hits =stats.get(field_hits) - prev_stats.get(field_hits)
-                        misses = stats.get(field_misses) - prev_stats.get(field_misses)
+                        hits = stats.get(field_hits) - prev_stats.get(field_hits)
+                        misses = (stats.get(field_misses) 
+                                  - prev_stats.get(field_misses))
                         total = hits + misses
                         if total > 0:
                             val = 100.0 * hits / total
-                    self.setGraphVal('memcached_hitpct',  field_name, round(val,  2))
+                    self.setGraphVal('memcached_hitpct',  field_name, 
+                                     round(val,  2))
                 self.saveState(stats)
 
 

@@ -1,34 +1,35 @@
 #!/usr/bin/python
-#
-# apachestats - Munin Plugin to monitor stats for Apache Web Server.
-#
-# Requirements
-#   - Access to Apache Web Server server-status page.
-# 
-#
-# Wild Card Plugin - No
-#
-#
-# Multigraph Plugin - Graph Structure
-#    - apache_access
-#    - apache_bytes
-#    - apache_workers
-#
-#    
-# Environment Variables
-#   host:           Apache Web Server Host. (Default: 127.0.0.1)
-#   port:           Apache Web Server Port. (Default: 8080, SSL: 8443)
-#   user:           User in case authentication is required for access to server-status.
-#   password:       User in case authentication is required for access to server-status.
-#   ssl:            Use SSL if yes. (Default: no)
-#   include_graphs: Comma separated list of enabled graphs. (All graphs enabled by default.)
-#   exclude_graphs: Comma separated list of disabled graphs.
-#
-#   Example:
-#     [apachestats]
-#         env.exclude_graphs apache_access,apache_load
-#
-#
+"""apachestats - Munin Plugin to monitor stats for Apache Web Server.
+
+Requirements
+  - Access to Apache Web Server server-status page.
+
+
+Wild Card Plugin - No
+
+
+Multigraph Plugin - Graph Structure
+   - apache_access
+   - apache_bytes
+   - apache_workers
+
+   
+Environment Variables
+  host:           Apache Web Server Host. (Default: 127.0.0.1)
+  port:           Apache Web Server Port. (Default: 8080, SSL: 8443)
+  user:           User in case authentication is required for access to 
+                  server-status page.
+  password:       User in case authentication is required for access 
+                  to server-status page.
+  ssl:            Use SSL if yes. (Default: no)
+  include_graphs: Comma separated list of enabled graphs. (All graphs enabled by default.)
+  exclude_graphs: Comma separated list of disabled graphs.
+
+  Example:
+    [apachestats]
+        env.exclude_graphs apache_access,apache_load
+
+"""
 # Munin  - Magic Markers
 #%# family=manual
 #%# capabilities=noautoconf nosuggest
@@ -70,7 +71,8 @@ class MuninApachePlugin(MuninPlugin):
         self._ssl = self._env.get('ssl', '').lower() in ('yes', 'on') 
         
         if self.graphEnabled('apache_access'):
-            graph = MuninGraph('Apache Web Server - Throughput (Requests / sec)', 'Apache',
+            graph = MuninGraph('Apache Web Server - Throughput (Requests / sec)', 
+                'Apache',
                 info='Throughput in Requests per second for Apache Web Server.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('reqs', 'reqs', draw='LINE2', type='DERIVE', min=0,
@@ -78,7 +80,8 @@ class MuninApachePlugin(MuninPlugin):
             self.appendGraph('apache_access', graph)
         
         if self.graphEnabled('apache_bytes'):
-            graph = MuninGraph('Apache Web Server - Througput (bytes/sec)', 'Apache',
+            graph = MuninGraph('Apache Web Server - Througput (bytes/sec)', 
+                'Apache',
                 info='Throughput in bytes per second for Apache Web Server.',
                 args='--base 1024 --lower-limit 0')
             graph.addField('bytes', 'bytes', draw='LINE2', type='DERIVE', min=0)
@@ -105,7 +108,8 @@ class MuninApachePlugin(MuninPlugin):
         if self.hasGraph('apache_access'):
             self.setGraphVal('apache_access', 'reqs', stats['Total Accesses'])
         if self.hasGraph('apache_bytes'):
-            self.setGraphVal('apache_bytes', 'bytes', stats['Total kBytes'] * 1000)
+            self.setGraphVal('apache_bytes', 'bytes', 
+                             stats['Total kBytes'] * 1000)
         if self.hasGraph('apache_workers'):
             self.setGraphVal('apache_workers', 'busy', stats['BusyWorkers'])
             self.setGraphVal('apache_workers', 'idle', stats['IdleWorkers'])

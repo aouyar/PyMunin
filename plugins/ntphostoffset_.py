@@ -1,32 +1,31 @@
 #!/usr/bin/python
-#
-# ntphostoffset_ - Munin Plugin to monitor time offset of remote host using NTP.
-#
-# Requirements
-#   - Requires ntpd running on remote host and access to NTP on remote host.
-#   - Requires ntpdate utility on local host.
-#
-# Wild Card Plugin
-#   Symlink indicates IP of remote host to be monitored:
-#   Ex: ntphostoffset_192.168.1.1 -> /usr/shar/munin/plugins/ntphostoffset_
-#
-#
-# Multigraph Plugin - Graph Structure
-#    - ntp_host_stratum_
-#    - ntp_host_offset_
-#
-#
-# Environment Variables
-#
-#   include_graphs: Comma separated list of enabled graphs.
-#                   (All graphs enabled by default.)
-#   exclude_graphs: Comma separated list of disabled graphs.
-#
-#   Example:
-#     [ntphostoffset_*]
-#        env.exclude_graphs ntp_host_stratum_
-#
-#
+"""ntphostoffset_ - Munin Plugin to monitor time offset of remote host using NTP.
+
+Requirements
+  - Requires ntpd running on remote host and access to NTP on remote host.
+  - Requires ntpdate utility on local host.
+
+Wild Card Plugin
+  Symlink indicates IP of remote host to be monitored:
+  Ex: ntphostoffset_192.168.1.1 -> /usr/shar/munin/plugins/ntphostoffset_
+
+
+Multigraph Plugin - Graph Structure
+   - ntp_host_stratum_
+   - ntp_host_offset_
+
+
+Environment Variables
+
+  include_graphs: Comma separated list of enabled graphs.
+                  (All graphs enabled by default.)
+  exclude_graphs: Comma separated list of disabled graphs.
+
+  Example:
+    [ntphostoffset_*]
+       env.exclude_graphs ntp_host_stratum_
+
+"""
 # Munin  - Magic Markers
 #%# family=manual
 #%# capabilities=noautoconf nosuggest
@@ -68,7 +67,8 @@ class MuninNTPhostOffsetPlugin(MuninPlugin):
 
         if self.graphEnabled('ntp_host_stratum'):
             graphName = 'ntp_host_stratum_%s' % self._remoteHost
-            graph = MuninGraph('NTP Stratum of Host %s' % self._remoteHost, 'Time',
+            graph = MuninGraph('NTP Stratum of Host %s' % self._remoteHost, 
+                'Time',
                 info='NTP Stratum of Host %s.' % self._remoteHost,
                 args='--base 1000 --lower-limit 0')
             graph.addField('stratum', 'stratum', type='GAUGE', draw='LINE2')
@@ -77,7 +77,8 @@ class MuninNTPhostOffsetPlugin(MuninPlugin):
         if self.graphEnabled('ntp_host_offset'):
             graphName = 'ntp_host_offset_%s' % self._remoteHost
             graph = MuninGraph('NTP Offset of Host %s' % self._remoteHost, 'Time',
-                info='NTP Offset of Host %s relative to current node.' % self._remoteHost,
+                info=('NTP Offset of Host %s relative to current node.' 
+                      % self._remoteHost),
                 args='--base 1000 --lower-limit 0',
                 vlabel='seconds'
                 )

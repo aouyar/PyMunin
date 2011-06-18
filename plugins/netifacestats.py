@@ -1,31 +1,31 @@
 #!/usr/bin/python
-#
-# netifacestats - Munin Plugin to monitor Network Interfaces.
-#
-# Requirements
-#
-#
-# Wild Card Plugin - No
-#
-#
-# Multigraph Plugin - Graph Structure
-#    - netiface_traffic
-#    - netiface_errors
-#
-#
-# Environment Variables
-#
-#   ifaces:         Comma separated list of Network Interfaces.
-#                   (All Network Interfaces are monitored by default.)
-#   include_graphs: Comma separated list of enabled graphs. (All graphs enabled by default.)
-#   exclude_graphs: Comma separated list of disabled graphs.
-#
-#   Example:
-#     [netifacestats]
-#        env.ifaces eth0,eth1
-#        env.exclude_graphs netiface_errors
-#
-#
+"""netifacestats - Munin Plugin to monitor Network Interfaces.
+
+Requirements
+
+
+Wild Card Plugin - No
+
+
+Multigraph Plugin - Graph Structure
+   - netiface_traffic
+   - netiface_errors
+
+
+Environment Variables
+
+  ifaces:         Comma separated list of Network Interfaces.
+                  (All Network Interfaces are monitored by default.)
+  include_graphs: Comma separated list of enabled graphs. 
+                  (All graphs enabled by default.)
+  exclude_graphs: Comma separated list of disabled graphs.
+
+  Example:
+    [netifacestats]
+       env.ifaces eth0,eth1
+       env.exclude_graphs netiface_errors
+
+"""
 # Munin  - Magic Markers
 #%# family=auto
 #%# capabilities=noautoconf nosuggest
@@ -77,32 +77,43 @@ class MuninNetIfacePlugin(MuninPlugin):
         
         for iface in self._ifaceList:
             if self.graphEnabled('netiface_traffic'):
-                graph = MuninGraph('Network Interface - Traffic - %s' % iface, 'Network',
+                graph = MuninGraph('Network Interface - Traffic - %s' % iface, 
+                    'Network',
                     info='Traffic Stats for Network Interface %s in bps.' % iface,
                     args='--base 1000 --lower-limit 0',
                     vlabel='bps in (-) / out (+) per second')
-                graph.addField('rx', 'bps', draw='LINE2', type='DERIVE', min=0, graph=False)
-                graph.addField('tx', 'bps', draw='LINE2', type='DERIVE', min=0,
-                    negative='rx')
+                graph.addField('rx', 'bps', draw='LINE2', type='DERIVE', 
+                               min=0, graph=False)
+                graph.addField('tx', 'bps', draw='LINE2', type='DERIVE', 
+                               min=0, negative='rx')
                 self.appendGraph('netiface_traffic_%s' % iface, graph)
 
             if self.graphEnabled('netiface_errors'):
-                graph = MuninGraph('Network Interface - Errors - %s' % iface, 'Network',
+                graph = MuninGraph('Network Interface - Errors - %s' % iface, 
+                    'Network',
                     info='Error Stats for Network Interface %s in errors/sec.' % iface,
                     args='--base 1000 --lower-limit 0',
                     vlabel='errors in (-) / out (+) per second')
-                graph.addField('rxerrs', 'errors', draw='LINE2', type='DERIVE', min=0, graph=False)
-                graph.addField('txerrs', 'errors', draw='LINE2', type='DERIVE', min=0,
-                    negative='rxerrs', info='Rx(-)/Tx(+) Errors per second.')
-                graph.addField('rxframe', 'frm/crr', draw='LINE2', type='DERIVE', min=0, graph=False)
-                graph.addField('txcarrier', 'frm/crr', draw='LINE2', type='DERIVE', min=0,
-                    negative='rxframe', info='Frame(-)/Carrier(+) Errors per second.')
-                graph.addField('rxdrop', 'drop', draw='LINE2', type='DERIVE', min=0, graph=False)
-                graph.addField('txdrop', 'drop', draw='LINE2', type='DERIVE', min=0,
-                    negative='rxdrop', info='Rx(-)/Tx(+) Dropped Packets per second.')
-                graph.addField('rxfifo', 'fifo', draw='LINE2', type='DERIVE', min=0, graph=False)
-                graph.addField('txfifo', 'fifo', draw='LINE2', type='DERIVE', min=0,
-                    negative='rxfifo', info='Rx(-)/Tx(+) FIFO Errors per second.')
+                graph.addField('rxerrs', 'errors', draw='LINE2', type='DERIVE', 
+                               min=0, graph=False)
+                graph.addField('txerrs', 'errors', draw='LINE2', type='DERIVE', 
+                               min=0, negative='rxerrs', 
+                               info='Rx(-)/Tx(+) Errors per second.')
+                graph.addField('rxframe', 'frm/crr', draw='LINE2', type='DERIVE', 
+                               min=0, graph=False)
+                graph.addField('txcarrier', 'frm/crr', draw='LINE2', type='DERIVE', 
+                               min=0, negative='rxframe', 
+                               info='Frame(-)/Carrier(+) Errors per second.')
+                graph.addField('rxdrop', 'drop', draw='LINE2', type='DERIVE', 
+                               min=0, graph=False)
+                graph.addField('txdrop', 'drop', draw='LINE2', type='DERIVE', 
+                               min=0, negative='rxdrop', 
+                               info='Rx(-)/Tx(+) Dropped Packets per second.')
+                graph.addField('rxfifo', 'fifo', draw='LINE2', type='DERIVE', 
+                               min=0, graph=False)
+                graph.addField('txfifo', 'fifo', draw='LINE2', type='DERIVE', 
+                               min=0, negative='rxfifo', 
+                               info='Rx(-)/Tx(+) FIFO Errors per second.')
                 self.appendGraph('netiface_errors_%s' % iface, graph)
 
         

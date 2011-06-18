@@ -1,34 +1,33 @@
 #! /usr/bin/python
-#
-# ntphostoffsets - Munin Plugin to monitor time offset of multiple remote hosts
-#                  using NTP.
-#
-# Requirements
-#   - Requires ntpd running on remote hosts and access to NTP on remote host.
-#   - Requires ntpdate utility on local host.
-#
-# Wild Card Plugin - No
-#
-#
-# Multigraph Plugin - Graph Structure
-#    - ntp_host_stratums
-#    - ntp_host_offsets
-#    - ntp_host_delays
-#
-#
-# Environment Variables
-#
-#   ntphosts:       Comma separated list of IP addresses of hosts to be monitored.
-#   include_graphs: Comma separated list of enabled graphs.
-#                   (All graphs enabled by default.)
-#   exclude_graphs: Comma separated list of disabled graphs.
-#
-#   Example:
-#     [ntphostoffsets]
-#         env.ntphosts 192.168.1.1,192.168.1.2
-#         env.exclude_graphs ntp_host_stratums
-#     
-#
+"""ntphostoffsets - Munin Plugin to monitor time offset of multiple remote hosts
+                 using NTP.
+
+Requirements
+  - Requires ntpd running on remote hosts and access to NTP on remote host.
+  - Requires ntpdate utility on local host.
+
+Wild Card Plugin - No
+
+
+Multigraph Plugin - Graph Structure
+   - ntp_host_stratums
+   - ntp_host_offsets
+   - ntp_host_delays
+
+
+Environment Variables
+
+  ntphosts:       Comma separated list of IP addresses of hosts to be monitored.
+  include_graphs: Comma separated list of enabled graphs.
+                  (All graphs enabled by default.)
+  exclude_graphs: Comma separated list of disabled graphs.
+
+  Example:
+    [ntphostoffsets]
+        env.ntphosts 192.168.1.1,192.168.1.2
+        env.exclude_graphs ntp_host_stratums
+    
+"""
 # Munin  - Magic Markers
 #%# family=manual
 #%# capabilities=noautoconf nosuggest
@@ -69,7 +68,8 @@ class MuninNTPhostOffsetsPlugin(MuninPlugin):
             hosts_str = re.sub('[^\d\.,]', '', self._env.get('ntphosts'))
             self._remoteHosts = hosts_str.split(',')
         else:
-            raise Exception("Remote host list must be passed in the 'ntphosts' environment variable.")
+            raise Exception("Remote host list must be passed in the 'ntphosts' "
+                            "environment variable.")
 
         if self.graphEnabled('ntp_host_stratums'):
             graph = MuninGraph('NTP Stratums of Multiple Hosts', 'Time',
@@ -112,11 +112,14 @@ class MuninNTPhostOffsetsPlugin(MuninPlugin):
                 hoststats = ntpstats.get(host)
                 if hoststats:
                     if self.hasGraph('ntp_host_stratums'):
-                        self.setGraphVal('ntp_host_stratums', hostkey, hoststats.get('stratum'))
+                        self.setGraphVal('ntp_host_stratums', hostkey, 
+                                         hoststats.get('stratum'))
                     if self.hasGraph('ntp_host_offsets'):
-                        self.setGraphVal('ntp_host_offsets', hostkey, hoststats.get('offset'))
+                        self.setGraphVal('ntp_host_offsets', hostkey, 
+                                         hoststats.get('offset'))
                     if self.hasGraph('ntp_host_delays'):
-                        self.setGraphVal('ntp_host_delays', hostkey, hoststats.get('delay'))
+                        self.setGraphVal('ntp_host_delays', hostkey, 
+                                         hoststats.get('delay'))
 
 
 if __name__ == "__main__":

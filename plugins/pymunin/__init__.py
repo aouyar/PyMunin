@@ -37,9 +37,10 @@ class MuninAttrFilter:
         
         @param list_include: Include List (List of attributes that are enabled.)
         @param list_exclude: Exclude List (List of attributes that are disabled.)
-        @param attr_regex:  If the regex is defined, the Attributes in the Include List
-                             and Exclude List are ignored unless they comply with the
-                             format dictated by the match regex.
+        @param attr_regex:  If the regex is defined, the Attributes in the 
+                            Include List and Exclude List are ignored unless 
+                            they comply with the format dictated by the match 
+                            regex.
         
         """
         self._attrs = {}
@@ -95,7 +96,8 @@ class MuninPlugin:
         self._argv = argv
         self._env = env
         self.arg0 = None
-        if self.plugin_name is not None and argv is not None and len(argv) > 0 and re.search('_$', self.plugin_name):
+        if (self.plugin_name is not None and argv is not None and len(argv) > 0 
+            and re.search('_$', self.plugin_name)):
             mobj = re.match("%s(\S+)$" % self.plugin_name, argv[0])
             if mobj:
                 self.arg0 = mobj.group(1)
@@ -120,13 +122,14 @@ class MuninPlugin:
         else:
             self._stateFile = '/tmp/munin-state-%s' % self.plugin_name
         if env.has_key('nested_graphs'):
-            if re.match('/s*(no|off)/s*$',  env.get('nested_graphs'), re.IGNORECASE):
+            if re.match('/s*(no|off)/s*$',  env.get('nested_graphs'), 
+                        re.IGNORECASE):
                 self.nestedGraphs = False
        
     def registerFilter(self, filter_name, attr_regex = '\w+$'):
         """Register filter for including, excluding attributes in graphs through 
-        the use of include_<name> and exclude_<name> environment variables. Parse 
-        the environment variables to initialize filter.
+        the use of include_<name> and exclude_<name> environment variables. 
+        Parse the environment variables to initialize filter.
         
         @param filter_name: Name of filter.
                             (Also determines suffix for environment variable name.)
@@ -146,8 +149,9 @@ class MuninPlugin:
                                                      attr_regex)
         
     def checkFilter(self, filter_name, attr):
-        """Check if a specific graph attribute is enabled or disabled through the 
-        use of a filter based on include_<name> and exclude_<name> environment variables.
+        """Check if a specific graph attribute is enabled or disabled through 
+        the use of a filter based on include_<name> and exclude_<name> 
+        environment variables.
         
         @param filter_name: Name of the Filter.
         @param attr:        Name of the Attribute.
@@ -171,10 +175,11 @@ class MuninPlugin:
         return self.checkFilter('graphs', name)
         
     def saveState(self,  stateObj):
-        """Utility methos to save plugin state stored in stateObj to persistent storage 
-        to permit access to previous state in subsequent plugin runs.
+        """Utility methos to save plugin state stored in stateObj to persistent 
+        storage to permit access to previous state in subsequent plugin runs.
         
-        Any object that can be pickled and unpickled can be used to stora plugin state.
+        Any object that can be pickled and unpickled can be used to store the 
+        plugin state.
         
         @param stateObj: Object that stores plugin state.
         
@@ -184,12 +189,13 @@ class MuninPlugin:
         try:
             pass
         except:
-            raise Exception("Failure in storing plugin state in file: %s" % self._stateFile)
+            raise Exception("Failure in storing plugin state in file: %s" 
+                            % self._stateFile)
         return True
     
     def restoreState(self):
-        """Utility method to restore plugin state from persistent storage to permit 
-        access to previous plugin state.
+        """Utility method to restore plugin state from persistent storage to 
+        permit access to previous plugin state.
         
         @return: Object that stores plugin state.
         
@@ -199,7 +205,8 @@ class MuninPlugin:
                 fp = open(self._stateFile,  'r')
                 stateObj = pickle.load(fp)
             except:
-                raise Exception("Failure in reading plugin state from file: %s" % self._stateFile)
+                raise Exception("Failure in reading plugin state from file: %s" 
+                                % self._stateFile)
             return stateObj
         return None
         
@@ -221,8 +228,8 @@ class MuninPlugin:
     def appendSubgraph(self, parent_name,  graph_name, graph):
         """Utility method to associate Subgraph Instance to Root Graph Instance.
 
-        This utility method is for use in constructor of child classes for associating
-        a MuninGraph Subgraph instance with a Root Graph instance.
+        This utility method is for use in constructor of child classes for 
+        associating a MuninGraph Subgraph instance with a Root Graph instance.
         
         @param parent_name: Root Graph Name
         @param graph_name:  Subgraph Name
@@ -242,8 +249,7 @@ class MuninPlugin:
     def setGraphVal(self, graph_name, field_name, val):
         """Utility method to set Value for Field in Graph.
         
-        The private method is for use in retrieveVals() method of child
-        classes.
+        The private method is for use in retrieveVals() method of child classes.
         
         @param name:    Graph Name
         @param valDict: Dictionary of monitored values
@@ -253,7 +259,8 @@ class MuninPlugin:
         if graph is not None:
             graph.setVal(field_name, val)
         else:
-            raise Exception("Invalid graph name %s used for setting value." % graph_name)
+            raise Exception("Invalid graph name %s used for setting value." 
+                            % graph_name)
     
     def setSubgraphVal(self,  parent_name,  graph_name,  val):
         """Set Value for Field in Subgraph.
@@ -270,8 +277,9 @@ class MuninPlugin:
         if graph is not None:
             graph.setVal("%s.%s" % (parent_name, graph_name),  val)
         else:
-            raise Exception("Invalid parent graph name %s used for setting value for subgraph %s."
-                % (parent_name, graph_name))
+            raise Exception("Invalid parent graph name %s used "
+                            "for setting value for subgraph %s."
+                            % (parent_name, graph_name))
     
     def hasGraph(self, name):
         """Return true if graph with name is registered to plugin.
@@ -290,7 +298,8 @@ class MuninPlugin:
         return self._graphNames
 
     def graphHasField(self, graph_name, field_name):
-        """Return true if graph with name graph_name has field with name field_name.
+        """Return true if graph with name graph_name has field with 
+        name field_name.
         
         @return: Boolean
         
@@ -317,8 +326,9 @@ class MuninPlugin:
     def autoconf(self):
         """Implements Munin Plugin Auto-Configuration Option.
 
-        Auto-configuration is disabled by default. To implement auto-configuration
-        for the Munin Plugin, this method must be overwritten in child class.
+        Auto-configuration is disabled by default. To implement 
+        auto-configuration for the Munin Plugin, this method must be overwritten 
+        in child class.
 
         """
         return False
@@ -329,7 +339,8 @@ class MuninPlugin:
         Prints out configuration for graphs.
 
         Use as is. Not required to be overwritten in child classes. The plugin
-        will work correctly as long as the Munin Graph objects have been populated.
+        will work correctly as long as the Munin Graph objects have been 
+        populated.
 
         """
         for name in self._graphNames:
@@ -405,9 +416,9 @@ class MuninGraph:
 
     """
 
-    def __init__(self, title, category = None, vlabel=None, info=None, args =None, 
-        period=None, scale=None,  total=None, order=None, printfformat=None,
-        witdh=None, height=None):
+    def __init__(self, title, category = None, vlabel=None, info=None, 
+                 args =None, period=None, scale=None,  total=None, order=None, 
+                 printfformat=None, witdh=None, height=None):
         """Initialize Munin Graph.
         
         @param title:        Graph Title
@@ -417,16 +428,16 @@ class MuninGraph:
         @param args:         Args passed to RRDtool
         @param period:       Time Unit - 'second' / 'minute' (Default: 'second')
         @param scale:        Graph Scaling - True / False (Default: True)
-        @param total:        Add a total field with sum of all datasources if defined.
-                             The value of the parameter is used as the label for the
-                             total field.
+        @param total:        Add a total field with sum of all datasources if 
+                             defined. The value of the parameter is used as the 
+                             label for the total field.
         @param order:        The order in which the fields are drawn on graph.
-                             The attribute must contain a comma separated list of
-                             field names.
-                             When the parameter is not used, the datasources are drawn 
-                             in the order they are defined by default.
-        @param printfformat: Format for printing numbers on graph. The defaults are 
-                             usually OK and this parameter is rarely needed.
+                             The attribute must contain a comma separated list 
+                             of field names.
+                             When the parameter is not used, the datasources are 
+                             drawn in the order they are defined by default.
+        @param printfformat: Format for printing numbers on graph. The defaults 
+                             are usually OK and this parameter is rarely needed.
         @param width:        Graph width in pixels.
         @param height:       Graph height in pixels.
             .
@@ -436,15 +447,19 @@ class MuninGraph:
         self._fieldAttrDict = {}
         self._fieldValDict = {}
 
-    def addField(self, name, label, type=None,  draw=None, info=None,
-        extinfo=None, colour=None, negative=None, graph=None, min=None, max=None,
-        cdef=None, line=None, warning=None, critical=None):
+    def addField(self, name, label, type=None,  draw=None, info=None, 
+                 extinfo=None, colour=None, negative=None, graph=None, 
+                 min=None, max=None, cdef=None, line=None, 
+                 warning=None, critical=None):
         """Add field to Munin Graph
         
             @param name:     Field Name
             @param label:    Field Label
-            @param type:     Stat Type - 'COUNTER' / 'ABSOLUTE' / 'DERIVE' / 'GAUGE'
-            @param draw:     Graph Type - 'AREA' / LINE{1,2,3} / STACK / LINESTACK{1,2,3}, AREASTACK
+            @param type:     Stat Type:
+                             'COUNTER' / 'ABSOLUTE' / 'DERIVE' / 'GAUGE'
+            @param draw:     Graph Type:
+                             'AREA' / 'LINE{1,2,3}' / 
+                             'STACK' / 'LINESTACK{1,2,3}' / 'AREASTACK'
             @param info:     Detailed Field Info
             @param extinfo:  Extended Field Info
             @param colour:   Field Colour
@@ -487,8 +502,8 @@ class MuninGraph:
         conf = []
         
         # Process Graph Attributes
-        for key in ('title', 'category', 'vlabel', 'info', 'args', 'period', 'scale',
-                    'total', 'order', 'printfformat', 'width', 'height'):
+        for key in ('title', 'category', 'vlabel', 'info', 'args', 'period', 
+                    'scale', 'total', 'order', 'printfformat', 'width', 'height'):
             val = self._graphAttrDict.get(key)
             if val is not None:
                 if isinstance(val, bool):
@@ -502,7 +517,8 @@ class MuninGraph:
         for field_name in self._fieldNameList:
             field_attrs = self._fieldAttrDict.get(field_name)
             for key in ('label', 'type', 'draw', 'info', 'extinfo', 'colour',
-                'negative', 'graph', 'min', 'max', 'cdef', 'line', 'warning', 'critical'):
+                        'negative', 'graph', 'min', 'max', 'cdef', 
+                        'line', 'warning', 'critical'):
                 val = field_attrs.get(key)
                 if val is not None:
                     if isinstance(val, bool):
