@@ -28,8 +28,6 @@ else:
 defaultTomcatPort = 8080
 defaultTomcatSSLport = 8443
 
-buffSize = 4096
-
 
 class TomcatInfo:
     """Class to retrieve stats for Apache Tomcat Application Server."""
@@ -82,16 +80,7 @@ class TomcatInfo:
             url = "%s://%s:%d/manager/status?XML=true" % (self._proto,
                  self._host, self._port)
         fp = urllib.urlopen(url)
-        response = ''
-        oldlen = 0
-        newlen = 0
-        while True:
-            response += fp.read(buffSize)
-            newlen = len(response)
-            if newlen - oldlen == 0:
-                break
-            else:
-                oldlen = newlen
+        response = util.socket_read(fp)
         fp.close()
         tree = ElementTree.XML(response)
         return tree

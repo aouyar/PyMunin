@@ -22,8 +22,6 @@ __status__ = "Development"
 defaultHTTPport = 80
 defaultHTTPSport = 443
 
-buffSize = 4096
-
 
 class ApacheInfo:
     """Class to retrieve stats for Apache Web Server."""
@@ -78,16 +76,7 @@ class ApacheInfo:
             url = "%s://%s:%d/%s?auto"  % (self._proto, self._host, self._port, 
                                            self._statuspath)
         fp = urllib.urlopen(url)
-        response = ''
-        oldlen = 0
-        newlen = 0
-        while True:
-            response += fp.read(buffSize)
-            newlen = len(response)
-            if newlen - oldlen == 0:
-                break
-            else:
-                oldlen = newlen
+        response = util.socket_read(fp)
         fp.close()
         self._statusDict = {}
         for line in response.splitlines():
