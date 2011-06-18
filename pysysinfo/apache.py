@@ -29,15 +29,16 @@ class ApacheInfo:
     """Class to retrieve stats for Apache Web Server."""
 
     def __init__(self, host=None, port=None, user=None, password=None,
-                 ssl=False, autoInit=True):
+                 statuspath = None, ssl=False, autoInit=True):
         """Initialize Apache server-status URL access.
         
         @param host:     Apache Web Server Host. (Default: 127.0.0.1)
         @param port:     Apache Web Server Port. (Default: 8080, SSL: 8443)
         @param user:     Username. (Not needed unless authentication is required 
-                             to access server-status page.
+                         to access server-status page.
         @param password: Password. (Not needed unless authentication is required 
-                             to access server-status page.
+                         to access server-status page.
+        @statuspath:     Path of status page. (Default: server-status)                
         @param ssl:      Use SSL if True. (Default: False)
         @param autoInit: If True connect to Apache Web Server on instantiation.
             
@@ -55,6 +56,10 @@ class ApacheInfo:
                 self._port = defaultApachePort
         self._user = user
         self._password = password
+        if statuspath is not None:
+            self._statuspath = statuspath
+        else:
+            self._statuspath = 'server-status'
         if ssl:
             self._proto = 'https'
         else:
@@ -66,9 +71,9 @@ class ApacheInfo:
     def initStats(self):
         """Query and parse Apache Web Server Status Page."""
         if self._user is not None and self._password is not None:
-            url = "%s://%s:%s@%s:%d/server-status?auto" % (self._proto,
+            url = "%s://%s:%s@%s:%d/%s?auto" % (self._proto,
                 urllib.quote(self._user), urllib.quote(self._password), 
-                self._host, self._port)
+                self._host, self._port, self._statuspath)
         else:
             url = ("%s://%s:%d/server-status?auto" 
                    % (self._proto, self._host, self._port))

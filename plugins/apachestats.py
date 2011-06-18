@@ -21,6 +21,8 @@ Environment Variables
                   server-status page.
   password:       User in case authentication is required for access 
                   to server-status page.
+  statuspath:     Path for Apache Web Server Status Page.
+                  (Default: server-status)
   ssl:            Use SSL if yes. (Default: no)
   include_graphs: Comma separated list of enabled graphs. (All graphs enabled by default.)
   exclude_graphs: Comma separated list of disabled graphs.
@@ -68,6 +70,7 @@ class MuninApachePlugin(MuninPlugin):
         self._port = self._env.get('port')
         self._user = self._env.get('user')
         self._password = self._env.get('password')
+        self._statuspath = self._env.get('statuspath')
         self._ssl = self._env.get('ssl', '').lower() in ('yes', 'on') 
         
         if self.graphEnabled('apache_access'):
@@ -103,7 +106,8 @@ class MuninApachePlugin(MuninPlugin):
     def retrieveVals(self):
         """Retrive values for graphs."""
         apacheInfo = ApacheInfo(self._host, self._port,
-                                self._user, self._password, self._ssl)
+                                self._user, self._password, 
+                                self._statuspath, self._ssl)
         stats = apacheInfo.getServerStats()
         if self.hasGraph('apache_access'):
             self.setGraphVal('apache_access', 'reqs', stats['Total Accesses'])
