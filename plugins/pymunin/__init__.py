@@ -257,7 +257,12 @@ class MuninPlugin:
         """
         graph = self._graphDict.get(graph_name)
         if graph is not None:
-            graph.setVal(field_name, val)
+            if graph.hasField(field_name):
+                graph.setVal(field_name, val)
+            else:
+                raise Exception("Invalid field name %s used for setting value "
+                                "for graph %s." 
+                                % (field_name, graph_name))
         else:
             raise Exception("Invalid graph name %s used for setting value." 
                             % graph_name)
