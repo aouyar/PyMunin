@@ -80,7 +80,7 @@ class PHPfpmInfo:
         for line in response.splitlines():
             mobj = re.match('([\w\s]+):\s+(\w+)$', line)
             if mobj:
-                stats[mobj.group(1)] = mobj.group(2)
+                stats[mobj.group(1)] = util.parse_value(mobj.group(2))
         return stats
     
                 

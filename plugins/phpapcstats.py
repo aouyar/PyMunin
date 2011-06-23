@@ -53,7 +53,7 @@ __email__ = "aouyar at gmail.com"
 __status__ = "Development"
 
 
-class MuninPHPAPCplugin(MuninPlugin):
+class MuninPHPapcPlugin(MuninPlugin):
     """Multigraph Munin Plugin for monitoring APC PHP Cache.
 
     """
@@ -176,5 +176,5 @@ class MuninPHPAPCplugin(MuninPlugin):
             
        
 if __name__ == "__main__":
-    sys.exit(muninMain(MuninPHPAPCplugin))
+    sys.exit(muninMain(MuninPHPapcPlugin))
 
