@@ -40,13 +40,14 @@ included:
 
 * Apache Tomcat
 * Apache Web Server
-* APC - PHP Cache
 * Asterisk Telephony Server
 * Disk Usage
 * Memcached
 * Network Interface Traffic and Errors
 * Nginx Web Server
 * NTP - Time Server
+* PHP APC - PHP Cache
+* PHP FPM (FastCGI Process Manager)
 * PostgreSQL Database
 * System Resources 
   (Load, CPU, Memory, Processes, Interrupts, Paging, Swapping, etc.)
