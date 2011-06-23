@@ -1,5 +1,5 @@
 #!/usr/bin/python
-"""phpapcstats - Munin Plugin to monitor stats for PHP APC Cache.
+"""phpapcstats - Munin Plugin for monitoring PHP APC Cache.
 
 Requirements
   - The PHP script apcinfo.php must be placed in the document root and have 
@@ -31,7 +31,7 @@ Environment Variables
   exclude_graphs: Comma separated list of disabled graphs.
 
   Example:
-    [apachestats]
+    [phpapcstats]
         env.exclude_graphs php_apc_items,php_apc_expunge
 
 """
