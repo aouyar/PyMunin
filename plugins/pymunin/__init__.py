@@ -541,7 +541,10 @@ class MuninGraph:
         @param value  : Value for field. 
         
         """
-        self._fieldValDict[name] = val
+        if val is not None:
+            self._fieldValDict[name] = val
+        else:
+            self._fieldValDict[name] = 'U'
 
     def getVals(self):
         """Returns value entries for Munin Graph
