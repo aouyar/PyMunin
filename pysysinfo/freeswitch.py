@@ -2,6 +2,7 @@
 
 """
 
+import re
 import ESL
 
 __author__ = "Ali Onur Uyar"
@@ -42,7 +43,7 @@ class FSinfo:
         # Set Connection Parameters
         self._eslhost = host or '127.0.0.1'
         self._eslport = port or 8021
-        self._eslpass = secret
+        self._eslpass = secret or "ClueCon"
         self._eslconn = None
         
         ESL.eslSetLogLevel(0)
@@ -61,6 +62,8 @@ class FSinfo:
                                               str(self._eslport), 
                                               self._eslpass)
         except:
+            pass
+        if not self._eslconn.connected:
             raise Exception(
                 "Connection to FreeSWITCH ESL Interface on host %s and port %d failed."
                 % (self._eslhost, self._eslport)
@@ -101,6 +104,33 @@ class FSinfo:
             result['items'] = items
         return result
     
-
+    def _execShowCountCmd(self, showcmd):
+        """Execute 'show' command and return result dictionary.
+        
+            @param cmd: Command string.
+            @return: Result dictionary.
             
-            
+        """
+        result = None
+        lines = self._execCmd("show", showcmd + " count")
+        for line in lines:
+            mobj = re.match('\s*(\d+)\s+total', line)
+            if mobj:
+                return int(mobj.group(1))
+        return result
+    
+    def getChannelCount(self):
+        """Get number of active channels from FreeSWITCH.
+        
+        @return: Integer or None.
+        
+        """
+        return self._execShowCountCmd("channels")
+    
+    def getCallCount(self):
+        """Get number of active calls from FreeSWITCH.
+        
+        @return: Integer or None.
+        
+        """
+        return self._execShowCountCmd("calls")
