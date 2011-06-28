@@ -42,6 +42,7 @@ included:
 * Apache Web Server
 * Asterisk Telephony Server
 * Disk Usage
+* FreeSWITCH Soft Switch
 * Memcached
 * Network Interface Traffic and Errors
 * Nginx Web Server
