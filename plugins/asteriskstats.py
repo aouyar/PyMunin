@@ -1,5 +1,5 @@
 #!/usr/bin/python
-"""asteriskstats - Munin Plugin to monitor Asterisk through Manager Interface
+"""asteriskstats - Munin Plugin to monitor Asterisk through Manager Interface.
 
 Requirements
   - Access to Asterisk Manager Interface
@@ -105,7 +105,7 @@ class MuninAsteriskPlugin(MuninPlugin):
                 args = '--base 1000 --lower-limit 0')
             for field in ('sip', 'iax2', 'dahdi', 'misdn', 'local', 'mix'):
                 graph.addField(field, field, type='GAUGE', draw='AREASTACK')
-            graph.addField('mix', 'mix', draw='LINE2')
+            graph.addField('mix', 'mix', type='GAUGE', draw='LINE2')
             self.appendGraph('asterisk_channels', graph)
 
         if self.graphEnabled('asterisk_peers_sip'):
