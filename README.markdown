@@ -113,7 +113,10 @@ Collaboration
 -------------
 
 I would be happy to receive suggestions on improving the code for developing 
-Munin Plugins.
+Munin Plugins. Alternatively you can use the _Issues_ functionality of _GitHub_ 
+to document problems and to propose improvements. You can use the internal 
+messaging system of _GitHub_ or my e-mail address in case you prefer to 
+contact me directly.
 
 I hope that by sharing the code, the existing plugins will get more testing and 
 receive improvements, and many more Multigraph plugins will be developed 
