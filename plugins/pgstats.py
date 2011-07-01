@@ -90,9 +90,9 @@ class MuninPgPlugin(MuninPlugin):
         self._user = self._env.get('user')
         self._password = self._env.get('password')
         
-        self._pgConn = PgInfo(self._host, self._port, self._database, 
+        self._dbconn = PgInfo(self._host, self._port, self._database, 
                               self._user, self._password)
-        dblist = self._pgConn.getDatabases()
+        dblist = self._dbconn.getDatabases()
         dblist.sort()
         
         if self.graphEnabled('pg_connections'):
@@ -265,12 +265,12 @@ class MuninPgPlugin(MuninPlugin):
             
     def retrieveVals(self):
         """Retrive values for graphs."""                
-        stats = self._pgConn.getDatabaseStats()
+        stats = self._dbconn.getDatabaseStats()
         databases = stats.get('databases')
         totals = stats.get('totals')
         if databases and len(databases) > 0:
             if self.hasGraph('pg_connections'):
-                limit = self._pgConn.getParam('max_connections')
+                limit = self._dbconn.getParam('max_connections')
                 self.setGraphVal('pg_connections', 'max_conn', limit)
                 for (db, dbstats) in databases.iteritems():
                     if self.dbIncluded(db):
