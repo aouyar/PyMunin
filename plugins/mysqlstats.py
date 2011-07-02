@@ -44,7 +44,7 @@ from pysysinfo.mysql import MySQLinfo
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
-__credits__ = []
+__credits__ = ["Kjell-Magne Oierud (kjellm at GitHub)"]
 __license__ = "GPL"
 __version__ = "0.7"
 __maintainer__ = "Ali Onur Uyar"
@@ -79,6 +79,61 @@ class MuninMySQLplugin(MuninPlugin):
         self._dbconn = MySQLinfo(self._host, self._port, self._database, 
                               self._user, self._password)
         
+        if self.graphEnabled('mysql_connections'):
+            graph = MuninGraph('MySQL - Connections per second', 
+                'MySQL',
+                info='MySQL Database Server new and aborted connections per second.',
+                args='--base 1000 --lower-limit 0')
+            graph.addField('conn', 'conn', draw='LINE2', 
+                type='DERIVE', min=0,
+                info = 'The number of connection attempts to the MySQL server.')
+            graph.addField('abort_conn', 'abort_conn', draw='LINE2', 
+                type='DERIVE', min=0,
+                info = 'The number of failed attempts to connect to the MySQL server.')
+            graph.addField('abort_client', 'abort_client', draw='LINE2', 
+                type='DERIVE', min=0,
+                info = 'The number of connections that were aborted, because '
+                       'the client died without closing the connection properly.')
+            self.appendGraph('mysql_connections', graph)
+        
+        if self.graphEnabled('mysql_traffic'):
+            graph = MuninGraph('MySQL - Network Traffic (bytes/sec)', 
+                'MySQL',
+                info='MySQL Database Server Network Traffic in bytes per second.',
+                args='--base 1000 --lower-limit 0',
+                vlabel='bytes in (-) / out (+) per second')
+            graph.addField('rx', 'bytes', draw='LINE2', type='DERIVE', 
+                           min=0, graph=False)
+            graph.addField('tx', 'bytes', draw='LINE2', type='DERIVE', 
+                           min=0, negative='rx',
+                    info="Bytes In (-) / Out (+) per second.")
+            self.appendGraph('mysql_traffic', graph)
+            
+        if self.graphEnabled('mysql_slowqueries'):
+            graph = MuninGraph('MySQL - Slow Queries per second', 
+                'MySQL',
+                info='The number of queries that have taken more than '
+                     'long_query_time seconds.',
+                args='--base 1000 --lower-limit 0')
+            graph.addField('queries', 'queries', draw='LINE2', 
+                           type='DERIVE', min=0)
+            self.appendGraph('mysql_slowqueries', graph)
+        
+        if self.graphEnabled('mysql_tablelocks'):
+            graph = MuninGraph('MySQL - Table Locks per second', 
+                'MySQL',
+                info='MySQL Table Locks per second.',
+                args='--base 1000 --lower-limit 0')
+            graph.addField('waited', 'waited', draw='AREASTACK', 
+                type='DERIVE', min=0,
+                info = 'The number of times that a request for a table lock '
+                       'could not be granted immediately and a wait was needed.')
+            graph.addField('immediate', 'immediate', draw='AREASTACK', 
+                type='DERIVE', min=0,
+                info = 'The number of times that a request for a table lock '
+                       'could be granted immediately.')
+            self.appendGraph('mysql_tablelocks', graph)
+        
         if self.graphEnabled('mysql_threads'):
             graph = MuninGraph('MySQL - Threads', 
                 'MySQL',
@@ -98,6 +153,34 @@ class MuninMySQLplugin(MuninPlugin):
     def retrieveVals(self):
         """Retrive values for graphs."""
         self._genStats = None
+        if self.hasGraph('mysql_connections'):
+            if self._genStats is None:
+                self._genStats = self._dbconn.getStats()
+            self.setGraphVal('mysql_connections', 'conn',
+                             self._genStats.get('Connections'))
+            self.setGraphVal('mysql_connections', 'abort_conn',
+                             self._genStats.get('Aborted_connects'))
+            self.setGraphVal('mysql_connections', 'abort_client',
+                             self._genStats.get('Aborted_clients'))
+        if self.hasGraph('mysql_traffic'):
+            if self._genStats is None:
+                self._genStats = self._dbconn.getStats()
+            self.setGraphVal('mysql_traffic', 'rx',
+                             self._genStats.get('Bytes_received'))
+            self.setGraphVal('mysql_traffic', 'tx',
+                             self._genStats.get('Bytes_sent'))
+        if self.graphEnabled('mysql_slowqueries'):
+            if self._genStats is None:
+                self._genStats = self._dbconn.getStats()
+            self.setGraphVal('mysql_slowqueries', 'queries',
+                             self._genStats.get('Slow_queries'))
+        if self.hasGraph('mysql_tablelocks'):
+            if self._genStats is None:
+                self._genStats = self._dbconn.getStats()
+            self.setGraphVal('mysql_tablelocks', 'waited',
+                             self._genStats.get('Table_locks_waited'))
+            self.setGraphVal('mysql_tablelocks', 'immediate',
+                             self._genStats.get('Table_locks_immediate'))
         if self.hasGraph('mysql_threads'):
             if self._genStats is None:
                 self._genStats = self._dbconn.getStats()

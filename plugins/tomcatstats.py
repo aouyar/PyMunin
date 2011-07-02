@@ -154,7 +154,7 @@ class MuninTomcatPlugin(MuninPlugin):
                                    min=0, graph=False)
                     graph.addField('tx', 'bytes', draw='LINE2', type='DERIVE', 
                                    min=0, negative='rx',
-                        info="Received (-) / Transmitted (+) bytes per second.")
+                        info="Bytes In (-) / Out (+) per second.")
                     self.appendGraph(name, graph)
 #                if self.graphEnabled('tomcat_cputime'):
 #                    name = "tomcat_cputime_%d" % port
