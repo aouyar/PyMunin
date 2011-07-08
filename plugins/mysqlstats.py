@@ -9,7 +9,12 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
-   - mysql_threads
+    - mysql_connections
+    - mysql_traffic
+    - mysql_slowqueries
+    - mysql_rowmodifications
+    - mysql_tablelocks
+    - mysql_threads
    
 
 Environment Variables
