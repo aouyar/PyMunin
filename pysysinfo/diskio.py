@@ -16,6 +16,7 @@ __status__ = "Development"
 
 
 # Defaults
+sectorSize = 512
 diskStatsFile = '/proc/diskstats'
 devicesFile = '/proc/devices'
 devmapperDir = '/dev/mapper'
@@ -39,6 +40,7 @@ class DiskIOinfo:
         self._dmMajorNum = None
         self._devClassDict = None
         self._partDict = None
+        self._partList = None
         self._vgDict = None
 
     def _initBlockMajorMap(self):
@@ -117,6 +119,18 @@ class DiskIOinfo:
                      'wios', 'wmerges', 'wsect', 'wticks'
                      'ios_active', 'totticks', 'rqticks'),
                     [int(x) for x in cols]))
+            elif len(cols) == 6:
+                self._diskStats[dev] = dict(zip(
+                    ('major', 'minor',
+                     'rios', 'rsect',
+                     'wios', 'wsect'),
+                    [int(x) for x in cols]))
+            else:
+                continue
+            self._diskStats[dev]['rbytes'] = (
+                self._diskStats[dev]['rsect'] * sectorSize)
+            self._diskStats[dev]['wbytes'] = (
+                self._diskStats[dev]['wsect'] * sectorSize) 
                     
     def _initDevClasses(self):
         """Sort block devices into lists depending on device class and 
@@ -193,6 +207,29 @@ class DiskIOinfo:
             self._initDevClasses()
         return self._devClassDict.get('device-mapper')
     
+    def getPartitionDict(self):
+        """Returns dict of disks and partitions.
+        
+        @return: Dict of disks and partitions.
+        
+        """
+        if self._partDict is None:
+            self._initDevClasses()
+        return self._partDict
+    
+    def getPartitionList(self):
+        """Returns list of partitions.
+        
+        @return: List of (disk,partition) pairs.
+        
+        """
+        if self._partList is None:
+            self._partList = []
+            for (disk,parts) in self.getPartitionDict().iteritems():
+                for part in parts:
+                    self._partList.append((disk,part))
+        return self._partList
+    
     def getVGdict(self):
         """Returns dict of VGs.
         
@@ -233,6 +270,11 @@ class DiskIOinfo:
         if self._diskStats is None:
             self._initDiskStats()
         return self._diskStats.get(dev)
+
+    getDiskStats = getDevStats
+    getPartitionStats = getDevStats
+    getMDstats = getDevStats
+    getDMstats = getDevStats
     
     def getLVstats(self, vg, lv):
         """Returns I/O stats for LV.
