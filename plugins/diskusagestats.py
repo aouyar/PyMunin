@@ -40,7 +40,7 @@ Environment Variables
 
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
-from pysysinfo.diskusage import DiskUsageInfo
+from pysysinfo.filesystem import FilesystemInfo
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
@@ -73,7 +73,7 @@ class MuninDiskUsagePlugin(MuninPlugin):
         
         self._statsSpace = None
         self._statsInode = None
-        self._info = DiskUsageInfo()
+        self._info = FilesystemInfo()
         
         name = 'diskspace'
         if self.graphEnabled(name):
