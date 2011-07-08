@@ -8,8 +8,8 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+    - diskio_disk_requests
     - diskio_disk_bytes
-    - diskio_disk_reqs
     - diskio_disk_active
 
    
@@ -91,7 +91,7 @@ class MuninDiskIOplugin(MuninPlugin):
             
         name = 'diskio_disk_active'
         if self.graphEnabled(name):
-            graph = MuninGraph('Disk I/O - Disk I/O Operations in Progress', 'Disk I/O',
+            graph = MuninGraph('Disk I/O - Disk - Queue Length', 'Disk I/O',
                 info='Disk I/O - Number  of I/O Operations in Progress for every disk.',
                 args='--base 1000 --lower-limit 0')
             for disk in self._info.getDiskList():
