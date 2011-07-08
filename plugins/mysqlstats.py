@@ -118,6 +118,22 @@ class MuninMySQLplugin(MuninPlugin):
             graph.addField('queries', 'queries', draw='LINE2', 
                            type='DERIVE', min=0)
             self.appendGraph('mysql_slowqueries', graph)
+            
+        if self.graphEnabled('mysql_rowmodifications'):
+            graph = MuninGraph('MySQL - Row Insert, Delete, Updates per second', 
+                'MySQL',
+                info='MySQL Inserted, Deleted, Updated Rows per second.',
+                args='--base 1000 --lower-limit 0')
+            graph.addField('insert', 'insert', draw='AREASTACK', 
+                type='DERIVE', min=0,
+                info = 'The number of requests to insert a rows into tables.')
+            graph.addField('update', 'update', draw='AREASTACK', 
+                type='DERIVE', min=0,
+                info = 'The number of requests to update a rows in a tables.')
+            graph.addField('delete', 'delete', draw='AREASTACK', 
+                type='DERIVE', min=0,
+                info = 'The number of requests to delete rows from tables.')
+            self.appendGraph('mysql_rowmodifications', graph)
         
         if self.graphEnabled('mysql_tablelocks'):
             graph = MuninGraph('MySQL - Table Locks per second', 
@@ -174,6 +190,15 @@ class MuninMySQLplugin(MuninPlugin):
                 self._genStats = self._dbconn.getStats()
             self.setGraphVal('mysql_slowqueries', 'queries',
                              self._genStats.get('Slow_queries'))
+        if self.hasGraph('mysql_rowmodifications'):
+            if self._genStats is None:
+                self._genStats = self._dbconn.getStats()
+            self.setGraphVal('mysql_rowmodifications', 'insert',
+                             self._genStats.get('Handler_write'))
+            self.setGraphVal('mysql_rowmodifications', 'update',
+                             self._genStats.get('Handler_update'))
+            self.setGraphVal('mysql_rowmodifications', 'delete',
+                             self._genStats.get('Handler_delete'))
         if self.hasGraph('mysql_tablelocks'):
             if self._genStats is None:
                 self._genStats = self._dbconn.getStats()
