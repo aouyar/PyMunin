@@ -1,4 +1,4 @@
-"""Implements DiskUsageInfo Class for gathering disk usage stats.
+"""Implements FilesystemInfo Class for gathering disk usage stats.
 
 """
 
@@ -20,7 +20,7 @@ mountsFile = '/proc/mounts'
 
 
 
-class DiskUsageInfo:
+class FilesystemInfo:
     """Class to retrieve stats for disk utilization."""
     
     def __init__(self):
@@ -41,10 +41,18 @@ class DiskUsageInfo:
     def getFSlist(self):
         """Returns list of filesystems.
         
-        @return: Lis of filesystems.
+        @return: List of filesystems.
         
         """
         return self._fstypeDict.keys()
+    
+    def getFStype(self, fs):
+        """Return the type of the filesystem fs.
+        
+        @return: Filesystem type.
+        
+        """
+        return self._fstypeDict.get(fs)
 
     def getSpaceUse(self):
         """Get disk space usage.
