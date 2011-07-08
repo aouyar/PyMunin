@@ -116,7 +116,7 @@ class DiskIOinfo:
                 self._diskStats[dev] = dict(zip(
                     ('major', 'minor',
                      'rios', 'rmerges', 'rsect', 'rticks',
-                     'wios', 'wmerges', 'wsect', 'wticks'
+                     'wios', 'wmerges', 'wsect', 'wticks',
                      'ios_active', 'totticks', 'rqticks'),
                     [int(x) for x in cols]))
             elif len(cols) == 6:
