@@ -8,7 +8,9 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
-    - diskio_
+    - diskio_disk_bytes
+    - diskio_disk_reqs
+    - diskio_disk_active
 
    
 Environment Variables
@@ -61,6 +63,19 @@ class MuninDiskIOplugin(MuninPlugin):
         self._statsInode = None
         self._info = DiskIOinfo()
         
+        name = 'diskio_disk_requests'
+        if self.graphEnabled(name):
+            graph = MuninGraph('Disk I/O - Disk - Requests', 'Disk I/O',
+                info='Disk I/O - Disk Throughput,  Read / write requests per second.',
+                args='--base 1000 --lower-limit 0',
+                vlabel='reqs/sec read (-) / write (+)')
+            for disk in self._info.getDiskList():
+                graph.addField(disk + '_read', disk, draw='LINE2', type='DERIVE',
+                    min = 0, graph=False)
+                graph.addField(disk + '_write', disk, draw='LINE2', type='DERIVE',
+                    min = 0, negative = disk + '_read')
+            self.appendGraph(name, graph)
+        
         name = 'diskio_disk_bytes'
         if self.graphEnabled(name):
             graph = MuninGraph('Disk I/O - Disk - Throughput', 'Disk I/O',
@@ -73,16 +88,32 @@ class MuninDiskIOplugin(MuninPlugin):
                 graph.addField(disk + '_write', disk, draw='LINE2', type='DERIVE',
                     min = 0, negative = disk + '_read')
             self.appendGraph(name, graph)
+            
+        name = 'diskio_disk_active'
+        if self.graphEnabled(name):
+            graph = MuninGraph('Disk I/O - Disk I/O Operations in Progress', 'Disk I/O',
+                info='Disk I/O - Number  of I/O Operations in Progress for every disk.',
+                args='--base 1000 --lower-limit 0')
+            for disk in self._info.getDiskList():
+                graph.addField(disk, disk, draw='AREASTACK', type='GAUGE')
+            self.appendGraph(name, graph)
                 
     def retrieveVals(self):
         """Retrive values for graphs."""
-        name = 'diskio_disk_bytes'
-        if self.hasGraph(name):
-            for disk in self._info.getDiskList():
-                stats = self._info.getDiskStats(disk)
+        for disk in self._info.getDiskList():
+            stats = self._info.getDiskStats(disk)
+            name = 'diskio_disk_requests'
+            if self.hasGraph(name):
+                self.setGraphVal(name, disk + '_read', stats['rios'])
+                self.setGraphVal(name, disk + '_write', stats['wios'])
+                name = 'diskio_disk_bytes'
+            if self.hasGraph(name):
                 self.setGraphVal(name, disk + '_read', stats['rbytes'])
                 self.setGraphVal(name, disk + '_write', stats['wbytes'])
-
+            name = 'diskio_disk_active'
+            if self.hasGraph(name):
+                self.setGraphVal(name, disk, stats['ios_active'])
+                
 
 if __name__ == "__main__":
     sys.exit(muninMain(MuninDiskIOplugin))
