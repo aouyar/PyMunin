@@ -4,6 +4,7 @@
 
 import re
 import os
+from filesystem import FilesystemInfo
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
@@ -42,9 +43,10 @@ class DiskIOinfo:
         self._partDict = None
         self._partList = None
         self._vgDict = None
+        self._fsDict = None
 
     def _initBlockMajorMap(self):
-        """Parses /proc/devices to initialize devive class - major number map
+        """Parses /proc/devices to initialize device class - major number map
         for block devices.
         
         """
@@ -99,6 +101,19 @@ class DiskIOinfo:
                     self._vgDict[vg] = []
                 self._vgDict[vg].append(lv)
                 
+    def _initFSinfo(self):
+        """Initialize filesystem to device mappings."""
+        self._fsDict = {}
+        fsinfo = FilesystemInfo()
+        if self._diskStats is None:
+            self._initDiskStats()
+        for fs in fsinfo.getFSlist():
+            devpath = fsinfo.getFSdev(fs)
+            if re.match('\/dev\/', devpath):
+                mobj = re.match('\/dev\/(.*)$', os.path.realpath(devpath))
+                if mobj:
+                    self._fsDict[fs] = mobj.group(1)
+    
     def _initDiskStats(self):
         """Parse and initialize block device I/O stats in /proc/diskstats."""
         self._diskStats = {}
@@ -230,6 +245,14 @@ class DiskIOinfo:
                     self._partList.append((disk,part))
         return self._partList
     
+    def getFilesystemList(self):
+        """Returns list of filesystems mapped to block devices on disks.
+        
+        @return: List of filesystem paths.
+        
+        """
+        pass
+    
     def getVGdict(self):
         """Returns dict of VGs.
         
@@ -246,9 +269,7 @@ class DiskIOinfo:
         @return: List of VGs.
         
         """
-        if self._vgDict is None:
-            self._initDMinfo()
-        return self._vgDict.keys()
+        return self.getVGdict().keys()
         
     def getLVlist(self):
         """Returns list of LV Devices.
@@ -259,6 +280,24 @@ class DiskIOinfo:
         if self._vgDict is None:
             self._initDMinfo()
         return self._mapMinorLV.values()
+
+    def getFSdict(self):
+        """Returns map of filesystems to disk devices.
+        
+        @return: Dict of filesystem to disk device mappings.
+        
+        """
+        if self._fsDict is None:
+            self._initFSinfo()
+        return self._fsDict
+    
+    def getFSlist(self):
+        """Returns list of filesystems mapped to disk devices.
+        
+        @return: List of filesystem paths.
+        
+        """
+        return self.getFSdict().keys()
     
     def getDevStats(self, dev):
         """Returns I/O stats for block device.
@@ -292,5 +331,16 @@ class DiskIOinfo:
         else:
             return None
     
-            
+    def getFSstats(self, fs):
+        """Returns I/O stats for filesystem.
+        
+        @param fs: Filesystem path.
+        @return: Dict of stats.
+        
+        """
+        if self._diskStats is None:
+            self._initDiskStats()
+        if self._fsDict is None:
+            self._initFSinfo()
+        return self._diskStats.get(self._fsDict.get(fs))
     

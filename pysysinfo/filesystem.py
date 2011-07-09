@@ -28,6 +28,7 @@ class FilesystemInfo:
         
         """
         self._fstypeDict = {}
+        self._fs2devDict = {}
         try:
             fp = open(mountsFile, 'r')
             data = fp.read()
@@ -37,6 +38,7 @@ class FilesystemInfo:
         for line in data.splitlines():
             cols = line.split()
             self._fstypeDict[cols[1]] = cols[2]
+            self._fs2devDict[cols[1]] = cols[0]
     
     def getFSlist(self):
         """Returns list of filesystems.
@@ -53,6 +55,14 @@ class FilesystemInfo:
         
         """
         return self._fstypeDict.get(fs)
+    
+    def getFSdev(self, fs):
+        """Return the device path forfilesystem fs.
+        
+        @return: Device path.
+        
+        """
+        return self._fs2devDict.get(fs)
 
     def getSpaceUse(self):
         """Get disk space usage.
