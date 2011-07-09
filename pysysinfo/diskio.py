@@ -5,6 +5,7 @@
 import re
 import os
 from filesystem import FilesystemInfo
+from system import SystemInfo
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
@@ -44,6 +45,7 @@ class DiskIOinfo:
         self._partList = None
         self._vgDict = None
         self._fsDict = None
+        self._swapList = None
 
     def _initBlockMajorMap(self):
         """Parses /proc/devices to initialize device class - major number map
@@ -101,7 +103,7 @@ class DiskIOinfo:
                     self._vgDict[vg] = []
                 self._vgDict[vg].append(lv)
                 
-    def _initFSinfo(self):
+    def _initFilesystemInfo(self):
         """Initialize filesystem to device mappings."""
         self._fsDict = {}
         fsinfo = FilesystemInfo()
@@ -113,6 +115,16 @@ class DiskIOinfo:
                 mobj = re.match('\/dev\/(.*)$', os.path.realpath(devpath))
                 if mobj:
                     self._fsDict[fs] = mobj.group(1)
+    
+    def _initSwapInfo(self):
+        """Initialize swap partition to device mappings."""
+        self._swapList = []
+        sysinfo = SystemInfo()
+        for (swap,attrs) in sysinfo.getSwapStats().iteritems():
+            if attrs['type'] == 'partition':
+                mobj = re.match('\/dev\/(.*)$', os.path.realpath(swap))
+                if mobj:
+                    self._swapList.append(mobj.group(1))
     
     def _initDiskStats(self):
         """Parse and initialize block device I/O stats in /proc/diskstats."""
@@ -245,14 +257,6 @@ class DiskIOinfo:
                     self._partList.append((disk,part))
         return self._partList
     
-    def getFilesystemList(self):
-        """Returns list of filesystems mapped to block devices on disks.
-        
-        @return: List of filesystem paths.
-        
-        """
-        pass
-    
     def getVGdict(self):
         """Returns dict of VGs.
         
@@ -281,23 +285,33 @@ class DiskIOinfo:
             self._initDMinfo()
         return self._mapMinorLV.values()
 
-    def getFSdict(self):
+    def getFilesystemDict(self):
         """Returns map of filesystems to disk devices.
         
         @return: Dict of filesystem to disk device mappings.
         
         """
         if self._fsDict is None:
-            self._initFSinfo()
+            self._initFilesystemInfo()
         return self._fsDict
     
-    def getFSlist(self):
+    def getFilesystemList(self):
         """Returns list of filesystems mapped to disk devices.
         
         @return: List of filesystem paths.
         
         """
-        return self.getFSdict().keys()
+        return self.getFilesystemDict().keys()
+
+    def getSwapList(self):
+        """Returns list of disk devices used for paging.
+        
+        @return: List of disk devices.
+        
+        """
+        if self._swapList is None:
+            self._initSwapInfo()
+        return self._swapList
     
     def getDevStats(self, dev):
         """Returns I/O stats for block device.
@@ -314,6 +328,7 @@ class DiskIOinfo:
     getPartitionStats = getDevStats
     getMDstats = getDevStats
     getDMstats = getDevStats
+    getSwapStats = getDevStats
     
     def getLVstats(self, vg, lv):
         """Returns I/O stats for LV.
@@ -331,7 +346,7 @@ class DiskIOinfo:
         else:
             return None
     
-    def getFSstats(self, fs):
+    def getFilesystemStats(self, fs):
         """Returns I/O stats for filesystem.
         
         @param fs: Filesystem path.
@@ -341,6 +356,6 @@ class DiskIOinfo:
         if self._diskStats is None:
             self._initDiskStats()
         if self._fsDict is None:
-            self._initFSinfo()
+            self._initFilesystemInfo()
         return self._diskStats.get(self._fsDict.get(fs))
     
