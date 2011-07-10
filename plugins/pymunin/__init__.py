@@ -423,7 +423,8 @@ class MuninGraph:
 
     def __init__(self, title, category = None, vlabel=None, info=None, 
                  args =None, period=None, scale=None,  total=None, order=None, 
-                 printfformat=None, witdh=None, height=None):
+                 printfformat=None, witdh=None, height=None,
+                 autoFixNames = False):
         """Initialize Munin Graph.
         
         @param title:        Graph Title
@@ -445,12 +446,14 @@ class MuninGraph:
                              are usually OK and this parameter is rarely needed.
         @param width:        Graph width in pixels.
         @param height:       Graph height in pixels.
+        @param autoFixNames: Automatically fix invalid characters in field names.
             .
         """
         self._graphAttrDict = locals()
         self._fieldNameList = []
         self._fieldAttrDict = {}
         self._fieldValDict = {}
+        self._autoFixNames = autoFixNames
 
     def addField(self, name, label, type=None,  draw=None, info=None, 
                  extinfo=None, colour=None, negative=None, graph=None, 
@@ -478,17 +481,21 @@ class MuninGraph:
             @param critical: Critical Value
             
         """
-        attrs = locals()
+        if self._autoFixNames:
+            name = self._fixName(name)
+        self._fieldAttrDict[name] = locals()
         self._fieldNameList.append(name)
-        self._fieldAttrDict[name] = attrs
 
-    def hasField(self, field_name):
+    def hasField(self, name):
         """Returns true if field with field_name exists.
         
-        @return: Boolean
+        @param name: Field Name
+        @return:     Boolean
         
         """
-        return self._fieldAttrDict.has_key(field_name)
+        if self._autoFixNames:
+            name = self._fixName(name)
+        return self._fieldAttrDict.has_key(name)
     
     def getFieldList(self):
         """Returns list of field names registered to Munin Graph.
@@ -541,6 +548,8 @@ class MuninGraph:
         @param value  : Value for field. 
         
         """
+        if self._autoFixNames:
+            name = self._fixName(name)
         if val is not None:
             self._fieldValDict[name] = val
         else:
@@ -553,14 +562,23 @@ class MuninGraph:
         
         """
         vals = []
-        for field_name in self._fieldNameList:
-            val = self._fieldValDict.get(field_name)
+        for name in self._fieldNameList:
+            val = self._fieldValDict.get(name)
             if val is not None:
                 if isinstance(val, float):
-                    vals.append("%s.value %f" % (field_name, val))
+                    vals.append("%s.value %f" % (name, val))
                 else:
-                    vals.append("%s.value %s" % (field_name, val))
+                    vals.append("%s.value %s" % (name, val))
         return "\n".join(vals)
+    
+    def _fixName(self, name):
+        """Replace invalid characters in field names with underscore.
+            @param name: Original name.
+            @return:     Fixed name.
+            
+        """        
+        return re.sub('[^A-Za-z0-9_]', '_',
+                      re.sub('^[^A-Za-z_]', '_', name))
 
 
 def muninMain(pluginClass, argv = None, env = None):

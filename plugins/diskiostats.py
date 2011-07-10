@@ -73,7 +73,7 @@ class MuninDiskIOplugin(MuninPlugin):
                 graph.addField(disk + '_write', disk, draw='LINE2', type='DERIVE',
                     min = 0, negative = disk + '_read')
             self.appendGraph(name, graph)
-        
+            
         name = 'diskio_disk_bytes'
         if self.graphEnabled(name):
             graph = MuninGraph('Disk I/O - Disk - Throughput', 'Disk I/O',
@@ -102,13 +102,12 @@ class MuninDiskIOplugin(MuninPlugin):
                 info='Disk I/O - Filesystem Throughput,'
                      'Read / write requests per second.',
                 args='--base 1000 --lower-limit 0',
-                vlabel='reqs/sec read (-) / write (+)')
+                vlabel='reqs/sec read (-) / write (+)', autoFixNames=True)
             for fs in self._info.getFilesystemList():
-                graph.addField(self._getFieldName(fs + '_read'), fs, 
-                    draw='LINE2', type='DERIVE', min = 0, graph=False)
-                graph.addField(self._getFieldName(fs + '_write'), fs, 
-                    draw='LINE2', type='DERIVE', min = 0, 
-                    negative = self._getFieldName(fs + '_read'))
+                graph.addField(fs + '_read', fs, draw='LINE2', type='DERIVE', 
+                               min = 0, graph=False)
+                graph.addField(fs + '_write', fs, draw='LINE2', type='DERIVE', 
+                               min = 0, negative = fs + '_read')
             self.appendGraph(name, graph)
         
         name = 'diskio_fs_bytes'
@@ -116,22 +115,22 @@ class MuninDiskIOplugin(MuninPlugin):
             graph = MuninGraph('Disk I/O - Filesystem - Throughput', 'Disk I/O',
                 info='Disk I/O - Filesystem Throughput, bytes read / written per second.',
                 args='--base 1000 --lower-limit 0',
-                vlabel='bytes/sec read (-) / write (+)')
+                vlabel='bytes/sec read (-) / write (+)', autoFixNames=True)
             for fs in self._info.getFilesystemList():
-                graph.addField(self._getFieldName(fs + '_read'), fs, 
+                graph.addField(fs + '_read', fs, 
                     draw='LINE2', type='DERIVE', min = 0, graph=False)
-                graph.addField(self._getFieldName(fs + '_write'), fs, 
+                graph.addField(fs + '_write', fs, 
                     draw='LINE2', type='DERIVE', min = 0, 
-                    negative = self._getFieldName(fs + '_read'))
+                    negative = fs + '_read')
             self.appendGraph(name, graph)
             
         name = 'diskio_fs_active'
         if self.graphEnabled(name):
             graph = MuninGraph('Disk I/O - Filesystem - Queue Length', 'Disk I/O',
                 info='Disk I/O - Number  of I/O Operations in Progress for every filesystem.',
-                args='--base 1000 --lower-limit 0')
+                args='--base 1000 --lower-limit 0', autoFixNames=True)
             for fs in self._info.getFilesystemList():
-                graph.addField(self._getFieldName(fs), fs, 
+                graph.addField(fs, fs, 
                                draw='AREASTACK', type='GAUGE')
             self.appendGraph(name, graph)
                 
@@ -154,34 +153,20 @@ class MuninDiskIOplugin(MuninPlugin):
             stats = self._info.getFilesystemStats(fs)
             name = 'diskio_fs_requests'
             if self.hasGraph(name):
-                self.setGraphVal(name, self._getFieldName(fs + '_read'), 
+                self.setGraphVal(name, fs + '_read', 
                                  stats['rios'])
-                self.setGraphVal(name, self._getFieldName(fs + '_write'), 
+                self.setGraphVal(name, fs + '_write', 
                                  stats['wios'])
                 name = 'diskio_fs_bytes'
             if self.hasGraph(name):
-                self.setGraphVal(name, self._getFieldName(fs + '_read'), 
+                self.setGraphVal(name, fs + '_read', 
                                  stats['rbytes'])
-                self.setGraphVal(name, self._getFieldName(fs + '_write'), 
-                                 stats['wbytes'])
+                self.setGraphVal(name, fs + '_write', stats['wbytes'])
             name = 'diskio_fs_active'
             if self.hasGraph(name):
-                self.setGraphVal(name, self._getFieldName(fs), 
-                                 stats['ios_active'])
-                
-    def _getFieldName(self, fspath):
-        """Generate a valid field name from the filesystem path.
-        
-        @param fspath: Filesystem path.
-        @return:       Field name.
-        
-        """
-        if fspath == '/':
-            return 'rootfs'
-        else:
-            return(fspath[1:].replace('/', '_'))
-                
+                self.setGraphVal(name, fs, stats['ios_active'])
 
+                
 if __name__ == "__main__":
     sys.exit(muninMain(MuninDiskIOplugin))
 

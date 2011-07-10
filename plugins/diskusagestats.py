@@ -80,11 +80,11 @@ class MuninDiskUsagePlugin(MuninPlugin):
             self._statsSpace = self._info.getSpaceUse()
             graph = MuninGraph('Disk Space Usage (%)', 'Disk Usage',
                 info='Disk space usage of filesystems.',
-                args='--base 1000 --lower-limit 0')
+                args='--base 1000 --lower-limit 0',
+                autoFixNames=True)
             for (fspath, stats) in self._statsSpace.iteritems():
                 if self.fsPathEnabled(fspath) and self.fsTypeEnabled(stats['type']):
-                    fname = self._getFieldName(fspath)
-                    graph.addField(fname, fspath, draw='LINE2', type='GAUGE',
+                    graph.addField(fspath, fspath, draw='LINE2', type='GAUGE',
                         info="Disk space usage for filesystem: %s" % fspath)
             self.appendGraph(name, graph)
         
@@ -93,11 +93,11 @@ class MuninDiskUsagePlugin(MuninPlugin):
             self._statsInode = self._info.getInodeUse()
             graph = MuninGraph('Inode Usage (%)', 'Disk Usage',
                 info='Inode usage of filesystems.',
-                args='--base 1000 --lower-limit 0')
+                args='--base 1000 --lower-limit 0',
+                autoFixNames=True)
             for (fspath, stats) in self._statsInode.iteritems():
                 if self.fsPathEnabled(fspath) and self.fsTypeEnabled(stats['type']):
-                    fname = self._getFieldName(fspath)
-                    graph.addField(fname, fspath, draw='LINE2', type='GAUGE',
+                    graph.addField(fspath, fspath, draw='LINE2', type='GAUGE',
                         info="Inode usage for filesystem: %s" % fspath)
             self.appendGraph(name, graph)
         
@@ -107,14 +107,12 @@ class MuninDiskUsagePlugin(MuninPlugin):
         if self.hasGraph(name):
             for (fspath, stats) in self._statsSpace.iteritems():
                 if self.fsPathEnabled(fspath) and self.fsTypeEnabled(stats['type']):
-                    fname = self._getFieldName(fspath)
-                    self.setGraphVal(name, fname, stats['inuse_pcent'])
+                    self.setGraphVal(name, fspath, stats['inuse_pcent'])
         name = 'diskinode'
         if self.hasGraph(name):
             for (fspath, stats) in self._statsInode.iteritems():
                 if self.fsPathEnabled(fspath) and self.fsTypeEnabled(stats['type']):
-                    fname = self._getFieldName(fspath)
-                    self.setGraphVal(name, fname, stats['inuse_pcent'])
+                    self.setGraphVal(name, fspath, stats['inuse_pcent'])
 
     def fsPathEnabled(self, fspath):
         """Utility method to check if a filesystem path is included in monitoring.
@@ -133,20 +131,7 @@ class MuninDiskUsagePlugin(MuninPlugin):
             
         """
         return self.checkFilter('fstypes', fstype)
-    
-    def _getFieldName(self, fspath):
-        """Generate a valid field name from the filesystem path.
-        
-        @param fspath: Filesystem path.
-        @return:       Field name.
-        
-        """
-        if fspath == '/':
-            return 'rootfs'
-        else:
-            return(fspath[1:].replace('/', '_'))
             
-
 
 if __name__ == "__main__":
     sys.exit(muninMain(MuninDiskUsagePlugin))
