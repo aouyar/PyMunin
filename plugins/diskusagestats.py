@@ -68,8 +68,8 @@ class MuninDiskUsagePlugin(MuninPlugin):
         """
         MuninPlugin.__init__(self, argv, env)
         
-        self.registerFilter('fspaths', '[\w\-\/]+$')
-        self.registerFilter('fstypes', '\w+$')
+        self.registerFilter('fspaths', '^[\w\-\/]+$')
+        self.registerFilter('fstypes', '^\w+$')
         
         self._statsSpace = None
         self._statsInode = None

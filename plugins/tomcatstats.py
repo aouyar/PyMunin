@@ -74,7 +74,7 @@ class MuninTomcatPlugin(MuninPlugin):
         """
         MuninPlugin.__init__(self, argv, env)
         
-        self.registerFilter('ports', '\d+$')
+        self.registerFilter('ports', '^\d+$')
         
         self._host = self._env.get('host')
         self._port = self._env.get('port')

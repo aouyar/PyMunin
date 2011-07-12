@@ -59,7 +59,7 @@ class MuninAttrFilter:
                     self._attrs[attr] = True
         if list_exclude:
             for attr in list_exclude:
-                if not self._regex or self._regex.match(attr):
+                if not self._regex or self._regex.search(attr):
                     self._attrs[attr] = False
     
     def check(self, attr):
@@ -111,7 +111,7 @@ class MuninPlugin:
             if mobj:
                 self.arg0 = mobj.group(1)
         self._parseEnv()
-        self.registerFilter('graphs', '[\w\-]+$')
+        self.registerFilter('graphs', '^[\w\-]+$')
                 
     def _parseEnv(self,  env=None):
         """Utility method that parses through environment variables.

@@ -73,7 +73,7 @@ class MuninMySQLplugin(MuninPlugin):
         """
         MuninPlugin.__init__(self, argv, env)
         
-        self.registerFilter('engine', '\w+$')
+        self.registerFilter('engine', '^\w+$')
         
         self._host = self._env.get('host')
         self._port = self._env.get('port')

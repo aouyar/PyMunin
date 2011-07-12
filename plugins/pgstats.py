@@ -82,7 +82,7 @@ class MuninPgPlugin(MuninPlugin):
         """
         MuninPlugin.__init__(self, argv, env)
         
-        self.registerFilter('db', '\w+$')
+        self.registerFilter('db', '^\w+$')
         
         self._host = self._env.get('host')
         self._port = self._env.get('port')
