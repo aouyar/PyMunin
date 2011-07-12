@@ -100,8 +100,8 @@ class MuninPlugin:
         self._graphDict = {}
         self._graphNames = []
         self._subGraphDict = {}
-        self.nestedGraphs = True
         self._filters = {}
+        self._flags = {}
         self._argv = argv
         self._env = env
         self.arg0 = None
@@ -112,6 +112,7 @@ class MuninPlugin:
                 self.arg0 = mobj.group(1)
         self._parseEnv()
         self.registerFilter('graphs', '^[\w\-]+$')
+        self.nestedGraphs = self.registerFlag('nested_graphs', True)
                 
     def _parseEnv(self,  env=None):
         """Utility method that parses through environment variables.
@@ -130,49 +131,85 @@ class MuninPlugin:
             self._stateFile = env.get('MUNIN_STATEFILE')
         else:
             self._stateFile = '/tmp/munin-state-%s' % self.plugin_name
-        if env.has_key('nested_graphs'):
-            if re.match('/s*(no|off)/s*$',  env.get('nested_graphs'), 
-                        re.IGNORECASE):
-                self.nestedGraphs = False
        
-    def registerFilter(self, filter_name, attr_regex = '^\w+$'):
+    def registerFilter(self, name, attr_regex = '^\w+$', default = True):
         """Register filter for including, excluding attributes in graphs through 
         the use of include_<name> and exclude_<name> environment variables. 
         Parse the environment variables to initialize filter.
         
-        @param filter_name: Name of filter.
-                            (Also determines suffix for environment variable name.)
+        @param name:       Name of filter.
+                           (Also determines suffix for environment variable name.)
         @param attr_regex: Regular expression string for checking valid items.
+        @param default:    Filter default. Applies when the attribute is not
+                           in the include or exclude list.
         
         """
         attrs = {}
         for prefix in ('include', 'exclude'):
-            key = "%s_%s" % (prefix, filter_name)
+            key = "%s_%s" % (prefix, name)
             val = self._env.get(key)
             if val:
                 attrs[prefix] = val.split(',')
             else:
                 attrs[prefix] = []
-        self._filters[filter_name] = MuninAttrFilter(attrs['include'], 
+        self._filters[name] = MuninAttrFilter(attrs['include'], 
                                                      attrs['exclude'], 
-                                                     attr_regex)
+                                                     attr_regex,
+                                                     default)
         
-    def checkFilter(self, filter_name, attr):
+    def checkFilter(self, name, attr):
         """Check if a specific graph attribute is enabled or disabled through 
         the use of a filter based on include_<name> and exclude_<name> 
         environment variables.
         
-        @param filter_name: Name of the Filter.
-        @param attr:        Name of the Attribute.
-        
-        @return:            Return True if the attribute is enabled.
+        @param name: Name of the Filter.
+        @param attr: Name of the Attribute.
+        @return:     Return True if the attribute is enabled.
         
         """
-        filter = self._filters.get(filter_name)
+        filter = self._filters.get(name)
         if filter:
             return filter.check(attr) 
         else:
-            raise AttributeError("Undefined filter: %s" % filter_name)
+            raise AttributeError("Undefined filter: %s" % name)
+        
+    def registerFlag(self, name, default = False):
+        """Check graph flag for enabling / disabling attributes through
+        the use of <name> environment variable.
+        
+        @param name:    Name of flag.
+                        (Also determines the environment variable name.)
+        @param default: Default value for flag.
+        @return:        Return True if the flag is enabled.
+        
+        """
+        val = self._env.get(name)
+        if val is None:
+            self._flags['name'] = default
+            return default
+        elif val.lower() in ['yes', 'on']:
+            self._flags[name] = True
+            return True
+        elif val.lower() in ['no', 'off']:
+            self._flags[name] = False
+            return False
+        else:
+            raise AttributeError("Value for flag %s, must be yes, no, on or off" 
+                                 % name)
+            
+    def checkFlag(self, name):
+        """Check if a specific graph flag is enabled or disabled through the use 
+        of <name> environment variable.
+        
+        @param name: Name of the flag.
+        @return:     Return True if the flag is enabled.
+        
+        """
+        val = self._flags.get(name)
+        if val is not None:
+            return val 
+        else:
+            raise AttributeError("Undefined flag: %s" % name)
                 
     def graphEnabled(self, name):
         """Utility method to check if graph with the given name is enabled.
@@ -193,10 +230,9 @@ class MuninPlugin:
         @param stateObj: Object that stores plugin state.
         
         """
-        fp = open(self._stateFile,  'w')
-        pickle.dump(stateObj, fp)
         try:
-            pass
+            fp = open(self._stateFile,  'w')
+            pickle.dump(stateObj, fp)
         except:
             raise Exception("Failure in storing plugin state in file: %s" 
                             % self._stateFile)
