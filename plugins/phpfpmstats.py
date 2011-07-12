@@ -70,7 +70,7 @@ class MuninPHPfpmPlugin(MuninPlugin):
         self._user = self._env.get('user')
         self._monpath = self._env.get('monpath')
         self._password = self._env.get('password')
-        self._ssl = self._env.get('ssl', '').lower() in ('yes', 'on') 
+        self._ssl = self.registerFlag('ssl', False) 
         
         if self.graphEnabled('php_fpm_connections'):
             graph = MuninGraph('PHP FPM - Connections per second', 'PHP',

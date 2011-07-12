@@ -25,7 +25,7 @@ Environment Variables
 
   Example:
     [memcachedstats]
-        env.exclude_graphs ntp_peer_stratum
+        env.exclude_graphs memcached_connrate
 
 """
 # Munin  - Magic Markers

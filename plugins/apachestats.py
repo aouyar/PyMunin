@@ -72,7 +72,7 @@ class MuninApachePlugin(MuninPlugin):
         self._user = self._env.get('user')
         self._password = self._env.get('password')
         self._statuspath = self._env.get('statuspath')
-        self._ssl = self._env.get('ssl', '').lower() in ('yes', 'on') 
+        self._ssl = self.registerFlag('ssl', False) 
         
         if self.graphEnabled('apache_access'):
             graph = MuninGraph('Apache Web Server - Throughput (Requests / sec)', 

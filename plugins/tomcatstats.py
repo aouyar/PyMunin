@@ -80,7 +80,7 @@ class MuninTomcatPlugin(MuninPlugin):
         self._port = self._env.get('port')
         self._user = self._env.get('user')
         self._password = self._env.get('password')
-        self._ssl = self._env.get('ssl')
+        self._ssl = self.registerFlag('ssl', False)
         
         self._tomcatInfo = TomcatInfo(self._host, self._port,
                                       self._user, self._password, self._ssl)

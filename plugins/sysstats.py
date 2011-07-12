@@ -28,7 +28,7 @@ Environment Variables
   exclude_graphs: Comma separated list of disabled graphs.
 
   Example:
-    [ntpstats]
+    [sysstats]
         env.exclude_graphs sys_loadavg
 
 """

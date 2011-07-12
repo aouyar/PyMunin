@@ -41,12 +41,12 @@ class PgInfo:
         if host is not None:
             self._connParams['host'] = host
             if port is not None:
-                self._connParams['port'] = port
+                self._connParams['port'] = int(port)
             else:
                 self._connParams['port'] = defaultPGport
         elif port is not None:
             self._connParams['host'] = '127.0.0.1'
-            self._connParams['port'] = port
+            self._connParams['port'] = int(port)
         if database is not None:
             self._connParams['database'] = database
         if user is not None:
