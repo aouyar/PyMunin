@@ -28,9 +28,9 @@ Environment Variables
   include_graphs: Comma separated list of enabled graphs.
                   (All graphs enabled by default.)
   exclude_graphs: Comma separated list of disabled graphs.
-  include_ports:  Comma separated list of databases to include in detail graphs.
-                  (All enabled by default.)
-  exclude_ports:  Comma separated list of databases to exclude from detail graphs.
+  include_ports:  Comma separated list of connector ports to include in graphs.
+                  (All included by default.)
+  exclude_ports:  Comma separated list of connector ports to include in graphs
 
   Example:
     [tomcatstats]
