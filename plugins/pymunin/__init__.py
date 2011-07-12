@@ -32,19 +32,22 @@ class MuninAttrFilter:
     
     """
     
-    def __init__(self, list_include = [], list_exclude = [], attr_regex = None):
+    def __init__(self, list_include = [], list_exclude = [], 
+                 attr_regex = None, default = True):
         """Initialize Munin Attribute Filter.
         
         @param list_include: Include List (List of attributes that are enabled.)
         @param list_exclude: Exclude List (List of attributes that are disabled.)
-        @param attr_regex:  If the regex is defined, the Attributes in the 
-                            Include List and Exclude List are ignored unless 
-                            they comply with the format dictated by the match 
-                            regex.
+        @param attr_regex:   If the regex is defined, the Attributes in the 
+                             Include List and Exclude List are ignored unless 
+                             they comply with the format dictated by the match 
+                             regex.
+        @param default:      Filter default. Applies when the attribute is not
+                             in the include or exclude list.
         
         """
         self._attrs = {}
-        self._default = True
+        self._default = default
         if attr_regex:
             self._regex = re.compile(attr_regex)
         else:
@@ -60,6 +63,12 @@ class MuninAttrFilter:
                     self._attrs[attr] = False
     
     def check(self, attr):
+        """Check if the attribute attr is in the include or exclude list.
+        Returns True if the attribute is enabled, false otherwise.
+        
+        @param attr: Name of attribute.
+        
+        """
         return self._attrs.get(attr, self._default)
 
 
