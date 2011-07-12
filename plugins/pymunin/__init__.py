@@ -135,7 +135,7 @@ class MuninPlugin:
                         re.IGNORECASE):
                 self.nestedGraphs = False
        
-    def registerFilter(self, filter_name, attr_regex = '\w+$'):
+    def registerFilter(self, filter_name, attr_regex = '^\w+$'):
         """Register filter for including, excluding attributes in graphs through 
         the use of include_<name> and exclude_<name> environment variables. 
         Parse the environment variables to initialize filter.
