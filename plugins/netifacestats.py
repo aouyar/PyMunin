@@ -13,16 +13,17 @@ Multigraph Plugin - Graph Structure
 
 
 Environment Variables
-
-  ifaces:         Comma separated list of Network Interfaces.
-                  (All Network Interfaces are monitored by default.)
   include_graphs: Comma separated list of enabled graphs. 
                   (All graphs enabled by default.)
   exclude_graphs: Comma separated list of disabled graphs.
-
+  include_ifaces: Comma separated list of network interfaces to include in 
+                  graphs. (All Network Interfaces are monitored by default.)
+  exclude_ifaces: Comma separated list of network interfaces to exclude from 
+                  graphs.
+                  
   Example:
     [netifacestats]
-       env.ifaces eth0,eth1
+       env.include_ifaces eth0,eth1
        env.exclude_graphs netiface_errors
 
 """
@@ -31,7 +32,6 @@ Environment Variables
 #%# capabilities=noautoconf nosuggest
 
 import sys
-import re
 from pymunin import MuninGraph, MuninPlugin, muninMain
 from pysysinfo.netiface import NetIfaceInfo
 
@@ -61,18 +61,15 @@ class MuninNetIfacePlugin(MuninPlugin):
         """
         MuninPlugin.__init__(self, argv, env)
 
+        self.registerFilter('ifaces', '^[\w\d:]+$')
+        
         self._ifaceInfo = NetIfaceInfo()
         self._ifaceStats = self._ifaceInfo.getIfStats()
-        
         self._ifaceList = []
-        if self._env.has_key('ifaces'):
-            iface_str = re.sub('[^\w\d,:]', '', self._env.get('ifaces'))
-            self._ifaceList = iface_str.split(',')
-        else:
-            for iface in list(self._ifaceStats):
-                if iface not in ['lo',]:
-                    if max(self._ifaceStats[iface].values()) > 0:
-                        self._ifaceList.append(iface)
+        for iface in list(self._ifaceStats):
+            if iface not in ['lo',] and self.ifaceIncluded(iface):
+                if max(self._ifaceStats[iface].values()) > 0:
+                    self._ifaceList.append(iface)
         self._ifaceList.sort()
         
         for iface in self._ifaceList:
@@ -130,6 +127,15 @@ class MuninNetIfacePlugin(MuninPlugin):
                 for field in ('rxerrs', 'txerrs', 'rxframe', 'txcarrier',
                     'rxdrop', 'txdrop', 'rxfifo', 'txfifo'):
                     self.setGraphVal(graph_name, field, stats.get(field))
+    
+    def ifaceIncluded(self, iface):
+        """Utility method to check if interface is included in monitoring.
+        
+        @param iface: Interface name.
+        @return:      Returns True if included in graphs, False otherwise.
+            
+        """
+        return self.checkFilter('ifaces', iface)
 
 
 if __name__ == "__main__":

@@ -16,16 +16,18 @@ Multigraph Plugin - Graph Structure
 
 Environment Variables
 
-  ifaces:         Comma separated list of Wanpipe Interfaces.
-                  (All Wanpipe Interfaces are monitored by default.)
   include_graphs: Comma separated list of enabled graphs.
                   (All graphs enabled by default.)
   exclude_graphs: Comma separated list of disabled graphs.
+  include_ifaces: Comma separated list of wanpipe interfaces to include in 
+                  graphs. (All Network Interfaces are monitored by default.)
+  exclude_ifaces: Comma separated list of wanpipe interfaces to exclude from 
+                  graphs.
 
   Example:
     [wanpipestats]
        user root
-       env.ifaces w1g1,w2g2
+       env.include_ifaces w1g1,w2g2
        env.exclude_graphs wanpipe_errors
 
 """
@@ -63,17 +65,17 @@ class MuninWanpipePlugin(MuninPlugin):
         
         """
         MuninPlugin.__init__(self, argv, env)
-
-        if self._env.has_key('ifaces'):
-            iface_str = re.sub('[^\w\d,]', '', self._env.get('ifaces'))
-            self._reqIfaceList = iface_str.split(',')
-        else:
-            self._reqIfaceList = None
+        
+        self.registerFilter('ifaces', '^[\w\d]+$')
 
         self._wanpipeInfo = WanpipeInfo()
         self._ifaceStats = self._wanpipeInfo.getIfaceStats()
-        self._ifaceList = list(self._ifaceStats)
+        self._ifaceList = []
+        for iface in list(self._ifaceStats):
+            if self.ifaceIncluded(iface):
+                self._ifaceList.append(iface)
         self._ifaceList.sort()
+        
         for iface in self._ifaceList:
             if self._reqIfaceList is None or iface in self._reqIfaceList:
                 if self.graphEnabled('wanpipe_traffic'):
@@ -183,6 +185,15 @@ class MuninWanpipePlugin(MuninPlugin):
                         if self.hasGraph('wanpipe_rxlevel'):
                             self.setGraphVal('wanpipe_pri_rxlevel', 
                                              iface, stats.get('rxlevel'))
+                            
+    def ifaceIncluded(self, iface):
+        """Utility method to check if interface is included in monitoring.
+        
+        @param iface: Interface name.
+        @return:      Returns True if included in graphs, False otherwise.
+            
+        """
+        return self.checkFilter('ifaces', iface)
 
 
 if __name__ == "__main__":
