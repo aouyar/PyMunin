@@ -337,7 +337,7 @@ class DiskIOinfo:
         """
         if self._diskStats is None:
             self._initDiskStats()
-        if type is not None:
+        if devtype is not None:
             if self._devClassTree is None:
                 self._initDevClasses()
             if devtype <> self._mapDevType.get(dev):
