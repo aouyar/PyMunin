@@ -63,6 +63,13 @@ yet for the following:
 * Squid Web Proxy
 
 
+Documentation
+-------------
+
+The documentation for the project and sample graphs for plugins will be 
+published in the [PyMunin Project Web Page](http://aouyar.github.com/PyMunin/)
+
+
 Installation
 ------------
 
@@ -84,13 +91,6 @@ Installation
   Configuration Directory_ (_/etc/munin/plugin-conf.d_). The environment 
   variables used by the plugin scripts are documented in the header part of the
   script code.
-
-
-Documentation
--------------
-
-The documentation for the project and sample graphs for plugins will be 
-published in the [PyMunin Project Web Page](http://aouyar.github.com/PyMunin/)
 
 
 Plugin Development
