@@ -64,7 +64,7 @@ class MuninNTPhostOffsetsPlugin(MuninPlugin):
         """
         MuninPlugin.__init__(self, argv, env)
 
-        if self.env.envHasKey('ntphosts'):
+        if self.envHasKey('ntphosts'):
             hosts_str = re.sub('[^\d\.,]', '', self.envGet('ntphosts'))
             self._remoteHosts = hosts_str.split(',')
         else:
