@@ -68,8 +68,8 @@ class MuninDiskUsagePlugin(MuninPlugin):
         """
         MuninPlugin.__init__(self, argv, env)
         
-        self.registerFilter('fspaths', '^[\w\-\/]+$')
-        self.registerFilter('fstypes', '^\w+$')
+        self.envRegisterFilter('fspaths', '^[\w\-\/]+$')
+        self.envRegisterFilter('fstypes', '^\w+$')
         
         self._statsSpace = None
         self._statsInode = None
@@ -121,7 +121,7 @@ class MuninDiskUsagePlugin(MuninPlugin):
         @return:       Returns True if included in graphs, False otherwise.
             
         """
-        return self.checkFilter('fspaths', fspath)
+        return self.envCheckFilter('fspaths', fspath)
 
     def fsTypeEnabled(self, fstype):
         """Utility method to check if a filesystem type is included in monitoring.
@@ -130,7 +130,7 @@ class MuninDiskUsagePlugin(MuninPlugin):
         @return:       Returns True if included in graphs, False otherwise.
             
         """
-        return self.checkFilter('fstypes', fstype)
+        return self.envCheckFilter('fstypes', fstype)
             
 
 if __name__ == "__main__":

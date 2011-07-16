@@ -111,8 +111,8 @@ class MuninPlugin:
             if mobj:
                 self.arg0 = mobj.group(1)
         self._parseEnv()
-        self.registerFilter('graphs', '^[\w\-]+$')
-        self.nestedGraphs = self.registerFlag('nested_graphs', True)
+        self.envRegisterFilter('graphs', '^[\w\-]+$')
+        self.nestedGraphs = self.envCheckFlag('nested_graphs', True)
                 
     def _parseEnv(self,  env=None):
         """Utility method that parses through environment variables.
@@ -132,7 +132,23 @@ class MuninPlugin:
         else:
             self._stateFile = '/tmp/munin-state-%s' % self.plugin_name
        
-    def registerFilter(self, name, attr_regex = '^\w+$', default = True):
+    def envHasKey(self, name):
+        """Return True if environment variable with name exists.  
+        
+        @param name: Name of environtment variable.
+        
+        """
+        return self._env.has_key(name)
+    
+    def envGet(self, name):
+        """Return value for environment variable or None.  
+        
+        @param name: Name of environtment variable.
+        
+        """
+        return self._env.get(name)
+    
+    def envRegisterFilter(self, name, attr_regex = '^\w+$', default = True):
         """Register filter for including, excluding attributes in graphs through 
         the use of include_<name> and exclude_<name> environment variables. 
         Parse the environment variables to initialize filter.
@@ -157,7 +173,7 @@ class MuninPlugin:
                                                      attr_regex,
                                                      default)
         
-    def checkFilter(self, name, attr):
+    def envCheckFilter(self, name, attr):
         """Check if a specific graph attribute is enabled or disabled through 
         the use of a filter based on include_<name> and exclude_<name> 
         environment variables.
@@ -173,43 +189,31 @@ class MuninPlugin:
         else:
             raise AttributeError("Undefined filter: %s" % name)
         
-    def registerFlag(self, name, default = False):
+    def envCheckFlag(self, name, default = False):
         """Check graph flag for enabling / disabling attributes through
         the use of <name> environment variable.
         
         @param name:    Name of flag.
                         (Also determines the environment variable name.)
-        @param default: Default value for flag.
+        @param default: Boolean (True or False). Default value for flag.
         @return:        Return True if the flag is enabled.
         
         """
-        val = self._env.get(name)
-        if val is None:
-            self._flags['name'] = default
-            return default
-        elif val.lower() in ['yes', 'on']:
-            self._flags[name] = True
-            return True
-        elif val.lower() in ['no', 'off']:
-            self._flags[name] = False
-            return False
+        if self._flags.has_key(name):
+            return self._flags[name]
         else:
-            raise AttributeError("Value for flag %s, must be yes, no, on or off" 
-                                 % name)
-            
-    def checkFlag(self, name):
-        """Check if a specific graph flag is enabled or disabled through the use 
-        of <name> environment variable.
-        
-        @param name: Name of the flag.
-        @return:     Return True if the flag is enabled.
-        
-        """
-        val = self._flags.get(name)
-        if val is not None:
-            return val 
-        else:
-            raise AttributeError("Undefined flag: %s" % name)
+            val = self._env.get(name)
+            if val is None:
+                return default
+            elif val.lower() in ['yes', 'on']:
+                self._flags[name] = True
+                return True
+            elif val.lower() in ['no', 'off']:
+                self._flags[name] = False
+                return False
+            else:
+                raise AttributeError("Value for flag %s, must be yes, no, on or off" 
+                                     % name)
                 
     def graphEnabled(self, name):
         """Utility method to check if graph with the given name is enabled.
@@ -218,7 +222,7 @@ class MuninPlugin:
         @return:     Returns True if Root Graph is enabled, False otherwise.
             
         """
-        return self.checkFilter('graphs', name)
+        return self.envCheckFilter('graphs', name)
         
     def saveState(self,  stateObj):
         """Utility methos to save plugin state stored in stateObj to persistent 

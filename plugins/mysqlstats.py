@@ -73,13 +73,13 @@ class MuninMySQLplugin(MuninPlugin):
         """
         MuninPlugin.__init__(self, argv, env)
         
-        self.registerFilter('engine', '^\w+$')
+        self.envRegisterFilter('engine', '^\w+$')
         
-        self._host = self._env.get('host')
-        self._port = self._env.get('port')
-        self._database = self._env.get('database')
-        self._user = self._env.get('user')
-        self._password = self._env.get('password')
+        self._host = self.envGet('host')
+        self._port = self.envGet('port')
+        self._database = self.envGet('database')
+        self._user = self.envGet('user')
+        self._password = self.envGet('password')
         
         self._dbconn = MySQLinfo(self._host, self._port, self._database, 
                               self._user, self._password)
@@ -232,7 +232,7 @@ class MuninMySQLplugin(MuninPlugin):
         @return:     Returns True if included in graphs, False otherwise.
             
         """
-        return self.checkFilter('engine', name)
+        return self.envCheckFilter('engine', name)
               
 
 

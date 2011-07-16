@@ -74,14 +74,14 @@ class MuninAsteriskPlugin(MuninPlugin):
         """
         MuninPlugin.__init__(self, argv, env)
 
-        self._amihost = self._env.get('amihost')
-        self._amiport = self._env.get('amiport')
-        self._amiuser = self._env.get('amiuser')
-        self._amipass = self._env.get('amipass')
+        self._amihost = self.envGet('amihost')
+        self._amiport = self.envGet('amiport')
+        self._amiuser = self.envGet('amiuser')
+        self._amipass = self.envGet('amipass')
 
         self._trunkList = []
-        if self._env.has_key('trunks'):
-            strtrunks = re.sub('[\s]',  '',  self._env.get('trunks'))
+        if self.envHasKey('trunks'):
+            strtrunks = re.sub('[\s]',  '',  self.envGet('trunks'))
             for trunk_entry in strtrunks.split(','):
                 mobj = (re.match('(.*)=(.*)=(\d+)-(\d+)',  
                                  trunk_entry, re.IGNORECASE) 

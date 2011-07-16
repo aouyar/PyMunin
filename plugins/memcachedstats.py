@@ -62,8 +62,8 @@ class MuninMemcachedPlugin(MuninPlugin):
         """
         MuninPlugin.__init__(self, argv, env)
         
-        self._host = self._env.get('host')
-        self._port = self._env.get('port')
+        self._host = self.envGet('host')
+        self._port = self.envGet('port')
         
         if self.graphEnabled('memcached_connections'):
             graph = MuninGraph('Memcached - Active Connections', 'Memcached',

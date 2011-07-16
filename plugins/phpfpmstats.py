@@ -65,12 +65,12 @@ class MuninPHPfpmPlugin(MuninPlugin):
         """
         MuninPlugin.__init__(self, argv, env)
         
-        self._host = self._env.get('host')
-        self._port = self._env.get('port')
-        self._user = self._env.get('user')
-        self._monpath = self._env.get('monpath')
-        self._password = self._env.get('password')
-        self._ssl = self.registerFlag('ssl', False) 
+        self._host = self.envGet('host')
+        self._port = self.envGet('port')
+        self._user = self.envGet('user')
+        self._monpath = self.envGet('monpath')
+        self._password = self.envGet('password')
+        self._ssl = self.envCheckFlag('ssl', False) 
         
         if self.graphEnabled('php_fpm_connections'):
             graph = MuninGraph('PHP FPM - Connections per second', 'PHP',

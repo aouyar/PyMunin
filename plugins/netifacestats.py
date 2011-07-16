@@ -61,7 +61,7 @@ class MuninNetIfacePlugin(MuninPlugin):
         """
         MuninPlugin.__init__(self, argv, env)
 
-        self.registerFilter('ifaces', '^[\w\d:]+$')
+        self.envRegisterFilter('ifaces', '^[\w\d:]+$')
         
         self._ifaceInfo = NetIfaceInfo()
         self._ifaceStats = self._ifaceInfo.getIfStats()
@@ -135,7 +135,7 @@ class MuninNetIfacePlugin(MuninPlugin):
         @return:      Returns True if included in graphs, False otherwise.
             
         """
-        return self.checkFilter('ifaces', iface)
+        return self.envCheckFilter('ifaces', iface)
 
 
 if __name__ == "__main__":

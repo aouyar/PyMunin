@@ -130,6 +130,13 @@ class MuninDiskIOplugin(MuninPlugin):
                           self._info.getFilesystemStats)
                 
     def _configDevRequests(self, namestr, titlestr, devlist):
+        """Generate configuration for I/O Request stats.
+        
+        @param namestr:  Field name component indicating device type.
+        @param titlestr: Title component indicating device type.
+        @param devlist:  List of devices.
+        
+        """
         name = 'diskio_%s_requests' % namestr
         if self.graphEnabled(name):
             graph = MuninGraph('Disk I/O - %s - Requests' % titlestr, 'Disk I/O',
@@ -145,6 +152,13 @@ class MuninDiskIOplugin(MuninPlugin):
             self.appendGraph(name, graph)
 
     def _configDevBytes(self, namestr, titlestr, devlist):
+        """Generate configuration for I/O Throughput stats.
+        
+        @param namestr:  Field name component indicating device type.
+        @param titlestr: Title component indicating device type.
+        @param devlist:  List of devices.
+        
+        """
         name = 'diskio_%s_bytes' % namestr
         if self.graphEnabled(name):
             graph = MuninGraph('Disk I/O - %s - Throughput' % titlestr, 'Disk I/O',
@@ -160,6 +174,13 @@ class MuninDiskIOplugin(MuninPlugin):
             self.appendGraph(name, graph)
             
     def _configDevActive(self, namestr, titlestr, devlist):
+        """Generate configuration for I/O Queue Length.
+        
+        @param namestr:  Field name component indicating device type.
+        @param titlestr: Title component indicating device type.
+        @param devlist:  List of devices.
+        
+        """
         name = 'diskio_%s_active' % namestr
         if self.graphEnabled(name):
             graph = MuninGraph('Disk I/O - %s - Queue Length' % titlestr, 
@@ -172,6 +193,13 @@ class MuninDiskIOplugin(MuninPlugin):
             self.appendGraph(name, graph)
 
     def _fetchDevAll(self, namestr, devlist, statsfunc):
+        """Initialize I/O stats for devices.
+        
+        @param namestr:   Field name component indicating device type.
+        @param devlist:   List of devices.
+        @param statsfunc: Function for retrieving stats for device.
+        
+        """
         for dev in devlist:
             stats = statsfunc(dev)
             name = 'diskio_%s_requests' % namestr

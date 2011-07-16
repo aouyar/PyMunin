@@ -67,12 +67,12 @@ class MuninApachePlugin(MuninPlugin):
         """
         MuninPlugin.__init__(self, argv, env)
         
-        self._host = self._env.get('host')
-        self._port = self._env.get('port')
-        self._user = self._env.get('user')
-        self._password = self._env.get('password')
-        self._statuspath = self._env.get('statuspath')
-        self._ssl = self.registerFlag('ssl', False) 
+        self._host = self.envGet('host')
+        self._port = self.envGet('port')
+        self._user = self.envGet('user')
+        self._password = self.envGet('password')
+        self._statuspath = self.envGet('statuspath')
+        self._ssl = self.envCheckFlag('ssl', False) 
         
         if self.graphEnabled('apache_access'):
             graph = MuninGraph('Apache Web Server - Throughput (Requests / sec)', 

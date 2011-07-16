@@ -64,8 +64,8 @@ class MuninNTPhostOffsetsPlugin(MuninPlugin):
         """
         MuninPlugin.__init__(self, argv, env)
 
-        if self._env.has_key('ntphosts'):
-            hosts_str = re.sub('[^\d\.,]', '', self._env.get('ntphosts'))
+        if self.env.envHasKey('ntphosts'):
+            hosts_str = re.sub('[^\d\.,]', '', self.envGet('ntphosts'))
             self._remoteHosts = hosts_str.split(',')
         else:
             raise Exception("Remote host list must be passed in the 'ntphosts' "

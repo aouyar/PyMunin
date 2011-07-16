@@ -66,7 +66,7 @@ class MuninWanpipePlugin(MuninPlugin):
         """
         MuninPlugin.__init__(self, argv, env)
         
-        self.registerFilter('ifaces', '^[\w\d]+$')
+        self.envRegisterFilter('ifaces', '^[\w\d]+$')
 
         self._wanpipeInfo = WanpipeInfo()
         self._ifaceStats = self._wanpipeInfo.getIfaceStats()
@@ -193,7 +193,7 @@ class MuninWanpipePlugin(MuninPlugin):
         @return:      Returns True if included in graphs, False otherwise.
             
         """
-        return self.checkFilter('ifaces', iface)
+        return self.envCheckFilter('ifaces', iface)
 
 
 if __name__ == "__main__":
