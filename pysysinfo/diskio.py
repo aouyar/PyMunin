@@ -394,18 +394,26 @@ class DiskIOinfo:
         else:
             return None
     
-    def getLVstats(self, vg, lv):
+    def getLVstats(self, *args):
         """Returns I/O stats for LV.
         
-        @param vg: VG name.
-        @param lv: LV name. 
-        @return: Dict of stats.
+        @param args: Two calling conventions are implemented:
+                     - Passing two parameters vg and lv.
+                     - Passing only one parameter in vg-lv format.  
+        @return:     Dict of stats.
         
         """
+        if len(args) == 1:
+            lvdev = args[0]
+        elif len(args) == 2:
+            lvdev = '-'.join(args)
+        else:
+            raise AttributeError("The getLVstats must be called with either "
+                                 "one or two arguments.")
         if self._mapLVminor is None:
             self._initDMinfo()
-        minor = self._mapLVminor.get("-".join((vg,lv)))
-        if minor:
+        minor = self._mapLVminor.get(lvdev)
+        if minor is not None:
             return self.getDevStats("dm-%d" % minor)
         else:
             return None
