@@ -11,6 +11,21 @@ Multigraph Plugin - Graph Structure
     - diskio_disk_requests
     - diskio_disk_bytes
     - diskio_disk_active
+    - diskio_part_requests
+    - diskio_part_bytes
+    - diskio_part_active
+    - diskio_md_requests
+    - diskio_md_bytes
+    - diskio_md_active
+    - diskio_lv_requests
+    - diskio_lv_bytes
+    - diskio_lv_active
+    - diskio_fs_requests
+    - diskio_fs_bytes
+    - diskio_fs_active
+    - diskio_fs_requests
+    - diskio_fs_bytes
+    - diskio_fs_active
 
    
 Environment Variables
@@ -21,8 +36,8 @@ Environment Variables
 
   Example:
     [diskiostats]
-        env.exclude_graphs diskinode
-        env.exclude_fstype tmpfs
+        env.include_graphs diskio_disk_requests, diskio_disk_bytes
+
 
 """
 # Munin  - Magic Markers
@@ -61,24 +76,58 @@ class MuninDiskIOplugin(MuninPlugin):
 
         self._info = DiskIOinfo()
         
-        disklist = self._info.getDiskList()
-        self._configDevRequests('disk', 'Disk', disklist)
-        self._configDevBytes('disk', 'Disk', disklist)
-        self._configDevActive('disk', 'Disk', disklist)
+        self._diskList = self._info.getDiskList()
+        if self._diskList:
+            self._diskList.sort()
+            self._configDevRequests('disk', 'Disk', self._diskList)
+            self._configDevBytes('disk', 'Disk', self._diskList)
+            self._configDevActive('disk', 'Disk', self._diskList)
+            
+        self._mdList = self._info.getMDlist()
+        if self._mdList:
+            self._mdList.sort()
+            self._configDevRequests('md', 'MD', self._mdList)
+            self._configDevBytes('md', 'MD', self._mdList)
+            self._configDevActive('md', 'MD', self._mdList)
+            
+        devlist = self._info.getPartitionList()
+        if devlist:
+            devlist.sort()
+            self._partList = [x[1] for x in devlist]
+            self._configDevRequests('part', 'Partition', self._partList)
+            self._configDevBytes('part', 'Partition', self._partList)
+            self._configDevActive('part', 'Partition', self._partList)
+            
+        devlist = self._info.getLVlist()
+        if devlist:
+            devlist.sort()
+            self._lvList = ["-".join(x) for x in devlist]
+            self._configDevRequests('lv', 'LV', self._lvList)
+            self._configDevBytes('lv', 'LV', self._lvList)
+            self._configDevActive('lv', 'LV', self._lvList)
         
-        fslist = self._info.getFilesystemList()
-        self._configDevRequests('fs', 'Filesystem', fslist)
-        self._configDevBytes('fs', 'Filesystem', fslist)
-        self._configDevActive('fs', 'Filesystem', fslist)
+        self._fsList = self._info.getFilesystemList()
+        self._fsList.sort()
+        self._configDevRequests('fs', 'Filesystem', self._fsList)
+        self._configDevBytes('fs', 'Filesystem', self._fsList)
+        self._configDevActive('fs', 'Filesystem', self._fsList)
                 
     def retrieveVals(self):
         """Retrive values for graphs."""
-        devlist = self._info.getDiskList()
-        statsfunc = self._info.getDiskStats
-        self._fetchDevAll('disk', devlist, statsfunc)
-        devlist = self._info.getFilesystemList()
-        statsfunc = self._info.getFilesystemStats
-        self._fetchDevAll('fs', devlist, statsfunc)
+        if self._diskList:
+            self._fetchDevAll('disk', self._diskList, 
+                              self._info.getDiskStats)
+        if self._mdList:
+            self._fetchDevAll('md', self._mdList, 
+                              self._info.getMDstats)
+        if self._partList:
+            self._fetchDevAll('part', self._partList, 
+                              self._info.getPartitionStats) 
+        if self._lvList:
+            self._fetchDevAll('lv', self._lvList, 
+                              self._info.getLVstats)
+        self._fetchDevAll('fs', self._fsList, 
+                          self._info.getFilesystemStats)
                 
     def _configDevRequests(self, namestr, titlestr, devlist):
         name = 'diskio_%s_requests' % namestr
