@@ -25,7 +25,8 @@ The plugins consist of the following components:
   The separation of the data retrieval logic should facilitate the use of the 
   same code in other monitoring solution.
 
-Although the solution is focused on implementing _Multigraph Plugins_ the 
+Although the solution is focused on implementing _Multigraph Plugins_ the module
+also supports simple single graph plugins.
 
 The initial design of the solution was inspired by 
 [python-munin](https://github.com/samuel/python-munin) 
@@ -42,8 +43,10 @@ included:
 * Apache Web Server
 * Asterisk Telephony Server
 * Disk Usage
+* Disk I/O
 * FreeSWITCH Soft Switch
 * Memcached
+* MySQL Database
 * Network Interface Traffic and Errors
 * Nginx Web Server
 * NTP - Time Server
@@ -57,8 +60,6 @@ included:
 Classes for retrieving stats are available, but no plugins have been developed
 yet for the following:
 
-* Disk I/O
-* MySQL Database
 * Squid Web Proxy
 
 
@@ -83,6 +84,13 @@ Installation
   Configuration Directory_ (_/etc/munin/plugin-conf.d_). The environment 
   variables used by the plugin scripts are documented in the header part of the
   script code.
+
+
+Documentation
+-------------
+
+The documentation for the project and sample graphs for plugins will be 
+published in the [PyMunin Project Web Page](http://aouyar.github.com/PyMunin/)
 
 
 Plugin Development
