@@ -18,17 +18,22 @@ __status__ = "Development"
 buffSize = 4096
 
 
-def parse_value(val):
+def parse_value(val, parsebool=False):
     """Parse input string and return int, float or str depending on format.
     
-    @param val: Input string.
-    @return:    Value of type int, float or str.
+    @param val:       Input string.
+    @param parsebool: If True parse yes / no, on / off as boolean.
+    @return:          Value of type int, float or str.
         
     """
     if re.match('-{0,1}\d+$',  str(val)):
             return int(val)
     elif re.match('-{0,1}\d*\.\d+$',  str(val)):
         return float(val)
+    elif parsebool and re.match('yes|on', str(val), re.IGNORECASE):
+        return True
+    elif parsebool and re.match('no|off', str(val), re.IGNORECASE):
+        return False
     else:
         return val
 
