@@ -30,7 +30,7 @@ __status__ = "Development"
 
 confFileFreePBX = '/etc/amportal.conf'
 confFileAMI = '/etc/asterisk/manager.conf'
-conn_timeout = 5
+connTimeout = 5
 
 
 
@@ -132,7 +132,7 @@ class AsteriskInfo:
         try:
             if sys.version_info[:2] >= (2,6):
                 self._conn = telnetlib.Telnet(self._amihost, self._amiport, 
-                                              conn_timeout)
+                                              connTimeout)
             else:
                 self._conn = telnetlib.Telnet(self._amihost, self._amiport)
         except:
@@ -166,7 +166,7 @@ class AsteriskInfo:
 
         """
         resp_dict= dict()
-        resp_str = self._conn.read_until("\r\n\r\n", conn_timeout)
+        resp_str = self._conn.read_until("\r\n\r\n", connTimeout)
         for line in resp_str.split("\r\n"):
             mobj = re.match('(\w+):\s*(\S.*)$', line);
             if mobj:
@@ -179,7 +179,7 @@ class AsteriskInfo:
         
     def _printResponse(self):
         """Read and print response from Asterisk Manager Interface."""
-        resp_str = self._conn.read_until("\r\n\r\n", conn_timeout)
+        resp_str = self._conn.read_until("\r\n\r\n", connTimeout)
         print resp_str
 
     def _getGreeting(self):
@@ -187,7 +187,7 @@ class AsteriskInfo:
         set Manager Interface version.
 
         """
-        greeting = self._conn.read_until("\r\n", conn_timeout)
+        greeting = self._conn.read_until("\r\n", connTimeout)
         mobj = re.match('Asterisk Call Manager\/([\d\.]+)\s*$', greeting)
         if mobj:
             self._amiversion = mobj.group(1)
