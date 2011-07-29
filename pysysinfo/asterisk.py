@@ -117,7 +117,7 @@ class AsteriskInfo:
                 data = fp.read()
                 fp.close()
             except:
-                raise Exception('Failed reading FreePBX configuration file: %s'
+                raise Exception('Failed reading Asterisk configuration file: %s'
                     % confFileAMI)
             mobj = re.search('^\[(\w+)\]\s*\r{0,1}\nsecret\s*=\s*(\S+)\s*$', 
                              data, re.MULTILINE)
@@ -138,7 +138,7 @@ class AsteriskInfo:
         except:
             raise Exception(
                 "Connection to Asterisk Manager Interface on "
-                "host %s and port %d failed."
+                "host %s and port %s failed."
                 % (self._amihost, self._amiport)
                 )
 
@@ -230,11 +230,16 @@ class AsteriskInfo:
             ("Command", command),
         ))
         resp = self._getResponse()
-        if resp.get("Response") == "Follows":
-            return resp.get('command_response')
+        result = resp.get("Response")
+        if result == "Follows":
+            return resp.get("command_response")
+        elif result == "Error":
+            raise Exception("Execution of Asterisk Manager Interface Command "
+                            "(%s) failed with error message: %s" % 
+                            (command, str(resp.get("Message"))))
         else:
-            raise Exception('Execution of Asterisk Manager Interface Command'
-                            'failed: %s' % command)
+            raise Exception("Execution of Asterisk Manager Interface Command "
+                            "failed: %s" % command)
 
     def getAsteriskVersion(self):
         """Query Asterisk Manager Interface for Asterisk Version.
