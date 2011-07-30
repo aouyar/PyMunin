@@ -52,14 +52,15 @@ class MuninNetIfacePlugin(MuninPlugin):
     plugin_name = 'netifacestats'
     isMultigraph = True
     
-    def __init__(self, argv = (), env = {}):
+    def __init__(self, argv=(), env={}, debug=False):
         """Populate Munin Plugin with MuninGraph instances.
         
-        @param argv: List of command line arguments.
-        @param env:  Dictionary of environment variables.
+        @param argv:  List of command line arguments.
+        @param env:   Dictionary of environment variables.
+        @param debug: Print debugging messages if True. (Default: False)
         
         """
-        MuninPlugin.__init__(self, argv, env)
+        MuninPlugin.__init__(self, argv, env, debug)
 
         self.envRegisterFilter('ifaces', '^[\w\d:]+$')
         

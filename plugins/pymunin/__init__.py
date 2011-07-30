@@ -90,7 +90,7 @@ class MuninPlugin:
     """True for Multi-Graph Plugins, and False for Simple Plugins.
     Must be overriden in child classes to indicate plugin type."""
 
-    def __init__(self, argv = (), env = {}):
+    def __init__(self, argv=(), env={}, debug=False):
         """Constructor for MuninPlugin Class.
         
         @param argv: List of command line arguments.
@@ -105,6 +105,7 @@ class MuninPlugin:
         self._argv = argv
         self._env = env
         self.arg0 = None
+        self._debug = debug
         if (self.plugin_name is not None and argv is not None and len(argv) > 0 
             and re.search('_$', self.plugin_name)):
             mobj = re.match("%s(\S+)$" % self.plugin_name, argv[0])
@@ -140,13 +141,14 @@ class MuninPlugin:
         """
         return self._env.has_key(name)
     
-    def envGet(self, name):
+    def envGet(self, name, default=None):
         """Return value for environment variable or None.  
         
-        @param name: Name of environtment variable.
+        @param name:    Name of environtment variable.
+        @param default: Default value if variable is undefined.
         
         """
-        return self._env.get(name)
+        return self._env.get(name, default)
     
     def envRegisterFilter(self, name, attr_regex = '^\w+$', default = True):
         """Register filter for including, excluding attributes in graphs through 
@@ -215,6 +217,14 @@ class MuninPlugin:
                 raise AttributeError("Value for flag %s, must be yes, no, on or off" 
                                      % name)
                 
+    def debugEnabled(self):
+        """Return True if plugin debugging is enabled.
+        
+            @return: Boolean
+            
+        """
+        return self._debug
+    
     def graphEnabled(self, name):
         """Utility method to check if graph with the given name is enabled.
         
@@ -630,21 +640,30 @@ class MuninGraph:
                       re.sub('^[^A-Za-z_]', '_', name))
 
 
-def muninMain(pluginClass, argv = None, env = None):
+def muninMain(pluginClass, argv=None, env=None, debug=False):
     """Main Block for Munin Plugins.
     
     @param pluginClass: Child class of MuninPlugin that implements plugin.
-    @param argv: List of command line arguments to Munin Plugin.
-    @param env: Dictionary of environment variables passed to Munin Plugin.
+    @param argv:        List of command line arguments to Munin Plugin.
+    @param env:         Dictionary of environment variables passed to Munin Plugin.
+    @param debug:       Print debugging messages if True. (Default: False)
     
     """
     if argv is None:
         argv = sys.argv
     if env is None:
         env = os.environ
-    plugin = pluginClass(argv, env)
-    ret = plugin.run()
-    if ret:
-        return 0
-    else:
+    debug = debug or env.has_key('MUNIN_DEBUG')
+    try:
+        plugin = pluginClass(argv, env, debug)
+        ret = plugin.run()
+        if ret:
+            return 0
+        else:
+            return 1
+    except Exception as msg:
+        if debug:
+            raise
+        else:
+            print >> sys.stderr, "EXCEPTION: %s" % msg
         return 1
