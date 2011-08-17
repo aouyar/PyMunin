@@ -275,7 +275,7 @@ class AsteriskInfo:
             dahdi = 0, sip = 0, iax2 = 0, misdn = 0, local = 0, mix = 0,
             active_calls = 0, active_channels = 0, calls_processed = 0)
         for line in cmdresp.splitlines():
-            mobj = re.match('(sip|iax2|zap|dahdi|local|misdn)\/(\w+)[-\s]', 
+            mobj = re.match('(sip|iax2|zap|dahdi|local|misdn)\/(\w+)', 
                             line, re.IGNORECASE)
             if mobj:
                 chan_type = mobj.group(1).lower()
