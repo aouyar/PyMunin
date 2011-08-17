@@ -93,6 +93,15 @@ Installation
   script code.
 
 
+Troubleshooting
+---------------
+
+On error plugins return short error messages by default. Plugin debugging must
+be enabled to return full trace for exceptions.
+
+To enable plugin debugging in _munin-run_ use the _--pidebug_ option.
+
+
 Plugin Development
 ------------------
 
