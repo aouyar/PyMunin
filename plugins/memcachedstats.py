@@ -42,6 +42,7 @@ Environment Variables
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
 from pysysinfo.memcached import MemcachedInfo
+from pysysinfo.util import safe_sum
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
@@ -257,8 +258,10 @@ class MuninMemcachedPlugin(MuninPlugin):
         stats = serverInfo.getStats()
         if stats:
             stats['set_hits'] = stats.get('total_items')
-            stats['set_misses'] = (stats.get('cmd_set') 
-                                   - stats.get('total_items'))
+            if stats.has_key('cmd_set') and stats.has_key('total_items'): 
+                stats['set_misses'] = stats['cmd_set'] - stats['total_items']
+            else:
+                stats['set_misses'] = None
             if self.hasGraph('memcached_connections'):
                 self.setGraphVal('memcached_connections', 'conn', 
                                  stats.get('curr_connections'))
@@ -282,38 +285,42 @@ class MuninMemcachedPlugin(MuninPlugin):
                 self.setGraphVal('memcached_reqrate', 'get', 
                                  stats.get('cmd_get'))
                 self.setGraphVal('memcached_reqrate', 'del',
-                    stats.get('delete_hits') + stats.get('delete_misses'))
+                                 safe_sum([stats.get('delete_hits'), 
+                                           stats.get('delete_misses')]))
                 self.setGraphVal('memcached_reqrate', 'cas',
-                                 stats.get('cas_hits') + stats.get('cas_misses') 
-                                 + stats.get('cas_badval'))
+                                 safe_sum([stats.get('cas_hits'), 
+                                           stats.get('cas_misses'), 
+                                           stats.get('cas_badval')]))
                 self.setGraphVal('memcached_reqrate', 'incr',
-                    stats.get('incr_hits') + stats.get('incr_misses'))
+                                 safe_sum([stats.get('incr_hits'), 
+                                           stats.get('incr_misses')]))
                 self.setGraphVal('memcached_reqrate', 'decr',
-                    stats.get('decr_hits') + stats.get('decr_misses'))
+                                 safe_sum([stats.get('decr_hits'), 
+                                           stats.get('decr_misses')]))
             if self.hasGraph('memcached_statget'):
                 self.setGraphVal('memcached_statget', 'hit', 
                                  stats.get('get_hits'))
                 self.setGraphVal('memcached_statget', 'miss', 
                                  stats.get('get_misses'))
                 self.setGraphVal('memcached_statget', 'total', 
-                                 sum([stats.get('get_hits'),
-                                      stats.get('get_misses')]))
+                                 safe_sum([stats.get('get_hits'),
+                                           stats.get('get_misses')]))
             if self.hasGraph('memcached_statset'):
                 self.setGraphVal('memcached_statset', 'hit', 
                                  stats.get('set_hits'))
                 self.setGraphVal('memcached_statset', 'miss', 
                                  stats.get('set_misses'))
                 self.setGraphVal('memcached_statset', 'total', 
-                                 sum([stats.get('set_hits'),
-                                      stats.get('set_misses')]))
+                                 safe_sum([stats.get('set_hits'),
+                                           stats.get('set_misses')]))
             if self.hasGraph('memcached_statdel'):
                 self.setGraphVal('memcached_statdel', 'hit', 
                                  stats.get('delete_hits'))
                 self.setGraphVal('memcached_statdel', 'miss', 
                                  stats.get('delete_misses'))
                 self.setGraphVal('memcached_statdel', 'total', 
-                                 sum([stats.get('delete_hits'),
-                                      stats.get('delete_misses')]))
+                                 safe_sum([stats.get('delete_hits'),
+                                           stats.get('delete_misses')]))
             if self.hasGraph('memcached_statcas'):
                 self.setGraphVal('memcached_statcas', 'hit', 
                                  stats.get('cas_hits'))
@@ -322,9 +329,9 @@ class MuninMemcachedPlugin(MuninPlugin):
                 self.setGraphVal('memcached_statcas', 'badval', 
                                  stats.get('cas_badval'))
                 self.setGraphVal('memcached_statcas', 'total', 
-                                 sum([stats.get('cas_hits'),
-                                      stats.get('cas_misses'),
-                                      stats.get('cas_badval')]))
+                                 safe_sum([stats.get('cas_hits'),
+                                           stats.get('cas_misses'),
+                                           stats.get('cas_badval')]))
             if self.hasGraph('memcached_statincrdecr'):
                 self.setGraphVal('memcached_statincrdecr', 'incr_hit', 
                                  stats.get('incr_hits'))
@@ -335,11 +342,10 @@ class MuninMemcachedPlugin(MuninPlugin):
                 self.setGraphVal('memcached_statincrdecr', 'decr_miss', 
                                  stats.get('decr_misses'))
                 self.setGraphVal('memcached_statincrdecr', 'total', 
-                                 sum([stats.get('incr_hits'),
-                                  stats.get('decr_hits'),
-                                  stats.get('incr_misses'),
-                                  stats.get('decr_misses')]))
-                
+                                 safe_sum([stats.get('incr_hits'),
+                                           stats.get('decr_hits'),
+                                           stats.get('incr_misses'),
+                                           stats.get('decr_misses')]))
             if self.hasGraph('memcached_statevict'):
                 self.setGraphVal('memcached_statevict', 'evict', 
                                  stats.get('evictions'))
@@ -361,15 +367,18 @@ class MuninMemcachedPlugin(MuninPlugin):
                         ('decr',  'decr_hits',  'decr_misses')
                     ):
                     val = float(100)
-                    if prev_stats: 
-                        hits = stats.get(field_hits) - prev_stats.get(field_hits)
-                        misses = (stats.get(field_misses) 
-                                  - prev_stats.get(field_misses))
-                        total = hits + misses
-                        if total > 0:
-                            val = 100.0 * hits / total
-                    self.setGraphVal('memcached_hitpct',  field_name, 
-                                     round(val,  2))
+                    if prev_stats:
+                        if (stats.has_key(field_hits) 
+                            and prev_stats.has_key(field_hits)
+                            and stats.has_key(field_misses) 
+                            and prev_stats.has_key(field_misses)):
+                            hits = stats[field_hits] - prev_stats[field_hits]
+                            misses = stats[field_misses] - prev_stats[field_misses]
+                            total = hits + misses
+                            if total > 0:
+                                val = 100.0 * hits / total
+                            self.setGraphVal('memcached_hitpct',  field_name, 
+                                             round(val,  2))
                 self.saveState(stats)
 
 

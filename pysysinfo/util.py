@@ -36,6 +36,19 @@ def parse_value(val, parsebool=False):
         return False
     else:
         return val
+    
+
+def safe_sum(seq):
+    """Returns the sum of a sequence of numbers. Returns 0 for empty sequence 
+    and None if any item is None.
+    
+    @param seq: Sequence of numbers or None.
+    
+    """
+    if None in seq:
+        return None
+    else:
+        return sum(seq)
 
 
 def socket_read(fp):
