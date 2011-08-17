@@ -98,6 +98,8 @@ class MuninDiskIOplugin(MuninPlugin):
             self._configDevRequests('part', 'Partition', self._partList)
             self._configDevBytes('part', 'Partition', self._partList)
             self._configDevActive('part', 'Partition', self._partList)
+        else:
+            self._partList = None
             
         devlist = self._info.getLVlist()
         if devlist:
@@ -106,6 +108,8 @@ class MuninDiskIOplugin(MuninPlugin):
             self._configDevRequests('lv', 'LV', self._lvList)
             self._configDevBytes('lv', 'LV', self._lvList)
             self._configDevActive('lv', 'LV', self._lvList)
+        else:
+            self._lvList = None
         
         self._fsList = self._info.getFilesystemList()
         self._fsList.sort()
