@@ -661,7 +661,7 @@ def muninMain(pluginClass, argv=None, env=None, debug=False):
             return 0
         else:
             return 1
-    except Exception as msg:
+    except Exception, msg:
         if debug:
             raise
         else:
