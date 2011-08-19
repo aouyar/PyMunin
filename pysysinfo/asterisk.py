@@ -256,7 +256,7 @@ class AsteriskInfo:
         if mobj:
             return mobj.group(1)
         else:
-            Exception('Asterisk version cannot be determined.')
+            raise Exception('Asterisk version cannot be determined.')
 
     def getChannelStats(self):
         """Query Asterisk Manager Interface for Channel Stats.
