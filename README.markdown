@@ -18,12 +18,12 @@ The plugins consist of the following components:
 
 * The _pymunin_ module _(./plugins/pymunin)_ implements the base classes for
   developing Munin plugins.
-* The plugin logic is implemented in the plugin scripts in _/pymunin_.
+* The plugin logic is implemented in the plugin scripts in _./plugins_.
 * The actual data retrieval logic is separated from the plugins to facilitate
   code reuse. Individual modules in the directory _./pysysinfo_ implement classes 
   for getting the monitoring data and returning them in dictionary objects. 
   The separation of the data retrieval logic should facilitate the use of the 
-  same code in other monitoring solution.
+  same code in other monitoring solutions.
 
 Although the solution is focused on implementing _Multigraph Plugins_ the module
 also supports simple single graph plugins.
@@ -70,6 +70,30 @@ The documentation for the project and sample graphs for plugins will be
 published in the [PyMunin Project Web Page](http://aouyar.github.com/PyMunin/)
 
 
+Collaboration
+-------------
+
+I would be happy to receive suggestions on improving the code for developing 
+Munin Plugins. Alternatively you can use the _Issues_ functionality of _GitHub_ 
+to document problems and to propose improvements. You can use the internal 
+messaging system of _GitHub_ or my e-mail address in case you prefer to 
+contact me directly.
+
+I hope that by sharing the code, the existing plugins will get more testing and 
+receive improvements, and many more Multigraph plugins will be developed 
+collaboratively.
+
+I would be glad to receive some sample graphs from anyone using the plugins.
+
+
+Licensing
+---------
+
+_PyMunin_ is copyrighted free software made available under the terms of the 
+_GPL License Version 3_ or later.
+
+See the _COPYING_ file that acompanies the code for full licensing information.
+
 Installation
 ------------
 
@@ -99,53 +123,4 @@ Troubleshooting
 On error plugins return short error messages by default. Plugin debugging must
 be enabled to return full trace for exceptions.
 
-To enable plugin debugging in _munin-run_ use the _--pidebug_ option.
-
-
-Plugin Development
-------------------
-
-The first step for implementing a new _Multigraph Munin Plugin_ is developing a 
-new module in _pysysinfo_ for retrieving the monitoring data.
-
-The steps for developing the actual plugin script are as follows:
-
-* The new plugin can be implemented by extending the the _MuninPlugin_ class in 
-  _./plugins/pymunin_.
-* The _plugin_name_ property of _MuninPlugin_ class must be set to the name of 
-  the plugin.
-* Graph Objects are registered to the plugin in the constructor of the plugin
-  class.
-* Code for creating graph objects of _MuninGraph_ class are placed in the 
-  constructor of the plugin class.
-* Code for adding fields to the graph using the _addField_ method of _MuninGraph_ 
-  class is placed in the constructor of the plugin class.
-* The _retrieveVals_ method of the plugin class is overwritten to retrieve 
-  data points and to associate values with the graph fields.
-* The _muninMain_ function in _pymunin_ is called with the plugin class as 
-  argument for initializing the main method of plugin. 
-
-
-Collaboration
--------------
-
-I would be happy to receive suggestions on improving the code for developing 
-Munin Plugins. Alternatively you can use the _Issues_ functionality of _GitHub_ 
-to document problems and to propose improvements. You can use the internal 
-messaging system of _GitHub_ or my e-mail address in case you prefer to 
-contact me directly.
-
-I hope that by sharing the code, the existing plugins will get more testing and 
-receive improvements, and many more Multigraph plugins will be developed 
-collaboratively.
-
-I would be glad to receive some sample graphs from anyone using the plugins.
-
-
-Licensing
----------
-
-_PyMunin_ is copyrighted free software made available under the terms of the 
-_GPL License Version 3_ or later.
-
-See the _COPYING_ file that acompanies the code for full licensing information.
+To enable plugin debugging in _munin-run_ use the _--pidebug_ option. 
