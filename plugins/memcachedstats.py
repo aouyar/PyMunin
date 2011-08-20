@@ -74,10 +74,12 @@ class MuninMemcachedPlugin(MuninPlugin):
         self._host = self.envGet('host')
         self._port = self.envGet('port')
         
+        self._stats = None
         self._prev_stats = self.restoreState()
         if self._prev_stats is None:
             serverInfo = MemcachedInfo(self._host,  self._port)
-            stats = serverInfo.getStats()
+            self._stats = serverInfo.getStats()
+            stats = self._stats
         else:
             stats = self._prev_stats
         if stats is None:
@@ -280,8 +282,11 @@ class MuninMemcachedPlugin(MuninPlugin):
             
     def retrieveVals(self):
         """Retrive values for graphs."""
-        serverInfo = MemcachedInfo(self._host,  self._port)
-        stats = serverInfo.getStats()
+        if self._stats is None:
+            serverInfo = MemcachedInfo(self._host,  self._port)
+            stats = serverInfo.getStats()
+        else:
+            stats = self._stats
         if stats is None:
             raise Exception("Undetermined error accesing stats.")        
         stats['set_hits'] = stats.get('total_items')
