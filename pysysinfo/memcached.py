@@ -55,7 +55,7 @@ class MemcachedInfo:
                 self._conn = telnetlib.Telnet(self._host, self._port, 
                                               connTimeout)
             else:
-                self._conn = telnetlib.Telnet(self._amihost, self._amiport)
+                self._conn = telnetlib.Telnet(self._host, self._port)
         except:
             raise Exception(
                 "Connection to Memcached Instance on host %s and port %d failed."
