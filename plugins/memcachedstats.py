@@ -105,6 +105,7 @@ class MuninMemcachedPlugin(MuninPlugin):
             and stats.has_key('bytes')):
             graph = MuninGraph('Memcached - Memory Usage', 'Memcached',
                 info='Memory used to store items on Memcached Server in bytes.',
+                vlabel='bytes',
                 args='--base 1024 --lower-limit 0')
             graph.addField('bytes', 'bytes', draw='LINE2', type='GAUGE')
             self.appendGraph('memcached_memory', graph)
@@ -113,7 +114,8 @@ class MuninMemcachedPlugin(MuninPlugin):
             and stats.has_key('total_connections')):
             graph = MuninGraph('Memcached - Throughput - Connections', 
                 'Memcached',
-                info='Connections per ${graph_period}.',
+                info='Connections per second.',
+                vlabel='conn / sec',
                 args='--base 1000 --lower-limit 0')
             graph.addField('conn', 'conn', draw='LINE2', type='DERIVE', min=0)
             self.appendGraph('memcached_connrate', graph)
@@ -121,9 +123,9 @@ class MuninMemcachedPlugin(MuninPlugin):
         if (self.graphEnabled('memcached_traffic')
             and stats.has_key('bytes_read') and stats.has_key('bytes_written')):
             graph = MuninGraph('Memcached - Throughput - Network', 'Memcached',
-                info='Bytes sent (+) / received (-)  by Memcached per ${graph_period}.',
-                args='--base 1024 --lower-limit 0',
-                vlabel='bytes in (-) / out (+) per second')
+                info='Bytes sent (+) / received (-)  by Memcached per second.',
+                vlabel='bytes in (-) / out (+) per second',
+                args='--base 1024 --lower-limit 0')
             graph.addField('rxbytes', 'bytes', draw='LINE2', type='DERIVE', 
                            min=0, graph=False)
             graph.addField('txbytes', 'bytes', draw='LINE2', type='DERIVE', 
@@ -135,8 +137,8 @@ class MuninMemcachedPlugin(MuninPlugin):
             and stats.has_key('cmd_get')):
             graph = MuninGraph('Memcached - Throughput - Request Rate', 
                 'Memcached',
-                info='Requests per ${graph_period}.',
-                args='--base 1000 --lower-limit 0')
+                info='Requests per second.',
+                vlabel='reqs / sec', args='--base 1000 --lower-limit 0')
             for (fname,fstat,fstr) in (('set', 'cmd_set', 'Set'),
                                        ('get', 'cmd_get', 'Get'),
                                        ('del', 'delete_hits', 'Delete'),
@@ -146,70 +148,70 @@ class MuninMemcachedPlugin(MuninPlugin):
                 if stats.has_key(fstat):
                     graph.addField(fname, fname, draw='AREASTACK', type='DERIVE', 
                                    min=0, 
-                                   info='%s requests per ${graph_period}.' % fstr)
+                                   info='%s requests per second.' % fstr)
             self.appendGraph('memcached_reqrate', graph)
             
         if (self.graphEnabled('memcached_statget')
             and stats.has_key('cmd_get')):
             graph = MuninGraph('Memcached - Stats - Get', 
                 'Memcached',
-                info='Get requests per ${graph_period}.',
-                args='--base 1000 --lower-limit 0')
+                info='Get requests per second.',
+                vlabel='reqs / sec', args='--base 1000 --lower-limit 0')
             graph.addField('hit', 'hit', draw='AREASTACK', type='DERIVE', min=0, 
-                info='Get request hits per ${graph_period}.')
+                info='Get request hits per second.')
             graph.addField('miss', 'miss', draw='AREASTACK', type='DERIVE', min=0, 
-                info='Get request misses per ${graph_period}.')
-            graph.addField('total', 'total', draw='LINE2', type='DERIVE', min=0,
+                info='Get request misses per second.')
+            graph.addField('total', 'total', draw='LINE1', type='DERIVE', min=0,
                 colour='000000', 
-                info='Total get requests per ${graph_period}.')
+                info='Total get requests per second.')
             self.appendGraph('memcached_statget', graph)
             
         if (self.graphEnabled('memcached_statset')
             and stats.has_key('cmd_set')):
             graph = MuninGraph('Memcached - Stats - Set', 
                 'Memcached',
-                info='Set requests per ${graph_period}.',
+                info='Set requests per second.', vlabel='reqs / sec',
                 args='--base 1000 --lower-limit 0')
             graph.addField('hit', 'hit', draw='AREASTACK', type='DERIVE', min=0, 
-                info='Set request hits per ${graph_period}.')
+                info='Set request hits per second.')
             graph.addField('miss', 'miss', draw='AREASTACK', type='DERIVE', min=0, 
-                info='Set request misses per ${graph_period}.')
-            graph.addField('total', 'total', draw='LINE2', type='DERIVE', min=0,
+                info='Set request misses per second.')
+            graph.addField('total', 'total', draw='LINE1', type='DERIVE', min=0,
                 colour='000000', 
-                info='Total set requests per ${graph_period}.')
+                info='Total set requests per second.')
             self.appendGraph('memcached_statset', graph)
             
         if (self.graphEnabled('memcached_statdel')
             and stats.has_key('delete_hits')):
             graph = MuninGraph('Memcached - Stats - Delete', 
                 'Memcached',
-                info='Delete requests per ${graph_period}.',
-                args='--base 1000 --lower-limit 0')
+                info='Delete requests per second.',
+                vlabel='reqs / sec', args='--base 1000 --lower-limit 0')
             graph.addField('hit', 'hit', draw='AREASTACK', type='DERIVE', min=0, 
-                info='Delete request hits per ${graph_period}.')
+                info='Delete request hits per second.')
             graph.addField('miss', 'miss', draw='AREASTACK', type='DERIVE', min=0, 
-                info='Delete request misses per ${graph_period}.')
-            graph.addField('total', 'total', draw='LINE2', type='DERIVE', min=0,
+                info='Delete request misses per second.')
+            graph.addField('total', 'total', draw='LINE1', type='DERIVE', min=0,
                 colour='000000', 
-                info='Total delete requests per ${graph_period}.')
+                info='Total delete requests per second.')
             self.appendGraph('memcached_statdel', graph)
         
         if (self.graphEnabled('memcached_statcas')
             and stats.has_key('cas_hits')):
             graph = MuninGraph('Memcached - Stats - CAS', 
                 'Memcached',
-                info='CAS requests per ${graph_period}.',
-                args='--base 1000 --lower-limit 0')
+                info='CAS requests per second.',
+                vlabel='reqs / sec', args='--base 1000 --lower-limit 0')
             graph.addField('hit', 'hit', draw='AREASTACK', type='DERIVE', min=0, 
-                info='CAS request hits per ${graph_period}.')
+                info='CAS request hits per second.')
             graph.addField('miss', 'miss', draw='AREASTACK', type='DERIVE', min=0, 
-                info='CAS request misses per ${graph_period}.')
+                info='CAS request misses per second.')
             graph.addField('badval', 'badval', draw='AREASTACK', 
                 type='DERIVE', min=0, 
-                info='CAS requests hits with bad value per ${graph_period}.')
-            graph.addField('total', 'total', draw='LINE2', type='DERIVE', min=0,
+                info='CAS requests hits with bad value per second.')
+            graph.addField('total', 'total', draw='LINE1', type='DERIVE', min=0,
                 colour='000000', 
-                info='Total CAS requests per ${graph_period}.')
+                info='Total CAS requests per second.')
             self.appendGraph('memcached_statcas', graph)
             
         if (self.graphEnabled('memcached_statincrdecr')
@@ -217,49 +219,49 @@ class MuninMemcachedPlugin(MuninPlugin):
             and stats.has_key('decr_hits')):
             graph = MuninGraph('Memcached - Stats - Incr / Decr', 
                 'Memcached',
-                info='Increment / decrement requests per ${graph_period}.',
-                args='--base 1000 --lower-limit 0')
+                info='Increment / decrement requests per second.',
+                vlabel='reqs / sec', args='--base 1000 --lower-limit 0')
             graph.addField('incr_hit', 'incr_hit', draw='AREASTACK', 
                 type='DERIVE', min=0, 
-                info='Increment hits per ${graph_period}.')
+                info='Increment hits per second.')
             graph.addField('decr_hit', 'decr_hit', draw='AREASTACK', 
                 type='DERIVE', min=0, 
-                info='Decrement hits per ${graph_period}.')
+                info='Decrement hits per second.')
             graph.addField('incr_miss', 'incr_miss', draw='AREASTACK', 
                 type='DERIVE', min=0, 
-                info='Increment misses per ${graph_period}.')
+                info='Increment misses per second.')
             graph.addField('decr_miss', 'decr_miss', draw='AREASTACK', 
                 type='DERIVE', min=0, 
-                info='Decrement misses per ${graph_period}.')
-            graph.addField('total', 'total', draw='LINE2', type='DERIVE', min=0,
+                info='Decrement misses per second.')
+            graph.addField('total', 'total', draw='LINE1', type='DERIVE', min=0,
                 colour='000000', 
-                info='Total Increment / decrement requests per ${graph_period}.')
+                info='Total Increment / decrement requests per second.')
             self.appendGraph('memcached_statincrdecr', graph)
             
         if (self.graphEnabled('memcached_statevict')
             and stats.has_key('evictions')):
             graph = MuninGraph('Memcached - Stats - Evictions', 
                 'Memcached',
-                info='Cache evictions and reclaims per ${graph_period}.',
-                args='--base 1000 --lower-limit 0')
+                info='Cache evictions and reclaims per second.',
+                vlabel='reqs / sec', args='--base 1000 --lower-limit 0')
             graph.addField('evict', 'evict', draw='LINE2', type='DERIVE', min=0, 
-                info='Items evicted from cache per ${graph_period}.')
+                info='Items evicted from cache per second.')
             if stats.has_key('reclaimed'):
                 graph.addField('reclaim', 'reclaim', draw='LINE2', type='DERIVE', 
                     min=0, 
-                    info='Items stored over expired entries per ${graph_period}.')
+                    info='Items stored over expired entries per second.')
             self.appendGraph('memcached_statevict', graph)
             
         if (self.graphEnabled('memcached_statauth')
             and stats.has_key('auth_cmds')):
             graph = MuninGraph('Memcached - Stats - Autentication', 
                 'Memcached',
-                info='Autentication requests per ${graph_period}.',
-                args='--base 1000 --lower-limit 0')
+                info='Autentication requests per second.',
+                vlabel='reqs / sec', args='--base 1000 --lower-limit 0')
             graph.addField('reqs', 'reqs', draw='LINE2', type='DERIVE', min=0, 
-                info='Authentication requests per ${graph_period}.')
+                info='Authentication requests per second.')
             graph.addField('errors', 'errors', draw='LINE2', type='DERIVE', min=0, 
-                info='Authentication errors per ${graph_period}.')
+                info='Authentication errors per second.')
             self.appendGraph('memcached_statauth', graph)
         
         if (self.graphEnabled('memcached_hitpct')
