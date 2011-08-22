@@ -89,7 +89,7 @@ class MuninMemcachedPlugin(MuninPlugin):
             and stats.has_key('curr_connections')):
             graph = MuninGraph('Memcached - Active Connections', 'Memcached',
                 info='Active connections for Memcached Server.',
-                args='--base 1000 --lower-limit 0')
+                vlabel='connections', args='--base 1000 --lower-limit 0')
             graph.addField('conn', 'conn', draw='LINE2', type='GAUGE')
             self.appendGraph('memcached_connections', graph)
         
@@ -97,7 +97,7 @@ class MuninMemcachedPlugin(MuninPlugin):
             and stats.has_key('curr_items')):
             graph = MuninGraph('Memcached - Items', 'Memcached',
                 info='Current number of items stored on Memcached Server.',
-                args='--base 1000 --lower-limit 0')
+                vlabel='items', args='--base 1000 --lower-limit 0')
             graph.addField('items', 'items', draw='LINE2', type='GAUGE')
             self.appendGraph('memcached_items', graph)
         
@@ -170,8 +170,8 @@ class MuninMemcachedPlugin(MuninPlugin):
             and stats.has_key('cmd_set')):
             graph = MuninGraph('Memcached - Stats - Set', 
                 'Memcached',
-                info='Set requests per second.', vlabel='reqs / sec',
-                args='--base 1000 --lower-limit 0')
+                info='Set requests per second.', 
+                vlabel='reqs / sec', args='--base 1000 --lower-limit 0')
             graph.addField('hit', 'hit', draw='AREASTACK', type='DERIVE', min=0, 
                 info='Set request hits per second.')
             graph.addField('miss', 'miss', draw='AREASTACK', type='DERIVE', min=0, 
@@ -243,7 +243,7 @@ class MuninMemcachedPlugin(MuninPlugin):
             graph = MuninGraph('Memcached - Stats - Evictions', 
                 'Memcached',
                 info='Cache evictions and reclaims per second.',
-                vlabel='reqs / sec', args='--base 1000 --lower-limit 0')
+                vlabel='per second', args='--base 1000 --lower-limit 0')
             graph.addField('evict', 'evict', draw='LINE2', type='DERIVE', min=0, 
                 info='Items evicted from cache per second.')
             if stats.has_key('reclaimed'):
@@ -269,7 +269,7 @@ class MuninMemcachedPlugin(MuninPlugin):
             and stats.has_key('cmd_get')):
             graph = MuninGraph('Memcached - Hit Percent', 'Memcached',
                 info='Hit percent for memcached requests.',
-                args='--base 1000 --lower-limit 0')
+                vlabel='%', args='--base 1000 --lower-limit 0')
             graph.addField('set', 'set', draw='LINE2', type='GAUGE', 
                 info='Stored items vs. total set requests.')
             for (fname,fstat,fstr) in (('get', 'cmd_get', 'Get'),
