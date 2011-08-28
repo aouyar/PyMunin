@@ -5,9 +5,8 @@ remote PostgreSQL Servers.
 
 """
 
-import psycopg2
-import re
 import util
+import psycopg2.extras
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
@@ -38,6 +37,8 @@ class PgInfo:
             
         """
         self._connParams = {}
+        self._version = None
+        self._conn = None
         if host is not None:
             self._connParams['host'] = host
             if port is not None:
@@ -67,6 +68,8 @@ class PgInfo:
             self._conn = psycopg2.connect(**self._connParams)
         else:
             self._conn = psycopg2.connect('')
+        self._version = self._conn.get_parameter_status('server_version')
+        
     
     def _createStatsDict(self, headers, rows):
         """Utility method that returns database stats as a nested dictionary.
@@ -112,12 +115,8 @@ class PgInfo:
         @return: Version string.
         
         """
-        versionStr = self._simpleQuery("SELECT version();")
-        mobj = re.match('^postgresql\s*([\d\.]+)\s', versionStr, re.IGNORECASE)
-        if mobj:
-            return mobj.group(1)
-        else:
-            return None
+        
+        return self._version
     
     def getStartTime(self):
         """Returns PostgreSQL Server start time.
@@ -200,6 +199,17 @@ class PgInfo:
         dbstats = self._createStatsDict(headers, rows)
         totals = self._createTotalsDict(headers, rows)
         return {'databases': dbstats, 'totals': totals}
+    
+    def getBgWriterStats(self):
+        """Returns Global Background Writer and Checkpoint Activity stats.
+        
+        @return: Nested dictionary of stats.
+        
+        """
+        cur = self._conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute("SELECT * FROM pg_stat_bgwriter")
+        info_dict = cur.fetchone()
+        return info_dict
     
     def getXlogStatus(self):
         """Returns Transaction Logging or Recovery Status.

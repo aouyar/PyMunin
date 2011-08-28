@@ -13,6 +13,7 @@ Multigraph Plugin - Graph Structure
    - pg_diskspace
    - pg_blockreads
    - pg_xact
+   - pg_checkpoints
    - pg_tup_read
    - pg_tup_write
    - pg_blockreads_detail
@@ -148,6 +149,16 @@ class MuninPgPlugin(MuninPlugin):
             graph.addField('rollbacks', 'rollbacks', draw='LINE2', type='DERIVE', 
                            min=0, info="Rollbacks per second.")
             self.appendGraph('pg_xact', graph)
+            
+        if self.graphEnabled('pg_checkpoints'):
+            graph = MuninGraph('PostgreSQL - Checkpoints per min', 'PostgreSQL Sys',
+                info='Number of Checkpoints per Minute for PostgreSQL Server.',
+                args='--base 1000 --lower-limit 0', period='minute')
+            graph.addField('req', 'req', draw='LINE2', type='DERIVE', 
+                           min=0, info="Requested checkpoints..")
+            graph.addField('timed', 'timed', draw='LINE2', type='DERIVE', 
+                           min=0, info="Check points started by timeout.")
+            self.appendGraph('pg_checkpoints', graph)
         
         if self.graphEnabled('pg_tup_read'):
             graph = MuninGraph('PostgreSQL - Tuple Reads', 'PostgreSQL Sys',
@@ -314,6 +325,15 @@ class MuninPgPlugin(MuninPlugin):
                         ):
                         if self.hasGraph(graph_name):
                             self.setGraphVal(graph_name, db, dbstats[attr_name])
+        
+        stats = None               
+        if self.hasGraph('pg_checkpoints'):
+            if stats is None:
+                stats = self._dbconn.getBgWriterStats()
+            self.setGraphVal('pg_checkpoints', 'req', 
+                             stats.get('checkpoints_req'))
+            self.setGraphVal('pg_checkpoints', 'timed', 
+                             stats.get('checkpoints_timed'))
     
     def dbIncluded(self, name):
         """Utility method to check if database is included in graphs.
