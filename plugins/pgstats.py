@@ -14,6 +14,7 @@ Multigraph Plugin - Graph Structure
    - pg_blockreads
    - pg_xact
    - pg_checkpoints
+   - pg_bgwriter
    - pg_tup_read
    - pg_tup_write
    - pg_blockreads_detail
