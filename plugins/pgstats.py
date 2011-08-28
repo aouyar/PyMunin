@@ -149,16 +149,18 @@ class MuninPgPlugin(MuninPlugin):
             graph.addField('rollbacks', 'rollbacks', draw='LINE2', type='DERIVE', 
                            min=0, info="Rollbacks per second.")
             self.appendGraph('pg_xact', graph)
-            
-        if self.graphEnabled('pg_checkpoints'):
-            graph = MuninGraph('PostgreSQL - Checkpoints per min', 'PostgreSQL Sys',
-                info='Number of Checkpoints per Minute for PostgreSQL Server.',
-                args='--base 1000 --lower-limit 0', period='minute')
-            graph.addField('req', 'req', draw='LINE2', type='DERIVE', 
-                           min=0, info="Requested checkpoints..")
-            graph.addField('timed', 'timed', draw='LINE2', type='DERIVE', 
-                           min=0, info="Check points started by timeout.")
-            self.appendGraph('pg_checkpoints', graph)
+        
+        if self._dbconn.checkVersion('8.3'):
+            if self.graphEnabled('pg_checkpoints'):
+                graph = MuninGraph('PostgreSQL - Checkpoints per min', 
+                    'PostgreSQL Sys',
+                    info='Number of Checkpoints per Minute for PostgreSQL Server.',
+                    args='--base 1000 --lower-limit 0', period='minute')
+                graph.addField('req', 'req', draw='LINE2', type='DERIVE', 
+                               min=0, info="Requested checkpoints..")
+                graph.addField('timed', 'timed', draw='LINE2', type='DERIVE', 
+                               min=0, info="Check points started by timeout.")
+                self.appendGraph('pg_checkpoints', graph)
         
         if self.graphEnabled('pg_tup_read'):
             graph = MuninGraph('PostgreSQL - Tuple Reads', 'PostgreSQL Sys',

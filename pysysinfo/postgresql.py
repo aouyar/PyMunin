@@ -38,6 +38,7 @@ class PgInfo:
         """
         self._connParams = {}
         self._version = None
+        self._version_tuple = ()
         self._conn = None
         if host is not None:
             self._connParams['host'] = host
@@ -69,6 +70,7 @@ class PgInfo:
         else:
             self._conn = psycopg2.connect('')
         self._version = self._conn.get_parameter_status('server_version')
+        self._version_tuple = tuple([int(x) for x in self._version.split('.')])
         
     
     def _createStatsDict(self, headers, rows):
@@ -110,13 +112,24 @@ class PgInfo:
         return util.parse_value(row[0])
     
     def getVersion(self):
-        """Returns PostgreSQL version string.
+        """Returns PostgreSQL Server version string.
         
         @return: Version string.
         
         """
         
         return self._version
+    
+    def checkVersion(self, verstr):
+        """Checks if PostgreSQL Server version is higher than or equal to 
+        certain verstr.
+        
+        @param version: Version string.
+        
+        """
+        version_tuple = tuple([int(x) for x in verstr.split('.')])
+        print version_tuple 
+        return self._version_tuple >= version_tuple
     
     def getStartTime(self):
         """Returns PostgreSQL Server start time.
@@ -206,9 +219,11 @@ class PgInfo:
         @return: Nested dictionary of stats.
         
         """
-        cur = self._conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cur.execute("SELECT * FROM pg_stat_bgwriter")
-        info_dict = cur.fetchone()
+        info_dict = {}
+        if self.checkVersion('8.3'):
+            cur = self._conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute("SELECT * FROM pg_stat_bgwriter")
+            info_dict = cur.fetchone()
         return info_dict
     
     def getXlogStatus(self):
@@ -217,27 +232,22 @@ class PgInfo:
         @return: Dictionary of status items.
         
         """
-        versionStr = self.getVersion()
-        if versionStr and int(versionStr.split('.')[0]) >= 9:
+        inRecovery = None
+        if self.checkVersion('9.0'):
             inRecovery = self._simpleQuery("SELECT pg_is_in_recovery();")
-        else:
-            inRecovery = False
         cur = self._conn.cursor()
         if inRecovery:
             cur.execute("""SELECT
-                true,
                 pg_last_xlog_receive_location(),
                 pg_last_xlog_replay_location();""")
-            headers = ('in_recovery', 'xlog_receive_location', 
-                       'xlog_replay_location')
+            headers = ('xlog_receive_location', 'xlog_replay_location')
         else:
             cur.execute("""SELECT
-                false,
                 pg_current_xlog_location(), 
                 pg_xlogfile_name(pg_current_xlog_location());""")
-            headers = ('in_recovery', 'xlog_location', 'xlog_filename')
+            headers = ('xlog_location', 'xlog_filename')
         row = cur.fetchone()
-        if row:
-            return dict(zip(headers, row))
-        else:
-            return None
+        info_dict = dict(zip(headers, row))
+        if inRecovery is not None:
+            info_dict['in_recovery'] = inRecovery
+        return info_dict
