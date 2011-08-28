@@ -117,7 +117,7 @@ class MuninPgPlugin(MuninPlugin):
         if self.graphEnabled('pg_diskspace'):
             graph = MuninGraph('PostgreSQL - Database Disk Usage', 
                 'PostgreSQL Sys',
-                info='Disk usage of databases on PostgreSQL Server.',
+                info='Disk usage of databases on PostgreSQL Server in bytes.',
                 args='--base 1024 --lower-limit 0')
             for db in dblist:
                 if self.dbIncluded(db):
@@ -152,7 +152,7 @@ class MuninPgPlugin(MuninPlugin):
         
         if self._dbconn.checkVersion('8.3'):
             if self.graphEnabled('pg_checkpoints'):
-                graph = MuninGraph('PostgreSQL - Checkpoints per min', 
+                graph = MuninGraph('PostgreSQL - Checkpoints per minute', 
                     'PostgreSQL Sys',
                     info='Number of Checkpoints per Minute for PostgreSQL Server.',
                     args='--base 1000 --lower-limit 0', period='minute')
@@ -161,6 +161,20 @@ class MuninPgPlugin(MuninPlugin):
                 graph.addField('timed', 'timed', draw='LINE2', type='DERIVE', 
                                min=0, info="Check points started by timeout.")
                 self.appendGraph('pg_checkpoints', graph)
+            if self.graphEnabled('pg_bgwriter'):
+                graph = MuninGraph('PostgreSQL - BgWriter Stats (blocks / second)', 
+                    'PostgreSQL Sys',
+                    info='PostgreSQL Server - Bgwriter - Blocks written per second.',
+                    args='--base 1000 --lower-limit 0', period='minute')
+                graph.addField('backend', 'backend', draw='LINE2', 
+                               type='DERIVE', min=0, 
+                               info="Buffers written by backend and not bgwriter.")
+                graph.addField('clean', 'clean', draw='LINE2', 
+                               type='DERIVE', min=0, 
+                               info="Buffers cleaned by bgwriter runs.")
+                graph.addField('chkpoint', 'chkpoint', draw='LINE2', type='DERIVE', 
+                               min=0, info="Buffers written performing checkpoints.")
+                self.appendGraph('pg_bgwriter', graph)
         
         if self.graphEnabled('pg_tup_read'):
             graph = MuninGraph('PostgreSQL - Tuple Reads', 'PostgreSQL Sys',
@@ -336,6 +350,16 @@ class MuninPgPlugin(MuninPlugin):
                              stats.get('checkpoints_req'))
             self.setGraphVal('pg_checkpoints', 'timed', 
                              stats.get('checkpoints_timed'))
+        if self.hasGraph('pg_bgwriter'):
+            if stats is None:
+                stats = self._dbconn.getBgWriterStats()
+            self.setGraphVal('pg_bgwriter', 'backend', 
+                             stats.get('buffers_backend'))
+            self.setGraphVal('pg_bgwriter', 'clean', 
+                             stats.get('buffers_clean'))
+            self.setGraphVal('pg_bgwriter', 'chkpoint', 
+                             stats.get('buffers_checkpoint'))
+            
     
     def dbIncluded(self, name):
         """Utility method to check if database is included in graphs.
