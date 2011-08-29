@@ -42,8 +42,9 @@ class MuninAttrFilter:
                              Include List and Exclude List are ignored unless 
                              they comply with the format dictated by the match 
                              regex.
-        @param default:      Filter default. Applies when the attribute is not
-                             in the include or exclude list.
+        @param default:      Filter default. Applies when the include list is 
+                             not defined and the attribute is not in the exclude 
+                             list.
         
         """
         self._attrs = {}
@@ -55,7 +56,7 @@ class MuninAttrFilter:
         if list_include:
             self._default = False
             for attr in list_include:
-                if not self._regex or self._regex.match(attr):
+                if not self._regex or self._regex.search(attr):
                     self._attrs[attr] = True
         if list_exclude:
             for attr in list_exclude:
@@ -144,22 +145,48 @@ class MuninPlugin:
     def envGet(self, name, default=None):
         """Return value for environment variable or None.  
         
-        @param name:    Name of environtment variable.
+        @param name:    Name of environment variable.
         @param default: Default value if variable is undefined.
         
         """
         return self._env.get(name, default)
     
+    def envGetList(self, name, attr_regex = '^\w+$'):
+        """Parse the plugin environment variables to return list from variable
+        with name list_<name>. The value of the variable must be a comma 
+        separated list of items.
+        
+        @param name:       Name of list.
+                           (Also determines suffix for environment variable name.)
+        @param attr_regex: If the regex is defined, the items in the list are 
+                           ignored unless they comply with the format dictated 
+                           by the match regex.
+        @return:           List of items.
+        
+        """
+        key = "list_%s" % name
+        item_list = []
+        if self._env.has_key(key):
+            if attr_regex:
+                recomp = re.compile(attr_regex)
+                for attr in self._env[key].split(','):
+                    attr = attr.strip()
+                    if recomp.search(attr):
+                        item_list.append(attr) 
+            else:
+                item_list = [attr.strip() for attr in self._env[key].split(',')]
+        return item_list
+    
     def envRegisterFilter(self, name, attr_regex = '^\w+$', default = True):
         """Register filter for including, excluding attributes in graphs through 
-        the use of include_<name> and exclude_<name> environment variables. 
-        Parse the environment variables to initialize filter.
+        the use of include_<name> and exclude_<name> environment variables.
+        The value of the variables must be a comma separated list of items. 
         
         @param name:       Name of filter.
                            (Also determines suffix for environment variable name.)
         @param attr_regex: Regular expression string for checking valid items.
-        @param default:    Filter default. Applies when the attribute is not
-                           in the include or exclude list.
+        @param default:    Filter default. Applies when the include list is not 
+                           defined and the attribute is not in the exclude list.
         
         """
         attrs = {}
@@ -167,13 +194,11 @@ class MuninPlugin:
             key = "%s_%s" % (prefix, name)
             val = self._env.get(key)
             if val:
-                attrs[prefix] = val.split(',')
+                attrs[prefix] = [attr.strip() for attr in val.split(',')]
             else:
                 attrs[prefix] = []
-        self._filters[name] = MuninAttrFilter(attrs['include'], 
-                                                     attrs['exclude'], 
-                                                     attr_regex,
-                                                     default)
+        self._filters[name] = MuninAttrFilter(attrs['include'], attrs['exclude'], 
+                                              attr_regex, default)
         
     def envCheckFilter(self, name, attr):
         """Check if a specific graph attribute is enabled or disabled through 
