@@ -258,6 +258,25 @@ class AsteriskInfo:
         else:
             raise Exception('Asterisk version cannot be determined.')
 
+    def getCodecList(self):
+        """Query Asterisk Manager Interface for defined codecs.
+        
+        @return: Dictionary - Short Name -> (Type, Long Name)
+        
+        """
+        if self._asterisk_version < '1.4':
+            cmd = "show codecs"
+        else:
+            cmd = "core show codecs"
+        cmdresp = self.executeCommand(cmd)
+        info_dict = {}
+        for line in cmdresp.splitlines():
+            mobj = re.match('\s*(\d+)\s+\((.+)\)\s+\((.+)\)\s+(\w+)\s+(\w+)\s+\((.+)\)$',
+                            line)
+            if mobj:
+                info_dict[mobj.group(5)] = (mobj.group(4), mobj.group(6))
+        return info_dict
+
     def getChannelStats(self):
         """Query Asterisk Manager Interface for Channel Stats.
 
@@ -270,10 +289,9 @@ class AsteriskInfo:
         else:
             cmd = "core show channels"
         cmdresp = self.executeCommand(cmd)
-
-        info_dict = dict(
-            dahdi = 0, sip = 0, iax2 = 0, misdn = 0, local = 0, mix = 0,
-            active_calls = 0, active_channels = 0, calls_processed = 0)
+        info_dict = dict(dahdi = 0, sip = 0, iax2 = 0, misdn = 0, local = 0, 
+                         mix = 0, active_calls = 0, active_channels = 0, 
+                         calls_processed = 0)
         for line in cmdresp.splitlines():
             mobj = re.match('(sip|iax2|zap|dahdi|local|misdn)\/(\w+)', 
                             line, re.IGNORECASE)
@@ -331,10 +349,13 @@ class AsteriskInfo:
                 
         return info_dict
 
-    def getVoIPchanStats(self, chan):
+    def getVoIPchanStats(self, chan, 
+                         codec_list=('ulaw', 'alaw', 'gsm', 'g729')):
         """Query Asterisk Manager Interface for SIP / IAX2 Channel / Codec Stats.
         
         @param chan: Must be 'sip' or 'iax2'.
+        @codec_list: List of codec names to parse.
+                     (Codecs not in the list are summed up to the other count.)
         @return:     Dictionary of statistics counters for Active VoIP Channels.
 
         """
@@ -347,7 +368,6 @@ class AsteriskInfo:
         cmdresp = self.executeCommand(cmd)
         lines = cmdresp.splitlines()
         headers = re.split('\s\s+', lines[0])
-        idx = None
         try:
             idx = headers.index('Format')
         except ValueError:
@@ -355,25 +375,26 @@ class AsteriskInfo:
                 idx = headers.index('Form')
             except:
                 raise Exception("Error in parsing header line of Channel Stats.")
-        if idx is not None:
-            info_dict = dict(ulaw = 0, alaw = 0, gsm = 0, g729 = 0, 
-                             other = 0, none = 0)
-            for line in lines[1:-1]:
-                codec = None
-                cols = re.split('\s\s+', line)
-                colcodec = cols[idx]
-                mobj = re.match('0x\w+\s\((\w+)\)$', colcodec)
-                if mobj:
-                    codec = mobj.group(1).lower()
-                elif re.match('\w+$', colcodec):
-                    codec = colcodec.lower()
-                if codec:
-                    if codec in info_dict:
-                        info_dict[codec] += 1
-                    elif codec == 'nothing' or codec[0:4] == 'unkn':
-                        info_dict['none'] += 1
-                    else:
-                        info_dict['other'] += 1
+        info_dict = {}
+        codec_list = tuple(codec_list) + ('other', 'none')
+        for codec in codec_list:
+            info_dict[codec] = 0
+        for line in lines[1:-1]:
+            codec = None
+            cols = re.split('\s\s+', line)
+            colcodec = cols[idx]
+            mobj = re.match('0x\w+\s\((\w+)\)$', colcodec)
+            if mobj:
+                codec = mobj.group(1).lower()
+            elif re.match('\w+$', colcodec):
+                codec = colcodec.lower()
+            if codec:
+                if codec in info_dict:
+                    info_dict[codec] += 1
+                elif codec == 'nothing' or codec[0:4] == 'unkn':
+                    info_dict['none'] += 1
+                else:
+                    info_dict['other'] += 1
         return info_dict
 
     def getConferenceStats(self):

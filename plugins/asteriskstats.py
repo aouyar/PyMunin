@@ -26,7 +26,10 @@ Environment Variables
   amiport:        Asterisk Manager Interface Port (Default: 5038)
   amiuser:        Asterisk Manager Interface User
   amipass:        Asterisk Manager Interface Password
-  trunks:         Comma separated search expressions of the following formats:
+  list_codecs:    List of codecs that will be shown in VoIP channel stats.
+                  Any codec that is not in the list will be counted as 'other'.
+                  (Default: alaw,ulaw,gsm,g729)
+  list_trunks:    Comma separated search expressions of the following formats:
                   - "Trunk Name"="Regular Expr"
                   - "Trunk Name"="Regular Expr with Named Group num"="MIN"-"MAX"
 
@@ -36,7 +39,8 @@ Environment Variables
         env.amiport 5038
         env.amiuser manager
         env.amipass secret
-        env.trunks PSTN=    Zap\/(?P<num>\d+)=1-3,VoIP=SIP\/(net2phone|skype)
+        env.list_codecs alaw,ulaw,gsm,ilbc,g729
+        env.list_trunks PSTN=Zap\/(?P<num>\d+)=1-3,VoIP=SIP\/(net2phone|skype)
 
 """
 # Munin  - Magic Markers
@@ -79,17 +83,16 @@ class MuninAsteriskPlugin(MuninPlugin):
         self._amiport = self.envGet('amiport')
         self._amiuser = self.envGet('amiuser')
         self._amipass = self.envGet('amipass')
-
+        
+        self._codecList = (self.envGetList('codecs') 
+                           or ['alaw', 'ulaw', 'gsm', 'g729'])
         self._trunkList = []
-        if self.envHasKey('trunks'):
-            strtrunks = re.sub('[\s]',  '',  self.envGet('trunks'))
-            for trunk_entry in strtrunks.split(','):
-                mobj = (re.match('(.*)=(.*)=(\d+)-(\d+)',  
-                                 trunk_entry, re.IGNORECASE) 
-                        or re.match('(.*)=(.*)',  trunk_entry,  re.IGNORECASE))
-                if mobj:
-                    self._trunkList.append(mobj.groups())
-
+        for trunk_entry in self.envGetList('trunks', None):
+            mobj = (re.match('(.*)=(.*)=(\d+)-(\d+)$',  trunk_entry, re.IGNORECASE) 
+                    or re.match('(.*)=(.*)$',  trunk_entry,  re.IGNORECASE))
+            if mobj:
+                self._trunkList.append(mobj.groups())
+                
         if self.graphEnabled('asterisk_calls'):
             graph = MuninGraph('Asterisk - Call Stats', 'Asterisk',
                 info = 'Asterisk - Information on Calls.', period='minute',
@@ -132,8 +135,9 @@ class MuninAsteriskPlugin(MuninPlugin):
                 'Asterisk',
                 info = 'Asterisk - Codecs for Active VoIP Channels (SIP/IAX2)',
                 args = '--base 1000 --lower-limit 0')
-            for field in ('alaw', 'ulaw', 'gsm', 'g729', 'other'):
+            for field in self._codecList:
                 graph.addField(field, field, type='GAUGE', draw='AREASTACK')
+            graph.addField('other', 'other', type='GAUGE', draw='AREASTACK')
             self.appendGraph('asterisk_voip_codecs', graph)
 
         if self.graphEnabled('asterisk_conferences'):
@@ -203,12 +207,14 @@ class MuninAsteriskPlugin(MuninPlugin):
                                      field, stats.get(field))
         
         if self.hasGraph('asterisk_voip_codecs'):
-            sipstats = ami.getVoIPchanStats('sip')
-            iax2stats = ami.getVoIPchanStats('iax2')
+            sipstats = ami.getVoIPchanStats('sip', self._codecList)
+            iax2stats = ami.getVoIPchanStats('iax2', self._codecList)
             if stats:
-                for field in ('alaw', 'ulaw', 'gsm', 'g729', 'other'):
+                for field in self._codecList:
                     self.setGraphVal('asterisk_voip_codecs', field,
-                        sipstats.get(field) + iax2stats.get(field))
+                                     sipstats.get(field) + iax2stats.get(field))
+                self.setGraphVal('asterisk_voip_codecs', 'other',
+                                 sipstats.get('other') + iax2stats.get('other'))
         
         if self.hasGraph('asterisk_conferences'):
             stats = ami.getConferenceStats()
