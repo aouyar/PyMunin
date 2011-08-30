@@ -277,7 +277,7 @@ class AsteriskInfo:
                 info_dict[mobj.group(5)] = (mobj.group(4), mobj.group(6))
         return info_dict
 
-    def getChannelStats(self):
+    def getChannelStats(self, chantypes=('dahdi', 'zap', 'sip', 'iax2', 'local')):
         """Query Asterisk Manager Interface for Channel Stats.
 
         @return: Dictionary of statistics counters for channels.
@@ -289,11 +289,19 @@ class AsteriskInfo:
         else:
             cmd = "core show channels"
         cmdresp = self.executeCommand(cmd)
-        info_dict = dict(dahdi = 0, sip = 0, iax2 = 0, misdn = 0, local = 0, 
-                         mix = 0, active_calls = 0, active_channels = 0, 
-                         calls_processed = 0)
+        info_dict ={}
+        for chanstr in chantypes:
+            chan = chanstr.lower()
+            if chan in ('zap', 'dahdi'):
+                info_dict['dahdi'] = 0
+                info_dict['mix'] = 0
+            else:
+                info_dict[chan] = 0
+        for k in ('active_calls', 'active_channels', 'calls_processed'):
+            info_dict[k] = 0
+        regexstr = ('(%s)\/(\w+)' % '|'.join(chantypes))    
         for line in cmdresp.splitlines():
-            mobj = re.match('(sip|iax2|zap|dahdi|local|misdn)\/(\w+)', 
+            mobj = re.match(regexstr, 
                             line, re.IGNORECASE)
             if mobj:
                 chan_type = mobj.group(1).lower()
