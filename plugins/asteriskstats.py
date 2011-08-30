@@ -107,7 +107,7 @@ class MuninAsteriskPlugin(MuninPlugin):
             graph = MuninGraph('Asterisk - Active Channels', 'Asterisk',
                 info = 'Asterisk - Information on Active Channels.',
                 args = '--base 1000 --lower-limit 0')
-            for field in ('sip', 'iax2', 'dahdi', 'misdn', 'local', 'mix'):
+            for field in ('sip', 'iax2', 'dahdi', 'misdn', 'local'):
                 graph.addField(field, field, type='GAUGE', draw='AREASTACK')
             graph.addField('mix', 'mix', type='GAUGE', draw='LINE2')
             self.appendGraph('asterisk_channels', graph)
