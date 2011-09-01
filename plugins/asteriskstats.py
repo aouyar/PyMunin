@@ -34,6 +34,8 @@ Environment Variables
   list_trunks:    Comma separated search expressions of the following formats:
                   - "Trunk Name"="Regular Expr"
                   - "Trunk Name"="Regular Expr with Named Group 'num'"="MIN"-"MAX"
+                  Check Python Regular Expressions docs for help on writing 
+                  regular expressions:http://docs.python.org/library/re.html
 
   Note: Channel, codec and trunk expressions are case insensitive.
 
