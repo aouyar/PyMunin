@@ -58,6 +58,8 @@ class AsteriskInfo:
         self._amiuser = user
         self._amipass = password
         self._conn = None
+        self._modules = None
+        self._applications = None
 
         if autoInit:
             if self._amiuser is None or self._amipass is None:
@@ -257,11 +259,11 @@ class AsteriskInfo:
             return mobj.group(1)
         else:
             raise Exception('Asterisk version cannot be determined.')
-
-    def getModuleList(self):
-        """Query Asterisk Manager Interface for list of modules.
-        
-        @return: List of module names.
+    
+    
+    def _initModuleList(self):
+        """Query Asterisk Manager Interface to initialize internal list of 
+        loaded modules.
         
         """
         if self._asterisk_version < '1.4':
@@ -269,17 +271,15 @@ class AsteriskInfo:
         else:
             cmd = "module show"
         cmdresp = self.executeCommand(cmd)
-        info_list = []
+        self._modules = set()
         for line in cmdresp.splitlines()[1:-1]:
             mobj = re.match('^\s*(\S+)\s', line)
             if mobj:
-                info_list.append(mobj.group(1))
-        return info_list
-    
-    def getApplicationList(self):
-        """Query Asterisk Manager Interface for list of applications.
-        
-        @return: List of application names.
+                self._modules.add(mobj.group(1).lower())
+
+    def _initApplicationList(self):
+        """Query Asterisk Manager Interface to initialize internal list of 
+        available applications.
         
         """
         if self._asterisk_version < '1.4':
@@ -287,12 +287,53 @@ class AsteriskInfo:
         else:
             cmd = "core show applications"
         cmdresp = self.executeCommand(cmd)
-        info_list = []
+        self._applications = set()
         for line in cmdresp.splitlines()[1:-1]:
-            mobj = re.match('^\s*(\S+)\s', line)
+            mobj = re.match('^\s*(\S+):', line)
             if mobj:
-                info_list.append(mobj.group(1))
-        return info_list
+                self._applications.add(mobj.group(1).lower())
+                                
+    def hasModule(self, mod):
+        """Returns True if mod is among the loaded modules.
+        
+        @param mod: Module name.
+        @return:    Boolean 
+        
+        """
+        if self._modules is None:
+            self._initModuleList()
+        return mod in self._modules
+    
+    def hasApplication(self, app):
+        """Returns True if app is among the loaded modules.
+        
+        @param app: Module name.
+        @return:    Boolean 
+        
+        """
+        if self._applications is None:
+            self._initApplicationList()
+        return app in self._applications
+    
+    def getModuleList(self):
+        """Returns list of loaded modules.
+        
+        @return: List 
+        
+        """
+        if self._modules is None:
+            self._initModuleList()
+        return list(self._modules)
+    
+    def getApplicationList(self):
+        """Returns list of available applications.
+        
+        @return: List
+         
+        """
+        if self._applications is None:
+            self._initApplicationList()
+        return list(self._applications)
     
     def getCodecList(self):
         """Query Asterisk Manager Interface for defined codecs.
