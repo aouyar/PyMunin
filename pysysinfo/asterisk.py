@@ -596,6 +596,11 @@ class AsteriskInfo:
         
         queue = None
         ctxt = None
+        member_states = ("unknown", "not in use", "in use", "busy", "invalid", 
+                         "unavailable", "ringing", "ring+inuse", "on hold", 
+                         "total")
+        member_state_dict = dict([(k.lower().replace(' ', '_'),0) 
+                                  for k in member_states]) 
         for line in cmdresp.splitlines():
             mobj = re.match(r"([\w\-]+)\s+has\s+(\d+)\s+calls\s+"
                             r"\(max (\d+|unlimited)\)\s+in\s+'(\w+)'\s+strategy\s+"
@@ -620,8 +625,7 @@ class AsteriskInfo:
                 info_dict[queue]['calls_abandoned'] = int(mobj.group(8))
                 info_dict[queue]['sla_pcent'] = float(mobj.group(9))
                 info_dict[queue]['sla_cutoff'] = int(mobj.group(10))
-                info_dict[queue]['members'] = {}
-                info_dict[queue]['members']['total'] = 0
+                info_dict[queue]['members'] = member_state_dict.copy() 
                 continue
             mobj = re.match('\s+(Members|Callers):\s*$', line)
             if mobj:
@@ -635,7 +639,8 @@ class AsteriskInfo:
                     if info_dict[queue]['members'].has_key(state):
                         info_dict[queue]['members'][state] += 1
                     else:
-                        info_dict[queue]['members'][state] = 1
+                        raise AttributeError("Undefined queue member state %s"
+                                             % state)
                     continue
         return info_dict
     
