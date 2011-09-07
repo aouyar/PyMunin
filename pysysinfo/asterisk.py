@@ -469,10 +469,8 @@ class AsteriskInfo:
                 idx = headers.index('Form')
             except:
                 raise Exception("Error in parsing header line of Channel Stats.")
-        info_dict = {}
         codec_list = tuple(codec_list) + ('other', 'none')
-        for codec in codec_list:
-            info_dict[codec] = 0
+        info_dict = dict([(k,0) for k in codec_list])
         for line in lines[1:-1]:
             codec = None
             cols = re.split('\s\s+', line)
@@ -597,12 +595,14 @@ class AsteriskInfo:
         cmdresp = self.executeCommand(cmd)
         
         queue = None
+        ctxt = None
         for line in cmdresp.splitlines():
             mobj = re.match(r"([\w\-]+)\s+has\s+(\d+)\s+calls\s+"
                             r"\(max (\d+|unlimited)\)\s+in\s+'(\w+)'\s+strategy\s+"
                             r"\((.+)\),\s+W:(\d+),\s+C:(\d+),\s+A:(\d+),\s+"
                             r"SL:([\d\.]+)%\s+within\s+(\d+)s", line)
             if mobj:
+                ctxt = None
                 queue = mobj.group(1)
                 info_dict[queue] = {}
                 info_dict[queue]['queue_len'] = int(mobj.group(2))
@@ -620,6 +620,23 @@ class AsteriskInfo:
                 info_dict[queue]['calls_abandoned'] = int(mobj.group(8))
                 info_dict[queue]['sla_pcent'] = float(mobj.group(9))
                 info_dict[queue]['sla_cutoff'] = int(mobj.group(10))
+                info_dict[queue]['members'] = {}
+                info_dict[queue]['members']['total'] = 0
+                continue
+            mobj = re.match('\s+(Members|Callers):\s*$', line)
+            if mobj:
+                ctxt = mobj.group(1).lower()
+                continue
+            if ctxt == 'members':
+                mobj = re.match(r"\s+\S.*\s\((.*)\)\s+has\s+taken.*calls", line)
+                if mobj:
+                    info_dict[queue]['members']['total'] += 1
+                    state = mobj.group(1).lower().replace(' ', '_')
+                    if info_dict[queue]['members'].has_key(state):
+                        info_dict[queue]['members'][state] += 1
+                    else:
+                        info_dict[queue]['members'][state] = 1
+                    continue
         return info_dict
     
     def getFaxStatsCounters(self):
@@ -657,12 +674,29 @@ class AsteriskInfo:
         """
         if self.hasModule('res_fax.so'):
             info_dict = {}
+            info_dict['total'] = 0
+            fax_types = ('g.711', 't.38')
+            fax_operations = ('send', 'recv')
+            fax_states = ('uninitialized', 'initialized', 'open', 
+                          'active', 'inactive', 'complete', 'unknown',)
+            info_dict['type'] = dict([(k,0) for k in fax_types])
+            info_dict['operation'] = dict([(k,0) for k in fax_operations])
+            info_dict['state'] = dict([(k,0) for k in fax_states])
             cmdresp = self.executeCommand('fax show sessions')
             sections = cmdresp.strip().split('\n\n')
-            mobj = re.match('\s*(\d+)\s+FAX sessions', sections[-1], 
-                            re.IGNORECASE)
-            if mobj:
-                info_dict['num_sessions'] = mobj.group(1)
+            if len(sections) >= 3:
+                for line in sections[1][1:]:
+                    cols = re.split('\s\s+', line)
+                    if len(cols) == 7:
+                        info_dict['total'] += 1
+                        if cols[3].lower() in fax_types:
+                            info_dict['type'][cols[3].lower()] += 1
+                        if cols[4] == 'receive':
+                            info_dict['operation']['recv'] += 1
+                        elif cols[4] == 'send':
+                            info_dict['operation']['send'] += 1
+                        if cols[5].lower() in fax_states:
+                            info_dict['state'][cols[5].lower()] += 1
             return info_dict
         else:
             return None
