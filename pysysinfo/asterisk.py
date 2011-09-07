@@ -258,6 +258,42 @@ class AsteriskInfo:
         else:
             raise Exception('Asterisk version cannot be determined.')
 
+    def getModuleList(self):
+        """Query Asterisk Manager Interface for list of modules.
+        
+        @return: List of module names.
+        
+        """
+        if self._asterisk_version < '1.4':
+            cmd = "show modules"
+        else:
+            cmd = "module show"
+        cmdresp = self.executeCommand(cmd)
+        info_list = []
+        for line in cmdresp.splitlines()[1:-1]:
+            mobj = re.match('^\s*(\S+)\s', line)
+            if mobj:
+                info_list.append(mobj.group(1))
+        return info_list
+    
+    def getApplicationList(self):
+        """Query Asterisk Manager Interface for list of applications.
+        
+        @return: List of application names.
+        
+        """
+        if self._asterisk_version < '1.4':
+            cmd = "show applications"
+        else:
+            cmd = "core show applications"
+        cmdresp = self.executeCommand(cmd)
+        info_list = []
+        for line in cmdresp.splitlines()[1:-1]:
+            mobj = re.match('^\s*(\S+)\s', line)
+            if mobj:
+                info_list.append(mobj.group(1))
+        return info_list
+    
     def getCodecList(self):
         """Query Asterisk Manager Interface for defined codecs.
         
