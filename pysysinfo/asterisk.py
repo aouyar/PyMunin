@@ -245,6 +245,7 @@ class AsteriskInfo:
 
     def getAsteriskVersion(self):
         """Query Asterisk Manager Interface for Asterisk Version.
+        CLI Command - core show version
         
         @return: Asterisk version string.
 
@@ -264,6 +265,7 @@ class AsteriskInfo:
     def _initModuleList(self):
         """Query Asterisk Manager Interface to initialize internal list of 
         loaded modules.
+        CLI Command - core show modules
         
         """
         if self._asterisk_version < '1.4':
@@ -273,13 +275,14 @@ class AsteriskInfo:
         cmdresp = self.executeCommand(cmd)
         self._modules = set()
         for line in cmdresp.splitlines()[1:-1]:
-            mobj = re.match('^\s*(\S+)\s', line)
+            mobj = re.match('\s*(\S+)\s', line)
             if mobj:
                 self._modules.add(mobj.group(1).lower())
 
     def _initApplicationList(self):
         """Query Asterisk Manager Interface to initialize internal list of 
         available applications.
+        CLI Command - core show applications
         
         """
         if self._asterisk_version < '1.4':
@@ -289,7 +292,7 @@ class AsteriskInfo:
         cmdresp = self.executeCommand(cmd)
         self._applications = set()
         for line in cmdresp.splitlines()[1:-1]:
-            mobj = re.match('^\s*(\S+):', line)
+            mobj = re.match('\s*(\S+):', line)
             if mobj:
                 self._applications.add(mobj.group(1).lower())
                                 
@@ -337,6 +340,7 @@ class AsteriskInfo:
     
     def getCodecList(self):
         """Query Asterisk Manager Interface for defined codecs.
+        CLI Command - core show codecs
         
         @return: Dictionary - Short Name -> (Type, Long Name)
         
@@ -356,6 +360,7 @@ class AsteriskInfo:
 
     def getChannelStats(self, chantypes=('dahdi', 'zap', 'sip', 'iax2', 'local')):
         """Query Asterisk Manager Interface for Channel Stats.
+        CLI Command - core show channels
 
         @return: Dictionary of statistics counters for channels.
             Number of active channels for each channel type.
@@ -407,6 +412,8 @@ class AsteriskInfo:
 
     def getPeerStats(self, chan):
         """Query Asterisk Manager Interface for SIP / IAX2 Peer Stats.
+        CLI Command - sip show peers
+                      iax2 show peers
         
         @param chan: Must be 'sip' or 'iax2'.
         @return:     Dictionary of statistics counters for VoIP Peers.
@@ -437,6 +444,8 @@ class AsteriskInfo:
     def getVoIPchanStats(self, chan, 
                          codec_list=('ulaw', 'alaw', 'gsm', 'g729')):
         """Query Asterisk Manager Interface for SIP / IAX2 Channel / Codec Stats.
+        CLI Commands - sip show channels
+                       iax2 show channnels
         
         @param chan: Must be 'sip' or 'iax2'.
         @codec_list: List of codec names to parse.
@@ -484,6 +493,7 @@ class AsteriskInfo:
 
     def getConferenceStats(self):
         """Query Asterisk Manager Interface for Conference Room Stats.
+        CLI Command - meetme list
 
         @return: Dictionary of statistics counters for Conference Rooms.
 
@@ -505,6 +515,7 @@ class AsteriskInfo:
 
     def getVoicemailStats(self):
         """Query Asterisk Manager Interface for Voicemail Stats.
+        CLI Command - voicemail show users
 
         @return: Dictionary of statistics counters for Voicemail Accounts.
 
@@ -533,6 +544,7 @@ class AsteriskInfo:
 
     def getTrunkStats(self, trunkList):
         """Query Asterisk Manager Interface for Trunk Stats.
+        CLI Command - core show channels
 
         @param trunkList: List of tuples of one of the two following types:
                             (Trunk Name, Regular Expression)
@@ -545,7 +557,7 @@ class AsteriskInfo:
         for filter in trunkList:
             info_dict[filter[0]] = 0
             re_list.append(re.compile(filter[1], re.IGNORECASE))
-                
+                  
         if self._asterisk_version < '1.4':
             cmd = "show channels"
         else:
@@ -570,8 +582,49 @@ class AsteriskInfo:
                                 continue
         return info_dict
     
-    def getFaxStats(self):
+    def getQueueStats(self):
+        """Query Asterisk Manager Interface for Queue Stats.
+        CLI Command: queue show
+        
+        @return: Dictionary of queue stats.
+        
+        """
+        info_dict = {}
+        if self._asterisk_version < '1.4':
+            cmd = "show queues"
+        else:
+            cmd = "queue show"
+        cmdresp = self.executeCommand(cmd)
+        
+        queue = None
+        for line in cmdresp.splitlines():
+            mobj = re.match(r"([\w\-]+)\s+has\s+(\d+)\s+calls\s+"
+                            r"\(max (\d+|unlimited)\)\s+in\s+'(\w+)'\s+strategy\s+"
+                            r"\((.+)\),\s+W:(\d+),\s+C:(\d+),\s+A:(\d+),\s+"
+                            r"SL:([\d\.]+)%\s+within\s+(\d+)s", line)
+            if mobj:
+                queue = mobj.group(1)
+                info_dict[queue] = {}
+                info_dict[queue]['queue_len'] = int(mobj.group(2))
+                try:
+                    info_dict[queue]['queue_maxlen'] = int(mobj.group(3))
+                except ValueError:
+                    info_dict[queue]['queue_maxlen'] = None
+                info_dict[queue]['strategy'] = mobj.group(4)
+                for tkn in mobj.group(5).split(','):
+                    mobjx = re.match(r"\s*(\d+)s\s+(\w+)\s*", tkn)
+                    if mobjx:
+                        info_dict[queue]['avg_' + mobjx.group(2)] = int(mobjx.group(1))
+                info_dict[queue]['queue_weight'] = int(mobj.group(6))
+                info_dict[queue]['calls_completed'] = int(mobj.group(7))
+                info_dict[queue]['calls_abandoned'] = int(mobj.group(8))
+                info_dict[queue]['sla_pcent'] = float(mobj.group(9))
+                info_dict[queue]['sla_cutoff'] = int(mobj.group(10))
+        return info_dict
+    
+    def getFaxStatsCounters(self):
         """Query Asterisk Manager Interface for Fax Stats.
+        CLI Command - fax show stats
         
         @return: Dictionary of fax stats.
         
@@ -583,7 +636,7 @@ class AsteriskInfo:
             for section in cmdresp.strip().split('\n\n')[1:]:
                 i = 0
                 for line in section.splitlines():
-                    mobj = re.match('^(\S.*\S)\s*:\s*(\d+)\s*$', line)
+                    mobj = re.match('(\S.*\S)\s*:\s*(\d+)\s*$', line)
                     if mobj:
                         if not info_dict.has_key(ctxt):
                             info_dict[ctxt] = {}
@@ -591,6 +644,25 @@ class AsteriskInfo:
                     elif i == 0:
                         ctxt = line.strip().lower()
                     i += 1    
+            return info_dict
+        else:
+            return None
+
+    def getFaxStatsSessions(self):
+        """Query Asterisk Manager Interface for Fax Stats.
+        CLI Command - fax show sessions
+        
+        @return: Dictionary of fax stats.
+        
+        """
+        if self.hasModule('res_fax.so'):
+            info_dict = {}
+            cmdresp = self.executeCommand('fax show sessions')
+            sections = cmdresp.strip().split('\n\n')
+            mobj = re.match('\s*(\d+)\s+FAX sessions', sections[-1], 
+                            re.IGNORECASE)
+            if mobj:
+                info_dict['num_sessions'] = mobj.group(1)
             return info_dict
         else:
             return None
