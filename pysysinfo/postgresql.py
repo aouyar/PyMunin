@@ -38,7 +38,6 @@ class PgInfo:
         """
         self._connParams = {}
         self._version = None
-        self._version_tuple = ()
         self._conn = None
         if host is not None:
             self._connParams['host'] = host
@@ -69,9 +68,8 @@ class PgInfo:
             self._conn = psycopg2.connect(**self._connParams)
         else:
             self._conn = psycopg2.connect('')
-        self._version = self._conn.get_parameter_status('server_version')
-        self._version_tuple = tuple([int(x) for x in self._version.split('.')])
-        
+        self._version = util.SoftwareVersion(
+            self._conn.get_parameter_status('server_version'))
     
     def _createStatsDict(self, headers, rows):
         """Utility method that returns database stats as a nested dictionary.
@@ -117,19 +115,16 @@ class PgInfo:
         @return: Version string.
         
         """
-        
-        return self._version
+        return str(self._version)
     
     def checkVersion(self, verstr):
         """Checks if PostgreSQL Server version is higher than or equal to 
-        certain verstr.
+        version identified by verstr.
         
         @param version: Version string.
         
         """
-        version_tuple = tuple([int(x) for x in verstr.split('.')])
-        print version_tuple 
-        return self._version_tuple >= version_tuple
+        return self._version >= util.SoftwareVersion(verstr)
     
     def getStartTime(self):
         """Returns PostgreSQL Server start time.

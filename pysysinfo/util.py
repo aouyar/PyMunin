@@ -72,7 +72,13 @@ def socket_read(fp):
 
 
 class NestedDict(dict):
+    """Dictionary class facilitates creation of nested dictionaries.
     
+    This works:
+        NestedDict d
+        d[k1][k2][k3] ... = v
+        
+    """
     def __getitem__(self, key):
         """x.__getitem__(y) <==> x[y]"""
         try:
@@ -93,3 +99,29 @@ class NestedDict(dict):
                     curr_dict[key] = type(self)()
                 curr_dict = curr_dict[key]
             curr_dict[last_key] = value
+
+    
+class SoftwareVersion(tuple):
+    """Class for parsing, storing and comparing version strings. 
+    
+    Version strings must begin with integer numbers separated by dots and may 
+    and with any string. The version string is broken down into its components
+    and stored as a tuple.All standard operations for tuple class are supported.
+    
+    """
+    def __init__(self, versionstr):
+        self._versionstr = versionstr
+        
+    def __new__(cls, versionstr):
+        mobj = re.match('(?P<version>\d+(\.\d+)*)(?P<suffix>.*)$', versionstr)
+        if mobj:
+            version = [int(i) for i in mobj.groupdict()['version'].split('.')]
+            suffix = mobj.groupdict()['suffix'].strip()
+            if len(suffix) > 0:
+                version.append(suffix)
+            return tuple.__new__(cls, version)
+        else:
+            raise AttributeError('Invalid version string format.')
+        
+    def __str__(self):
+        return self._versionstr

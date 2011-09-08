@@ -13,6 +13,7 @@ import sys
 import os.path
 import re
 import telnetlib
+import util
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
@@ -58,6 +59,8 @@ class AsteriskInfo:
         self._amiuser = user
         self._amipass = password
         self._conn = None
+        self._ami_version = None
+        self._asterisk_version = None
         self._modules = None
         self._applications = None
 
@@ -192,22 +195,28 @@ class AsteriskInfo:
         greeting = self._conn.read_until("\r\n", connTimeout)
         mobj = re.match('Asterisk Call Manager\/([\d\.]+)\s*$', greeting)
         if mobj:
-            self._amiversion = mobj.group(1)
+            self._ami_version = util.SoftwareVersion(mobj.group(1))
         else:
             raise Exception("Asterisk Manager Interface version cannot be determined.")
 
     def _initAsteriskVersion(self):
         """Query Asterisk Manager Interface for Asterisk Version to configure
-        system for compatibility with multiple versions.
+        system for compatibility with multiple versions
+        .
+        CLI Command - core show version
 
         """
-        version_str = self.getAsteriskVersion()
-        mobj = re.match('(\d+\.\d+)\.', version_str)
-        if mobj:
-            self._asterisk_version = mobj.group(1)
+        if self._ami_version > util.SoftwareVersion('1.0'):
+            cmd = "core show version"
         else:
-            raise Exception("Asterisk Version cannot be determined.")
-
+            cmd = "show version"
+        cmdresp = self.executeCommand(cmd)
+        mobj = re.match('Asterisk\s+(\d+(\.\d+)*)', cmdresp )
+        if mobj:
+            self._asterisk_version = util.SoftwareVersion(mobj.group(1))
+        else:
+            raise Exception('Asterisk version cannot be determined.')
+        
     def _login(self):
         """Login to Asterisk Manager Interface."""
         self._sendAction("login", (
@@ -243,35 +252,17 @@ class AsteriskInfo:
             raise Exception("Execution of Asterisk Manager Interface Command "
                             "failed: %s" % command)
 
-    def getAsteriskVersion(self):
-        """Query Asterisk Manager Interface for Asterisk Version.
-        CLI Command - core show version
-        
-        @return: Asterisk version string.
-
-        """
-        if self._amiversion == '1.0':
-            cmd = "show version"
-        else:
-            cmd = "core show version"
-        cmdresp = self.executeCommand(cmd)
-        mobj = re.match('Asterisk\s+([\d\.]+\d)', cmdresp )
-        if mobj:
-            return mobj.group(1)
-        else:
-            raise Exception('Asterisk version cannot be determined.')
-    
-    
     def _initModuleList(self):
         """Query Asterisk Manager Interface to initialize internal list of 
         loaded modules.
+        
         CLI Command - core show modules
         
         """
-        if self._asterisk_version < '1.4':
-            cmd = "show modules"
-        else:
+        if self.checkVersion('1.4'):
             cmd = "module show"
+        else:
+            cmd = "show modules"
         cmdresp = self.executeCommand(cmd)
         self._modules = set()
         for line in cmdresp.splitlines()[1:-1]:
@@ -282,20 +273,38 @@ class AsteriskInfo:
     def _initApplicationList(self):
         """Query Asterisk Manager Interface to initialize internal list of 
         available applications.
+        
         CLI Command - core show applications
         
         """
-        if self._asterisk_version < '1.4':
-            cmd = "show applications"
-        else:
+        if self.checkVersion('1.4'):
             cmd = "core show applications"
+        else:
+            cmd = "show applications"
         cmdresp = self.executeCommand(cmd)
         self._applications = set()
         for line in cmdresp.splitlines()[1:-1]:
             mobj = re.match('\s*(\S+):', line)
             if mobj:
                 self._applications.add(mobj.group(1).lower())
-                                
+                
+    def getAsteriskVersion(self):
+        """Returns Asterisk version string.
+        
+        @return: Asterisk version string.
+
+        """
+        return str(self._asterisk_version)
+    
+    def checkVersion(self, verstr):
+        """Checks if Asterisk version is higher than or equal to version 
+        identified by verstr.
+        
+        @param version: Version string.
+        
+        """
+        return self._asterisk_version >= util.SoftwareVersion(verstr)
+                                    
     def hasModule(self, mod):
         """Returns True if mod is among the loaded modules.
         
@@ -340,15 +349,16 @@ class AsteriskInfo:
     
     def getCodecList(self):
         """Query Asterisk Manager Interface for defined codecs.
+        
         CLI Command - core show codecs
         
         @return: Dictionary - Short Name -> (Type, Long Name)
         
         """
-        if self._asterisk_version < '1.4':
-            cmd = "show codecs"
-        else:
+        if self.checkVersion('1.4'):
             cmd = "core show codecs"
+        else:
+            cmd = "show codecs"
         cmdresp = self.executeCommand(cmd)
         info_dict = {}
         for line in cmdresp.splitlines():
@@ -360,16 +370,17 @@ class AsteriskInfo:
 
     def getChannelStats(self, chantypes=('dahdi', 'zap', 'sip', 'iax2', 'local')):
         """Query Asterisk Manager Interface for Channel Stats.
+        
         CLI Command - core show channels
 
         @return: Dictionary of statistics counters for channels.
             Number of active channels for each channel type.
 
         """
-        if self._asterisk_version < '1.4':
-            cmd = "show channels"
-        else:
+        if self.checkVersion('1.4'):
             cmd = "core show channels"
+        else:
+            cmd = "show channels"
         cmdresp = self.executeCommand(cmd)
         info_dict ={}
         for chanstr in chantypes:
@@ -412,6 +423,7 @@ class AsteriskInfo:
 
     def getPeerStats(self, chan):
         """Query Asterisk Manager Interface for SIP / IAX2 Peer Stats.
+        
         CLI Command - sip show peers
                       iax2 show peers
         
@@ -444,6 +456,7 @@ class AsteriskInfo:
     def getVoIPchanStats(self, chan, 
                          codec_list=('ulaw', 'alaw', 'gsm', 'g729')):
         """Query Asterisk Manager Interface for SIP / IAX2 Channel / Codec Stats.
+        
         CLI Commands - sip show channels
                        iax2 show channnels
         
@@ -491,15 +504,16 @@ class AsteriskInfo:
 
     def getConferenceStats(self):
         """Query Asterisk Manager Interface for Conference Room Stats.
+        
         CLI Command - meetme list
 
         @return: Dictionary of statistics counters for Conference Rooms.
 
         """
-        if self._asterisk_version < '1.6':
-            cmd = "meetme"
-        else:
+        if self.checkVersion('1.6'):
             cmd = "meetme list"
+        else:
+            cmd = "meetme"
         cmdresp = self.executeCommand(cmd)
 
         info_dict = dict(active_conferences = 0, conference_users = 0)
@@ -513,15 +527,16 @@ class AsteriskInfo:
 
     def getVoicemailStats(self):
         """Query Asterisk Manager Interface for Voicemail Stats.
+        
         CLI Command - voicemail show users
 
         @return: Dictionary of statistics counters for Voicemail Accounts.
 
         """
-        if self._asterisk_version < '1.4':
-            cmd = "show voicemail users"
-        else:
+        if self.checkVersion('1.4'):
             cmd = "voicemail show users"
+        else:
+            cmd = "show voicemail users"
         cmdresp = self.executeCommand(cmd)
 
         info_dict = dict(accounts = 0, avg_messages = 0, max_messages = 0, 
@@ -542,6 +557,7 @@ class AsteriskInfo:
 
     def getTrunkStats(self, trunkList):
         """Query Asterisk Manager Interface for Trunk Stats.
+        
         CLI Command - core show channels
 
         @param trunkList: List of tuples of one of the two following types:
@@ -556,10 +572,10 @@ class AsteriskInfo:
             info_dict[filter[0]] = 0
             re_list.append(re.compile(filter[1], re.IGNORECASE))
                   
-        if self._asterisk_version < '1.4':
-            cmd = "show channels"
-        else:
+        if self.checkVersion('1.4'):
             cmd = "core show channels"
+        else:
+            cmd = "show channels"
         cmdresp = self.executeCommand(cmd)
 
         for line in cmdresp.splitlines():
@@ -582,16 +598,17 @@ class AsteriskInfo:
     
     def getQueueStats(self):
         """Query Asterisk Manager Interface for Queue Stats.
+        
         CLI Command: queue show
         
         @return: Dictionary of queue stats.
         
         """
         info_dict = {}
-        if self._asterisk_version < '1.4':
-            cmd = "show queues"
-        else:
+        if self.checkVersion('1.4'):
             cmd = "queue show"
+        else:
+            cmd = "show queues"
         cmdresp = self.executeCommand(cmd)
         
         queue = None
@@ -646,6 +663,7 @@ class AsteriskInfo:
     
     def getFaxStatsCounters(self):
         """Query Asterisk Manager Interface for Fax Stats.
+        
         CLI Command - fax show stats
         
         @return: Dictionary of fax stats.
@@ -672,6 +690,7 @@ class AsteriskInfo:
 
     def getFaxStatsSessions(self):
         """Query Asterisk Manager Interface for Fax Stats.
+        
         CLI Command - fax show sessions
         
         @return: Dictionary of fax stats.
