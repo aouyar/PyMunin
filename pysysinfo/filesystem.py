@@ -34,7 +34,7 @@ class FilesystemInfo:
             data = fp.read()
             fp.close()
         except:
-            raise Exception('Reading of file %s failed.' % mountsFile)
+            raise IOError('Reading of file %s failed.' % mountsFile)
         for line in data.splitlines():
             cols = line.split()
             self._fstypeDict[cols[1]] = cols[2]

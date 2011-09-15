@@ -121,7 +121,7 @@ class SoftwareVersion(tuple):
                 version.append(suffix)
             return tuple.__new__(cls, version)
         else:
-            raise AttributeError('Invalid version string format.')
+            raise ValueError('Invalid version string format.')
         
     def __str__(self):
         return self._versionstr

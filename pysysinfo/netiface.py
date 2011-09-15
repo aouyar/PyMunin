@@ -36,8 +36,8 @@ class NetIfaceInfo:
             data = fp.read()
             fp.close()
         except:
-            raise Exception('Failed reading interface stats from file: %s'
-                    % ifaceStatsFile)
+            raise IOError('Failed reading interface stats from file: %s'
+                          % ifaceStatsFile)
         for line in data.splitlines():
             mobj = re.match('^\s*([\w\d:]+):\s*(.*\S)\s*$', line)
             if mobj:

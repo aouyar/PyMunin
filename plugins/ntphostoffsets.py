@@ -69,8 +69,8 @@ class MuninNTPhostOffsetsPlugin(MuninPlugin):
             hosts_str = re.sub('[^\d\.,]', '', self.envGet('ntphosts'))
             self._remoteHosts = hosts_str.split(',')
         else:
-            raise Exception("Remote host list must be passed in the 'ntphosts' "
-                            "environment variable.")
+            raise AttributeError("Remote host list must be passed in the "
+                                 "'ntphosts' environment variable.")
 
         if self.graphEnabled('ntp_host_stratums'):
             graph = MuninGraph('NTP Stratums of Multiple Hosts', 'Time',

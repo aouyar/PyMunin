@@ -54,7 +54,7 @@ class SystemInfo:
             line = fp.readline()
             fp.close()
         except:
-            raise Exception('Failed reading stats from file: %s' % uptimeFile)
+            raise IOError('Failed reading stats from file: %s' % uptimeFile)
         return float(line.split()[0])
     
     def getLoadAvg(self):
@@ -68,7 +68,7 @@ class SystemInfo:
             line = fp.readline()
             fp.close()
         except:
-            raise Exception('Failed reading stats from file: %s' % loadavgFile)
+            raise IOError('Failed reading stats from file: %s' % loadavgFile)
         arr = line.split()
         if len(arr) >= 3:
             return [float(col) for col in arr[:3]]
@@ -88,7 +88,7 @@ class SystemInfo:
             line = fp.readline()
             fp.close()
         except:
-            raise Exception('Failed reading stats from file: %s' % cpustatFile)
+            raise IOError('Failed reading stats from file: %s' % cpustatFile)
         headers = ['user', 'nice', 'system', 'idle', 'iowait', 'irq', 'softirq', 'steal', 'guest']
         arr = line.split()
         if len(arr) > 1 and arr[0] == 'cpu':
@@ -108,7 +108,7 @@ class SystemInfo:
             data = fp.read()
             fp.close()
         except:
-            raise Exception('Failed reading stats from file: %s' % cpustatFile)
+            raise IOError('Failed reading stats from file: %s' % cpustatFile)
         for line in data.splitlines():
             arr = line.split()
             if len(arr) > 1 and arr[0] in ('ctxt', 'intr', 'softirq',
@@ -129,7 +129,7 @@ class SystemInfo:
             data = fp.read()
             fp.close()
         except:
-            raise Exception('Failed reading stats from file: %s' % meminfoFile)
+            raise IOError('Failed reading stats from file: %s' % meminfoFile)
         for line in data.splitlines():
             mobj = re.match('^(.+):\s*(\d+)\s*(\w+|)\s*$', line)
             if mobj:
@@ -152,7 +152,7 @@ class SystemInfo:
             data = fp.read()
             fp.close()
         except:
-            raise Exception('Failed reading stats from file: %s' % swapsFile)
+            raise IOError('Failed reading stats from file: %s' % swapsFile)
         lines = data.splitlines()
         if len(lines) > 1:
             colnames = [name.lower() for name in lines[0].split()]
@@ -173,7 +173,7 @@ class SystemInfo:
             data = fp.read()
             fp.close()
         except:
-            raise Exception('Failed reading stats from file: %s' % vmstatFile)
+            raise IOError('Failed reading stats from file: %s' % vmstatFile)
         for line in data.splitlines():
             cols = line.split()
             if len(cols) == 2:

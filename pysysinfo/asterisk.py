@@ -95,7 +95,7 @@ class AsteriskInfo:
                 data = fp.read()
                 fp.close()
             except:
-                raise Exception('Failed reading FreePBX configuration file: %s'
+                raise IOError('Failed reading FreePBX configuration file: %s'
                     % confFileFreePBX)
             for (key, val) in re.findall('^(AMPMGR\w+)\s*=\s*(\S+)\s*$',
                 data, re.MULTILINE):
@@ -122,7 +122,7 @@ class AsteriskInfo:
                 data = fp.read()
                 fp.close()
             except:
-                raise Exception('Failed reading Asterisk configuration file: %s'
+                raise IOError('Failed reading Asterisk configuration file: %s'
                     % confFileAMI)
             mobj = re.search('^\[(\w+)\]\s*\r{0,1}\nsecret\s*=\s*(\S+)\s*$', 
                              data, re.MULTILINE)
@@ -436,7 +436,7 @@ class AsteriskInfo:
         elif chan.lower() == 'sip':
             cmd = "sip show peers"
         else:
-            raise Exception("Invalid channel type in query for Peer Stats.")
+            raise AttributeError("Invalid channel type in query for Peer Stats.")
         cmdresp = self.executeCommand(cmd)
         
         info_dict = dict(
@@ -471,7 +471,7 @@ class AsteriskInfo:
         elif chan.lower() == 'sip':
             cmd = "sip show channels"
         else:
-            raise Exception("Invalid channel type in query for Channel Stats.")
+            raise AttributeError("Invalid channel type in query for Channel Stats.")
         cmdresp = self.executeCommand(cmd)
         lines = cmdresp.splitlines()
         headers = re.split('\s\s+', lines[0])

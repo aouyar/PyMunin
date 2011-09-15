@@ -59,8 +59,8 @@ class DiskIOinfo:
             data = fp.read()
             fp.close()
         except:
-            raise Exception('Failed reading interface stats from file: %s'
-                    % devicesFile)
+            raise IOError('Failed reading interface stats from file: %s'
+                          % devicesFile)
         skip = True
         for line in data.splitlines():
             if skip:
@@ -135,8 +135,8 @@ class DiskIOinfo:
             data = fp.read()
             fp.close()
         except:
-            raise Exception('Failed reading interface stats from file: %s'
-                    % diskStatsFile)
+            raise IOError('Failed reading interface stats from file: %s'
+                          % diskStatsFile)
         for line in data.splitlines():
             cols = line.split()
             dev = cols.pop(2)

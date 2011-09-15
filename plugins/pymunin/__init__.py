@@ -273,8 +273,8 @@ class MuninPlugin:
             fp = open(self._stateFile,  'w')
             pickle.dump(stateObj, fp)
         except:
-            raise Exception("Failure in storing plugin state in file: %s" 
-                            % self._stateFile)
+            raise IOError("Failure in storing plugin state in file: %s" 
+                          % self._stateFile)
         return True
     
     def restoreState(self):
@@ -289,8 +289,8 @@ class MuninPlugin:
                 fp = open(self._stateFile,  'r')
                 stateObj = pickle.load(fp)
             except:
-                raise Exception("Failure in reading plugin state from file: %s" 
-                                % self._stateFile)
+                raise IOError("Failure in reading plugin state from file: %s" 
+                              % self._stateFile)
             return stateObj
         return None
         
@@ -327,7 +327,7 @@ class MuninPlugin:
                 self._subGraphDict['parent_name'] = {}
             self._subGraphDict['parent_name']['graph_name'] = graph
         else:
-            raise Exception("Invalid parent graph name %s used for subgraph %s."
+            raise AttributeError("Invalid parent graph name %s used for subgraph %s."
                 % (parent_name,  graph_name))
             
     def setGraphVal(self, graph_name, field_name, val):
@@ -344,12 +344,12 @@ class MuninPlugin:
             if graph.hasField(field_name):
                 graph.setVal(field_name, val)
             else:
-                raise Exception("Invalid field name %s used for setting value "
-                                "for graph %s." 
-                                % (field_name, graph_name))
+                raise AttributeError("Invalid field name %s used for setting "
+                                     "value for graph %s." 
+                                     % (field_name, graph_name))
         else:
-            raise Exception("Invalid graph name %s used for setting value." 
-                            % graph_name)
+            raise AttributeError("Invalid graph name %s used for setting value." 
+                                 % graph_name)
     
     def setSubgraphVal(self,  parent_name,  graph_name,  val):
         """Set Value for Field in Subgraph.
@@ -366,9 +366,9 @@ class MuninPlugin:
         if graph is not None:
             graph.setVal("%s.%s" % (parent_name, graph_name),  val)
         else:
-            raise Exception("Invalid parent graph name %s used "
-                            "for setting value for subgraph %s."
-                            % (parent_name, graph_name))
+            raise AttributeError("Invalid parent graph name %s used "
+                                 "for setting value for subgraph %s."
+                                 % (parent_name, graph_name))
     
     def hasGraph(self, name):
         """Return true if graph with name is registered to plugin.
@@ -496,7 +496,7 @@ class MuninPlugin:
         elif oper == 'suggest':
             ret = self.suggest()
         else:
-            raise Exception("Invalid command argument: %s" % oper)
+            raise AttributeError("Invalid command argument: %s" % oper)
         return ret
 
 
