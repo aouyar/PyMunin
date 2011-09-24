@@ -148,11 +148,12 @@ class MuninDiskIOplugin(MuninPlugin):
                 info='Disk I/O - %s Throughput, Read / write requests per second.' 
                      % titlestr,
                 args='--base 1000 --lower-limit 0',
-                vlabel='reqs/sec read (-) / write (+)')
+                vlabel='reqs/sec read (-) / write (+)',
+                autoFixNames = True)
             for dev in devlist:
-                graph.addField(dev + '_read', namestr, draw='LINE2', 
+                graph.addField(dev + '_read', dev, draw='LINE2', 
                                type='DERIVE', min=0, graph=False)
-                graph.addField(dev + '_write', namestr, draw='LINE2', 
+                graph.addField(dev + '_write', dev, draw='LINE2', 
                                type='DERIVE', min=0, negative=(dev + '_read'))
             self.appendGraph(name, graph)
 
@@ -170,7 +171,8 @@ class MuninDiskIOplugin(MuninPlugin):
                 info='Disk I/O - %s Throughput, bytes read / written per second.'
                      % titlestr,
                 args='--base 1000 --lower-limit 0',
-                vlabel='bytes/sec read (-) / write (+)')
+                vlabel='bytes/sec read (-) / write (+)',
+                autoFixNames = True)
             for dev in devlist:
                 graph.addField(dev + '_read', dev, draw='LINE2', type='DERIVE',
                     min=0, graph=False)
@@ -192,7 +194,8 @@ class MuninDiskIOplugin(MuninPlugin):
                 'Disk I/O',
                 info='Disk I/O - Number  of I/O Operations in Progress for every %s.'
                      % titlestr,
-                args='--base 1000 --lower-limit 0')
+                args='--base 1000 --lower-limit 0',
+                autoFixNames = True)
             for dev in devlist:
                 graph.addField(dev, dev, draw='AREASTACK', type='GAUGE')
             self.appendGraph(name, graph)
