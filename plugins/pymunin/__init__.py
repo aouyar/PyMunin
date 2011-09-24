@@ -530,7 +530,8 @@ class MuninGraph:
                              are usually OK and this parameter is rarely needed.
         @param width:        Graph width in pixels.
         @param height:       Graph height in pixels.
-        @param autoFixNames: Automatically fix invalid characters in field names.
+        @param autoFixNames: Automatically fix invalid characters in field names
+                             by replacing them with '_'.
             .
         """
         self._graphAttrDict = locals()
@@ -567,6 +568,8 @@ class MuninGraph:
         """
         if self._autoFixNames:
             name = self._fixName(name)
+            if negative is not None:
+                negative = self._fixName(negative)
         self._fieldAttrDict[name] = locals()
         self._fieldNameList.append(name)
 
