@@ -185,7 +185,8 @@ class MuninAsteriskPlugin(MuninPlugin):
         if self.graphEnabled('asterisk_trunks') and len(self._trunkList) > 0:
             graph = MuninGraph('Asterisk - Trunks', 'Asterisk',
                 info = 'Asterisk - Active calls on trunks.',
-                args = '--base 1000 --lower-limit 0')
+                args = '--base 1000 --lower-limit 0',
+                autoFixNames = True)
             for trunk in self._trunkList:
                 graph.addField(trunk[0], trunk[0], type='GAUGE', draw='AREASTACK')
             self.appendGraph('asterisk_trunks', graph)

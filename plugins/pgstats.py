@@ -95,18 +95,19 @@ class MuninPgPlugin(MuninPlugin):
         
         self._dbconn = PgInfo(self._host, self._port, self._database, 
                               self._user, self._password)
-        dblist = self._dbconn.getDatabases()
+        dblist = [db for db in self._dbconn.getDatabases()
+                  if self.dbIncluded(db)]
         dblist.sort()
         
         if self.graphEnabled('pg_connections'):
             graph = MuninGraph('PostgreSQL - Active Connections', 
                 'PostgreSQL Sys',
                 info='Active connections for PostgreSQL Database Server.',
-                args='--base 1000 --lower-limit 0')
+                args='--base 1000 --lower-limit 0',
+                autoFixNames = True)
             for db in dblist:
-                if self.dbIncluded(db):
-                    graph.addField(db, db, draw='AREASTACK', type='GAUGE',
-                        info="Active connections to database %s." % db)
+                graph.addField(db, db, draw='AREASTACK', type='GAUGE',
+                    info="Active connections to database %s." % db)
             graph.addField('total', 'total', draw='LINE2', type='GAUGE', 
                            colour='000000',
                 info="Total number of active connections.")
@@ -119,11 +120,11 @@ class MuninPgPlugin(MuninPlugin):
             graph = MuninGraph('PostgreSQL - Database Disk Usage', 
                 'PostgreSQL Sys',
                 info='Disk usage of databases on PostgreSQL Server in bytes.',
-                args='--base 1024 --lower-limit 0')
+                args='--base 1024 --lower-limit 0',
+                autoFixNames = True)
             for db in dblist:
-                if self.dbIncluded(db):
-                    graph.addField(db, db, draw='AREASTACK', type='GAUGE',
-                        info="Disk usage of database %s." % db)
+                graph.addField(db, db, draw='AREASTACK', type='GAUGE',
+                    info="Disk usage of database %s." % db)
             graph.addField('total', 'total', draw='LINE2', type='GAUGE', 
                 colour='000000', info="Total disk usage of all databases.")
             self.appendGraph('pg_diskspace', graph)
@@ -207,89 +208,89 @@ class MuninPgPlugin(MuninPlugin):
                 graph = MuninGraph('PostgreSQL - Block Read Stats Detail', 
                     'PostgreSQL DB',
                     info='Block read stats for each database in PostgreSQL Server.',
-                    args='--base 1000 --lower-limit 0')
+                    args='--base 1000 --lower-limit 0',
+                    autoFixNames = True)
                 for db in dblist:
-                    if self.dbIncluded(db):
-                        graph.addField(db, db, draw='AREASTACK', 
-                            type='DERIVE', min=0,
-                            info="Blocks read per second for database %s." % db)
+                    graph.addField(db, db, draw='AREASTACK', 
+                        type='DERIVE', min=0,
+                        info="Blocks read per second for database %s." % db)
                 self.appendGraph('pg_blockread_detail', graph)
             if self.graphEnabled('pg_xact_commit_detail'):
                 graph = MuninGraph('PostgreSQL - Transaction Commits Detail', 
                     'PostgreSQL DB',
                     info='Transaction commits for each database in PostgreSQL Server.',
-                    args='--base 1000 --lower-limit 0')
+                    args='--base 1000 --lower-limit 0',
+                    autoFixNames = True)
                 for db in dblist:
-                    if self.dbIncluded(db):
-                        graph.addField(db, db, draw='AREASTACK', 
-                            type='DERIVE', min=0,
-                            info="Transaction commits per second for database %s." % db)
+                    graph.addField(db, db, draw='AREASTACK', 
+                        type='DERIVE', min=0,
+                        info="Transaction commits per second for database %s." % db)
                 self.appendGraph('pg_xact_commit_detail', graph)
             if self.graphEnabled('pg_xact_rollback_detail'):
                 graph = MuninGraph('PostgreSQL - Transaction Rollbacks Detail', 
                     'PostgreSQL DB',
                     info='Transaction rollbacks for each database in PostgreSQL Server.',
-                    args='--base 1000 --lower-limit 0')
+                    args='--base 1000 --lower-limit 0',
+                    autoFixNames = True)
                 for db in dblist:
-                    if self.dbIncluded(db):
-                        graph.addField(db, db, draw='AREASTACK', 
-                            type='DERIVE', min=0,
-                            info="Transaction rollbacks per second for database %s." % db)
+                    graph.addField(db, db, draw='AREASTACK', 
+                        type='DERIVE', min=0,
+                        info="Transaction rollbacks per second for database %s." % db)
                 self.appendGraph('pg_xact_rollback_detail', graph)
             if self.graphEnabled('pg_tup_return_detail'):
                 graph = MuninGraph('PostgreSQL - Tuple Scan Detail', 
                     'PostgreSQL DB',
                     info='Tuple scans for each database in PostgreSQL Server.',
-                    args='--base 1000 --lower-limit 0')
+                    args='--base 1000 --lower-limit 0',
+                    autoFixNames = True)
                 for db in dblist:
-                    if self.dbIncluded(db):
-                        graph.addField(db, db, draw='AREASTACK', 
-                            type='DERIVE', min=0,
-                            info="Tuples scanned per second from database %s." % db)
+                    graph.addField(db, db, draw='AREASTACK', 
+                        type='DERIVE', min=0,
+                        info="Tuples scanned per second from database %s." % db)
                 self.appendGraph('pg_tup_return_detail', graph)
             if self.graphEnabled('pg_tup_fetch_detail'):
                 graph = MuninGraph('PostgreSQL - Tuple Fetch Detail', 
                     'PostgreSQL DB',
                     info='Tuple fetches for each database in PostgreSQL Server.',
-                    args='--base 1000 --lower-limit 0')
+                    args='--base 1000 --lower-limit 0',
+                    autoFixNames = True)
                 for db in dblist:
-                    if self.dbIncluded(db):
-                        graph.addField(db, db, draw='AREASTACK', 
-                            type='DERIVE', min=0,
-                            info="Tuples fetched per second from database %s." % db)
+                    graph.addField(db, db, draw='AREASTACK', 
+                        type='DERIVE', min=0,
+                        info="Tuples fetched per second from database %s." % db)
                 self.appendGraph('pg_tup_fetch_detail', graph)
             if self.graphEnabled('pg_tup_delete_detail'):
                 graph = MuninGraph('PostgreSQL - Tuple Delete Detail', 
                     'PostgreSQL DB',
                     info='Tuple deletes for each database in PostgreSQL Server.',
-                    args='--base 1000 --lower-limit 0')
+                    args='--base 1000 --lower-limit 0',
+                    autoFixNames = True)
                 for db in dblist:
-                    if self.dbIncluded(db):
-                        graph.addField(db, db, draw='AREASTACK',
-                            type='DERIVE', min=0,
-                            info="Tuples deleted per second from database %s." % db)
+                    graph.addField(db, db, draw='AREASTACK',
+                        type='DERIVE', min=0,
+                        info="Tuples deleted per second from database %s." % db)
                 self.appendGraph('pg_tup_delete_detail', graph)
             if self.graphEnabled('pg_tup_update_detail'):
                 graph = MuninGraph('PostgreSQL - Tuple Updates Detail', 
                     'PostgreSQL DB',
                     info='Tuple updates for each database in PostgreSQL Server.',
-                    args='--base 1000 --lower-limit 0')
+                    args='--base 1000 --lower-limit 0',
+                    autoFixNames = True)
                 for db in dblist:
-                    if self.dbIncluded(db):
-                        graph.addField(db, db, draw='AREASTACK', 
-                            type='DERIVE', min=0,
-                            info="Tuples updated per second in database %s." % db)
+                    graph.addField(db, db, draw='AREASTACK', 
+                        type='DERIVE', min=0,
+                        info="Tuples updated per second in database %s." % db)
                 self.appendGraph('pg_tup_update_detail', graph)
             if self.graphEnabled('pg_tup_insert_detail'):
                 graph = MuninGraph('PostgreSQL - Tuple Inserts Detail', 
                     'PostgreSQL DB',
                     info='Tuple insertes for each database in PostgreSQL Server.',
-                    args='--base 1000 --lower-limit 0')
+                    args='--base 1000 --lower-limit 0',
+                    autoFixNames = True)
                 for db in dblist:
-                    if self.dbIncluded(db):
-                        graph.addField(db, db, draw='AREASTACK', 
-                            type='DERIVE', min=0,
-                            info="Tuples inserted per second into database %s." % db)
+                    graph.addField(db, db, draw='AREASTACK', 
+                        type='DERIVE', min=0,
+                        info="Tuples inserted per second into database %s." % db)
                 self.appendGraph('pg_tup_insert_detail', graph)
             
     def retrieveVals(self):
