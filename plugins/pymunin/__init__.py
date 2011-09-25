@@ -107,6 +107,7 @@ class MuninPlugin:
         self._env = env
         self.arg0 = None
         self._debug = debug
+        self._dirtyConfig = False
         if (self.plugin_name is not None and argv is not None and len(argv) > 0 
             and re.search('_$', self.plugin_name)):
             mobj = re.match("%s(\S+)$" % self.plugin_name, argv[0])
@@ -114,13 +115,14 @@ class MuninPlugin:
                 self.arg0 = mobj.group(1)
         self._parseEnv()
         self.envRegisterFilter('graphs', '^[\w\-]+$')
-        self.nestedGraphs = self.envCheckFlag('nested_graphs', True)
+        self._nestedGraphs = self.envCheckFlag('nested_graphs', True)
                 
     def _parseEnv(self,  env=None):
         """Utility method that parses through environment variables.
         
         Parses for environment variables common to all Munin Plugins:
             - MUNIN_STATEFILE
+            - MUNIN_CAP_DIRTY_CONFIG
             - nested_graphs
         
         @param env: Dictionary of environment variables.
@@ -133,6 +135,8 @@ class MuninPlugin:
             self._stateFile = env.get('MUNIN_STATEFILE')
         else:
             self._stateFile = '/tmp/munin-state-%s' % self.plugin_name
+        if env.has_key('MUNIN_CAP_DIRTY_CONFIG'):
+            self._dirtyConfig = True
        
     def envHasKey(self, name):
         """Return True if environment variable with name exists.  
@@ -438,7 +442,7 @@ class MuninPlugin:
                 print "multigraph %s" % name
             print graph.getConfig()
             print
-        if self.nestedGraphs and self._subGraphDict:
+        if self._nestedGraphs and self._subGraphDict:
             for (parent_name, subgraphs) in self._subGraphDict.iteritems():
                 for (graph_name,  graph) in subgraphs:
                     print "multigraph %s.%s" % (parent_name,  graph_name)
@@ -468,7 +472,7 @@ class MuninPlugin:
                 print "multigraph %s" % name
             print graph.getVals()
             print
-        if self.nestedGraphs and self._subGraphDict:
+        if self._nestedGraphs and self._subGraphDict:
             for (parent_name, subgraphs) in self._subGraphDict.iteritems():
                 for (graph_name,  graph) in subgraphs:
                     print "multigraph %s.%s" % (parent_name,  graph_name)
@@ -486,6 +490,8 @@ class MuninPlugin:
             ret = self.fetch()
         elif oper == 'config':
             ret = self.config()
+            if ret and self._dirtyConfig:
+                ret = self.fetch()
         elif oper == 'autoconf':
             ret = self.autoconf()
             if ret:
