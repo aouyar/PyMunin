@@ -79,8 +79,8 @@ class MuninSysStatsPlugin(MuninPlugin):
                 info='Load Average (15 min, 5 min, 1 min).',
                 args='--base 1000 --lower-limit 0')
             graph.addField('load15min', '15 min', type='GAUGE', draw='AREA')
-            graph.addField('load5min', '5 min', type='GAUGE', draw='LINE2')
-            graph.addField('load1min', '1 min', type='GAUGE', draw='LINE2')
+            graph.addField('load5min', '5 min', type='GAUGE', draw='LINE1')
+            graph.addField('load1min', '1 min', type='GAUGE', draw='LINE1')
             self.appendGraph('sys_loadavg', graph)
         
         if self.graphEnabled('sys_cpu_util'):
@@ -188,9 +188,9 @@ class MuninSysStatsPlugin(MuninPlugin):
                 info='Virtual Memory Paging: Pages In (-) / Out (+) per Second.',
                 args='--base 1000 --lower-limit 0',
                 vlabel='pages in (-) / out (+) per second')
-            graph.addField('in', 'in', type='DERIVE', min=0, draw='LINE2', 
+            graph.addField('in', 'pages', type='DERIVE', min=0, draw='LINE2', 
                            graph=False)
-            graph.addField('out', 'out', type='DERIVE', min=0, draw='LINE2', 
+            graph.addField('out', 'pages', type='DERIVE', min=0, draw='LINE2', 
                            negative='in')
             self.appendGraph('sys_vm_paging', graph)
         
@@ -199,9 +199,9 @@ class MuninSysStatsPlugin(MuninPlugin):
                 info='Virtual Memory Swapping: Pages In (-) / Out (+) per Second.',
                 args='--base 1000 --lower-limit 0',
                 vlabel='pages in (-) / out (+) per second')
-            graph.addField('in', 'in', type='DERIVE', min=0, draw='LINE2', 
+            graph.addField('in', 'pages', type='DERIVE', min=0, draw='LINE2', 
                            graph=False)
-            graph.addField('out', 'out', type='DERIVE', min=0, draw='LINE2', 
+            graph.addField('out', 'pages', type='DERIVE', min=0, draw='LINE2', 
                            negative='in')
             self.appendGraph('sys_vm_swapping', graph)
 
