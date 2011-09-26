@@ -45,7 +45,8 @@ Environment Variables
 #%# capabilities=noautoconf nosuggest
 
 import sys
-from pymunin import MuninGraph, MuninPlugin, muninMain
+from pymunin import (MuninGraph, MuninPlugin, muninMain, 
+                     fixLabel, maxLabelLenGraphSimple, maxLabelLenGraphDual)
 from pysysinfo.diskio import DiskIOinfo
 
 __author__ = "Ali Onur Uyar"
@@ -56,6 +57,7 @@ __version__ = "0.7"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
+
 
 
 class MuninDiskIOplugin(MuninPlugin):
@@ -76,6 +78,8 @@ class MuninDiskIOplugin(MuninPlugin):
         MuninPlugin.__init__(self, argv, env, debug)
 
         self._info = DiskIOinfo()
+        
+        self._labelDelim = { 'fs': '/', 'lv': '-'}
         
         self._diskList = self._info.getDiskList()
         if self._diskList:
@@ -116,6 +120,7 @@ class MuninDiskIOplugin(MuninPlugin):
         self._configDevRequests('fs', 'Filesystem', self._fsList)
         self._configDevBytes('fs', 'Filesystem', self._fsList)
         self._configDevActive('fs', 'Filesystem', self._fsList)
+        
                 
     def retrieveVals(self):
         """Retrive values for graphs."""
@@ -148,13 +153,20 @@ class MuninDiskIOplugin(MuninPlugin):
                 info='Disk I/O - %s Throughput, Read / write requests per second.' 
                      % titlestr,
                 args='--base 1000 --lower-limit 0',
-                vlabel='reqs/sec read (-) / write (+)',
+                vlabel='reqs/sec read (-) / write (+)', printf='%6.1lf',
                 autoFixNames = True)
             for dev in devlist:
-                graph.addField(dev + '_read', dev, draw='LINE2', 
-                               type='DERIVE', min=0, graph=False)
-                graph.addField(dev + '_write', dev, draw='LINE2', 
-                               type='DERIVE', min=0, negative=(dev + '_read'))
+                graph.addField(dev + '_read',
+                               fixLabel(dev, maxLabelLenGraphDual, 
+                                        repl = '..', truncend=False,
+                                        delim = self._labelDelim.get(namestr)), 
+                               draw='LINE2', type='DERIVE', min=0, graph=False)
+                graph.addField(dev + '_write',
+                               fixLabel(dev, maxLabelLenGraphDual, 
+                                        repl = '..', truncend=False,
+                                        delim = self._labelDelim.get(namestr)),
+                               draw='LINE2', type='DERIVE', min=0, 
+                               negative=(dev + '_read'),info=dev)
             self.appendGraph(name, graph)
 
     def _configDevBytes(self, namestr, titlestr, devlist):
@@ -170,14 +182,21 @@ class MuninDiskIOplugin(MuninPlugin):
             graph = MuninGraph('Disk I/O - %s - Throughput' % titlestr, 'Disk I/O',
                 info='Disk I/O - %s Throughput, bytes read / written per second.'
                      % titlestr,
-                args='--base 1000 --lower-limit 0',
+                args='--base 1000 --lower-limit 0', printf='%6.1lf',
                 vlabel='bytes/sec read (-) / write (+)',
                 autoFixNames = True)
             for dev in devlist:
-                graph.addField(dev + '_read', dev, draw='LINE2', type='DERIVE',
-                    min=0, graph=False)
-                graph.addField(dev + '_write', dev, draw='LINE2', type='DERIVE',
-                    min=0, negative=(dev + '_read'))
+                graph.addField(dev + '_read', 
+                               fixLabel(dev, maxLabelLenGraphDual, 
+                                        repl = '..', truncend=False,
+                                        delim = self._labelDelim.get(namestr)),
+                               draw='LINE2', type='DERIVE', min=0, graph=False)
+                graph.addField(dev + '_write', 
+                               fixLabel(dev, maxLabelLenGraphDual, 
+                                        repl = '..', truncend=False,
+                                        delim = self._labelDelim.get(namestr)),
+                               draw='LINE2', type='DERIVE', min=0, 
+                               negative=(dev + '_read'), info=dev)
             self.appendGraph(name, graph)
             
     def _configDevActive(self, namestr, titlestr, devlist):
@@ -194,10 +213,14 @@ class MuninDiskIOplugin(MuninPlugin):
                 'Disk I/O',
                 info='Disk I/O - Number  of I/O Operations in Progress for every %s.'
                      % titlestr,
-                args='--base 1000 --lower-limit 0',
+                args='--base 1000 --lower-limit 0', printf='%6.1lf',
                 autoFixNames = True)
             for dev in devlist:
-                graph.addField(dev, dev, draw='AREASTACK', type='GAUGE')
+                graph.addField(dev, 
+                               fixLabel(dev, maxLabelLenGraphSimple, 
+                                        repl = '..', truncend=False,
+                                        delim = self._labelDelim.get(namestr)), 
+                               draw='AREASTACK', type='GAUGE', info=dev)
             self.appendGraph(name, graph)
 
     def _fetchDevAll(self, namestr, devlist, statsfunc):

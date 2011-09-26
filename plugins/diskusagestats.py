@@ -39,7 +39,8 @@ Environment Variables
 #%# capabilities=noautoconf nosuggest
 
 import sys
-from pymunin import MuninGraph, MuninPlugin, muninMain
+from pymunin import (MuninGraph, MuninPlugin, muninMain, 
+                     fixLabel, maxLabelLenGraphSimple, maxLabelLenGraphDual)
 from pysysinfo.filesystem import FilesystemInfo
 
 __author__ = "Ali Onur Uyar"
@@ -86,12 +87,15 @@ class MuninDiskUsagePlugin(MuninPlugin):
             self._statsSpace = self._info.getSpaceUse()
             graph = MuninGraph('Disk Space Usage (%)', 'Disk Usage',
                 info='Disk space usage of filesystems.',
-                args='--base 1000 --lower-limit 0',
+                args='--base 1000 --lower-limit 0', printf='%6.1lf',
                 autoFixNames=True)
             for fspath in self._fslist:
                 if self._statsSpace.has_key(fspath):
-                    graph.addField(fspath, fspath, draw='LINE2', type='GAUGE',
-                        info="Disk space usage for filesystem: %s" % fspath)
+                    graph.addField(fspath, 
+                        fixLabel(fspath, maxLabelLenGraphSimple, 
+                                 delim='/', repl='..', truncend=False), 
+                        draw='LINE2', type='GAUGE',
+                        info="Disk space usage for: %s" % fspath)
             self.appendGraph(name, graph)
         
         name = 'diskinode'
@@ -99,12 +103,15 @@ class MuninDiskUsagePlugin(MuninPlugin):
             self._statsInode = self._info.getInodeUse()
             graph = MuninGraph('Inode Usage (%)', 'Disk Usage',
                 info='Inode usage of filesystems.',
-                args='--base 1000 --lower-limit 0',
+                args='--base 1000 --lower-limit 0', printf='%6.1lf',
                 autoFixNames=True)
             for fspath in self._fslist:
                 if self._statsInode.has_key(fspath):
-                    graph.addField(fspath, fspath, draw='LINE2', type='GAUGE',
-                        info="Inode usage for filesystem: %s" % fspath)
+                    graph.addField(fspath,
+                        fixLabel(fspath, maxLabelLenGraphSimple, 
+                                 delim='/', repl='..', truncend=False), 
+                        draw='LINE2', type='GAUGE',
+                        info="Inode usage for: %s" % fspath)
             self.appendGraph(name, graph)
         
     def retrieveVals(self):

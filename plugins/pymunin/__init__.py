@@ -21,6 +21,10 @@ __email__ = "aouyar at gmail.com"
 __status__ = "Development"
 
 
+maxLabelLenGraphSimple = 40
+maxLabelLenGraphDual = 14
+
+
 class MuninAttrFilter:
     """Class for implementing Attribute Filters for Munin Graphs.
     
@@ -513,7 +517,7 @@ class MuninGraph:
 
     def __init__(self, title, category = None, vlabel=None, info=None, 
                  args =None, period=None, scale=None,  total=None, order=None, 
-                 printfformat=None, witdh=None, height=None,
+                 printf=None, witdh=None, height=None,
                  autoFixNames = False):
         """Initialize Munin Graph.
         
@@ -532,13 +536,13 @@ class MuninGraph:
                              of field names.
                              When the parameter is not used, the datasources are 
                              drawn in the order they are defined by default.
-        @param printfformat: Format for printing numbers on graph. The defaults 
+        @param printf:       Format for printing numbers on graph. The defaults 
                              are usually OK and this parameter is rarely needed.
         @param width:        Graph width in pixels.
         @param height:       Graph height in pixels.
         @param autoFixNames: Automatically fix invalid characters in field names
                              by replacing them with '_'.
-            .
+        
         """
         self._graphAttrDict = locals()
         self._fieldNameList = []
@@ -608,7 +612,7 @@ class MuninGraph:
         
         # Process Graph Attributes
         for key in ('title', 'category', 'vlabel', 'info', 'args', 'period', 
-                    'scale', 'total', 'order', 'printfformat', 'width', 'height'):
+                    'scale', 'total', 'order', 'printf', 'width', 'height'):
             val = self._graphAttrDict.get(key)
             if val is not None:
                 if isinstance(val, bool):
@@ -701,3 +705,38 @@ def muninMain(pluginClass, argv=None, env=None, debug=False):
         else:
             print >> sys.stderr, "EXCEPTION: %s" % msg
         return 1
+
+
+def fixLabel(label, maxlen, delim=None, repl='', truncend=True):
+    """Truncate long graph and field labels.
+    
+        @param label:    Label text.
+        @param maxlen:   Maximum field label length in characters.
+                         No maximum field label length is enforced by default.
+        @param delim:    Delimiter for field labels field labels longer than 
+                         maxlen will preferably be truncated at delimiter.
+        @param repl:     Replacement string for truncated part.
+        @param truncend: Truncate the end of label name if True. (Default)
+                         The beginning part of label will be truncated if False.
+                         
+    """
+    if len(label) <= maxlen:
+        return label
+    else:
+        maxlen -= len(repl)
+        if delim is not None:  
+            if truncend:
+                end = label.rfind(delim, 0, maxlen)
+                if end > 0:
+                    return label[:end+1] + repl
+            else:
+                start = label.find(delim, len(label) - maxlen)
+                if start > 0:
+                    return repl + label[start:]
+        if truncend:
+            return label[:maxlen] + repl
+        else:
+            return repl + label[-maxlen:]
+            
+            
+    
