@@ -24,7 +24,7 @@ class FilesystemInfo:
     """Class to retrieve stats for disk utilization."""
     
     def __init__(self):
-        """ Read /proc/mounts to get filesystem types.
+        """Read /proc/mounts to get filesystem types.
         
         """
         self._fstypeDict = {}
