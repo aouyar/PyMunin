@@ -23,9 +23,6 @@ Multigraph Plugin - Graph Structure
     - diskio_fs_requests
     - diskio_fs_bytes
     - diskio_fs_active
-    - diskio_fs_requests
-    - diskio_fs_bytes
-    - diskio_fs_active
 
    
 Environment Variables
