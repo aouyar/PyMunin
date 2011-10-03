@@ -40,7 +40,7 @@ Environment Variables
 
 import sys
 from pymunin import (MuninGraph, MuninPlugin, muninMain, 
-                     fixLabel, maxLabelLenGraphSimple, maxLabelLenGraphDual)
+                     fixLabel, maxLabelLenGraphSimple)
 from pysysinfo.filesystem import FilesystemInfo
 
 __author__ = "Ali Onur Uyar"
