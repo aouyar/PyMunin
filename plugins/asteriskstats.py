@@ -20,6 +20,7 @@ Multigraph Plugin - Graph Structure
    - asterisk_queue_avg_talk
    - asterisk_queue_calls
    - asterisk_queue_abandon_pcent
+   - asterisk_fax_stats
 
 
 Environment Variables
