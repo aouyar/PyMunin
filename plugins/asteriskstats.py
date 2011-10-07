@@ -15,6 +15,11 @@ Multigraph Plugin - Graph Structure
    - asterisk_conferences
    - asterisk_voicemail
    - asterisk_trunks
+   - asterisk_queue_len
+   - asterisk_queue_avg_hold
+   - asterisk_queue_avg_talk
+   - asterisk_queue_calls
+   - asterisk_queue_abandon_pcent
 
 
 Environment Variables
@@ -36,6 +41,9 @@ Environment Variables
                   - "Trunk Name"="Regular Expr with Named Group 'num'"="MIN"-"MAX"
                   Check Python Regular Expressions docs for help on writing 
                   regular expressions:http://docs.python.org/library/re.html
+  include_queues: Comma separated list of queues to include in  graphs.
+                  (All queues included by default.)
+  exclude_queues: Comma separated list of queues to exclude from graphs.
 
   Note: Channel, codec and trunk expressions are case insensitive.
 
@@ -85,10 +93,12 @@ class MuninAsteriskPlugin(MuninPlugin):
         """
         MuninPlugin.__init__(self, argv, env, debug)
 
+        self.envRegisterFilter('queues', '^[\w\-]+$')
         self._amihost = self.envGet('amihost')
         self._amiport = self.envGet('amiport')
         self._amiuser = self.envGet('amiuser')
         self._amipass = self.envGet('amipass')
+        self._ami = None
         
         self._codecList = (self.envGetList('codecs') 
                            or ['alaw', 'ulaw', 'gsm', 'g729'])
@@ -112,8 +122,8 @@ class MuninAsteriskPlugin(MuninPlugin):
                 
         if self.graphEnabled('asterisk_calls'):
             graph = MuninGraph('Asterisk - Call Stats', 'Asterisk',
-                info = 'Asterisk - Information on Calls.', period='minute',
-                args = '--base 1000 --lower-limit 0')
+                info='Asterisk - Information on Calls.', period='minute',
+                args='--base 1000 --lower-limit 0')
             graph.addField('active_calls', 'active_calls', type='GAUGE',
                 draw='LINE2',info='Active Calls')
             graph.addField('calls_per_min','calls_per_min', type='DERIVE', min=0,
@@ -122,8 +132,8 @@ class MuninAsteriskPlugin(MuninPlugin):
 
         if self.graphEnabled('asterisk_channels'):
             graph = MuninGraph('Asterisk - Active Channels', 'Asterisk',
-                info = 'Asterisk - Information on Active Channels.',
-                args = '--base 1000 --lower-limit 0')
+                info='Asterisk - Information on Active Channels.',
+                args='--base 1000 --lower-limit 0')
             for field in self._chanList:
                 graph.addField(field, field, type='GAUGE', draw='AREASTACK')
             if 'dahdi' in self._chanList:
@@ -132,8 +142,8 @@ class MuninAsteriskPlugin(MuninPlugin):
 
         if self.graphEnabled('asterisk_peers_sip'):
             graph = MuninGraph('Asterisk - VoIP Peers - SIP', 'Asterisk',
-                info = 'Asterisk - Information on SIP VoIP Peers.',
-                args = '--base 1000 --lower-limit 0')
+                info='Asterisk - Information on SIP VoIP Peers.',
+                args='--base 1000 --lower-limit 0')
             for field in ('online', 'unmonitored', 'unreachable', 
                           'lagged', 'unknown'):
                 graph.addField(field, field, type='GAUGE', draw='AREASTACK')
@@ -141,8 +151,8 @@ class MuninAsteriskPlugin(MuninPlugin):
 
         if self.graphEnabled('asterisk_peers_iax2'):
             graph = MuninGraph('Asterisk - VoIP Peers - IAX2', 'Asterisk',
-                info = 'Asterisk - Information on IAX2 VoIP Peers.',
-                args = '--base 1000 --lower-limit 0')
+                info='Asterisk - Information on IAX2 VoIP Peers.',
+                args='--base 1000 --lower-limit 0')
             for field in ('online', 'unmonitored', 'unreachable', 
                           'lagged', 'unknown'):
                 graph.addField(field, field, type='GAUGE', draw='AREASTACK')
@@ -151,8 +161,8 @@ class MuninAsteriskPlugin(MuninPlugin):
         if self.graphEnabled('asterisk_voip_codecs'):
             graph = MuninGraph('Asterisk - VoIP Codecs for Active Channels', 
                 'Asterisk',
-                info = 'Asterisk - Codecs for Active VoIP Channels (SIP/IAX2)',
-                args = '--base 1000 --lower-limit 0')
+                info='Asterisk - Codecs for Active VoIP Channels (SIP/IAX2)',
+                args='--base 1000 --lower-limit 0')
             for field in self._codecList:
                 graph.addField(field, field, type='GAUGE', draw='AREASTACK')
             graph.addField('other', 'other', type='GAUGE', draw='AREASTACK')
@@ -160,8 +170,8 @@ class MuninAsteriskPlugin(MuninPlugin):
 
         if self.graphEnabled('asterisk_conferences'):
             graph = MuninGraph('Asterisk - Conferences', 'Asterisk',
-                info = 'Asterisk - Information on Meetme Conferences',
-                args = '--base 1000 --lower-limit 0')
+                info='Asterisk - Information on Meetme Conferences',
+                args='--base 1000 --lower-limit 0')
             graph.addField('rooms', 'rooms', type='GAUGE', draw='LINE2', 
                 info='Active conference rooms.')
             graph.addField('users', 'users', type='GAUGE', draw='LINE2', 
@@ -170,8 +180,8 @@ class MuninAsteriskPlugin(MuninPlugin):
 
         if self.graphEnabled('asterisk_voicemail'):
             graph = MuninGraph('Asterisk - Voicemail', 'Asterisk',
-                info = 'Asterisk - Information on Voicemail Accounts',
-                args = '--base 1000 --lower-limit 0')
+                info='Asterisk - Information on Voicemail Accounts',
+                args='--base 1000 --lower-limit 0')
             graph.addField('accounts', 'accounts', type='GAUGE', draw='LINE2',
                 info='Number of voicemail accounts.')
             graph.addField('msg_avg', 'msg_avg', type='GAUGE', draw='LINE2',
@@ -184,21 +194,89 @@ class MuninAsteriskPlugin(MuninPlugin):
 
         if self.graphEnabled('asterisk_trunks') and len(self._trunkList) > 0:
             graph = MuninGraph('Asterisk - Trunks', 'Asterisk',
-                info = 'Asterisk - Active calls on trunks.',
-                args = '--base 1000 --lower-limit 0',
+                info='Asterisk - Active calls on trunks.',
+                args='--base 1000 --lower-limit 0',
                 autoFixNames = True)
             for trunk in self._trunkList:
                 graph.addField(trunk[0], trunk[0], type='GAUGE', draw='AREASTACK')
             self.appendGraph('asterisk_trunks', graph)
-
+        
+        self._queues = None
+        self._queue_list = None
+        if (self.graphEnabled('asterisk_queue_len')
+            or self.graphEnabled('asterisk_queue_avg_hold')
+            or self.graphEnabled('asterisk_queue_avg_talk')
+            or self.graphEnabled('asterisk_queue_calls')
+            or self.graphEnabled('asterisk_queue_abandon_pcent')):
+            if self._ami is None:
+                self._ami = AsteriskInfo(self._amihost, self._amiport, 
+                                         self._amiuser, self._amipass)
+            self._queues = self._ami.getQueueStats()
+            self._queue_list = [queue for queue in self._queues.keys()
+                                if self.envCheckFilter('queues', queue)]
+            self._queue_list.sort()
+            if self.graphEnabled('asterisk_queue_abandon_pcent'):
+                self._queues_prev = self.restoreState()
+                if self._queues_prev is None:
+                    self._queues_prev = self._queues
+                self.saveState(self._queues)
+        
+        if self._queues is not None and len(self._queue_list) > 0:
+            if self.graphEnabled('asterisk_queue_len'):
+                graph = MuninGraph('Asterisk - Queues - Calls in Queue', 'Asterisk',
+                    info='Asterisk - Queues - Number of calls in queues.',
+                    args='--base 1000 --lower-limit 0')
+                for queue in self._queue_list:
+                    graph.addField(queue, queue, type='GAUGE', draw='LINE2',
+                                   info='Number of calls in queue %s.' % queue)
+                self.appendGraph('asterisk_queue_len', graph)
+            if self.graphEnabled('asterisk_queue_avg_hold'):
+                graph = MuninGraph('Asterisk - Queues - Average Hold Time', 
+                    'Asterisk',
+                    info='Asterisk - Queues - Average Hold Time.',
+                    args='--base 1000 --lower-limit 0')
+                for queue in self._queue_list:
+                    graph.addField(queue, queue, type='GAUGE', draw='LINE2',
+                                   info='Average hold time for queue %s.' % queue)
+                self.appendGraph('asterisk_queue_avg_hold', graph)
+            if self.graphEnabled('asterisk_queue_avg_talk'):
+                graph = MuninGraph('Asterisk - Queues - Average Talk Time', 
+                    'Asterisk',
+                    info='Asterisk - Queues - Average Talk Time.).',
+                    args='--base 1000 --lower-limit 0')
+                for queue in self._queue_list:
+                    graph.addField(queue, queue, type='GAUGE', draw='LINE2',
+                                   info='Average talk time for queue %s.' % queue)
+                self.appendGraph('asterisk_queue_avg_talk', graph)
+            if self.graphEnabled('asterisk_queue_calls'):
+                graph = MuninGraph('Asterisk - Queues - Calls per Minute', 
+                    'Asterisk', period='minute',
+                    info='Asterisk - Queues - Abandoned/Completed Calls per minute.',
+                    args='--base 1000 --lower-limit 0')
+                graph.addField('abandon', 'abandon', type='DERIVE', draw='AREASTACK',
+                               info='Abandoned calls per minute.')
+                graph.addField('answer', 'answer', type='DERIVE', draw='AREASTACK',
+                               info='Answered calls per minute.')
+                self.appendGraph('asterisk_queue_calls', graph)
+            if self.graphEnabled('asterisk_queue_abandon_pcent'):
+                graph = MuninGraph('Asterisk - Queues - Abandoned Calls (%)', 
+                    'Asterisk',
+                    info='Asterisk - Queues - Abandoned calls vs, total calls.',
+                    args='--base 1000 --lower-limit 0')
+                for queue in self._queue_list:
+                    graph.addField(queue, queue, type='GAUGE', draw='LINE2',
+                                   info='Abandoned vs. total calls for queue %s.' 
+                                        % queue)
+                self.appendGraph('asterisk_queue_abandon_pcent', graph)
 
     def retrieveVals(self):
         """Retrive values for graphs."""
-        ami = AsteriskInfo(self._amihost, self._amiport, 
-                           self._amiuser, self._amipass)
+        if self._ami is None:
+            self._ami = AsteriskInfo(self._amihost, self._amiport, 
+                                     self._amiuser, self._amipass)
 
         if self.hasGraph('asterisk_calls') or self.hasGraph('asterisk_channels'):
-            stats = ami.getChannelStats(self._chanList)
+            stats = self._ami.getChannelStats(self._chanList)
             if  self.hasGraph('asterisk_calls')  and stats:
                 self.setGraphVal('asterisk_calls', 'active_calls', 
                                  stats.get('active_calls'))
@@ -213,7 +291,7 @@ class MuninAsteriskPlugin(MuninPlugin):
                                      'mix', stats.get('mix'))
 
         if self.hasGraph('asterisk_peers_sip'):
-            stats = ami.getPeerStats('sip')
+            stats = self._ami.getPeerStats('sip')
             if stats:
                 for field in ('online', 'unmonitored', 'unreachable', 
                               'lagged', 'unknown'):
@@ -221,7 +299,7 @@ class MuninAsteriskPlugin(MuninPlugin):
                                      field, stats.get(field))
         
         if self.hasGraph('asterisk_peers_iax2'):
-            stats = ami.getPeerStats('iax2')
+            stats = self._ami.getPeerStats('iax2')
             if stats:
                 for field in ('online', 'unmonitored', 'unreachable', 
                               'lagged', 'unknown'):
@@ -229,8 +307,8 @@ class MuninAsteriskPlugin(MuninPlugin):
                                      field, stats.get(field))
         
         if self.hasGraph('asterisk_voip_codecs'):
-            sipstats = ami.getVoIPchanStats('sip', self._codecList)
-            iax2stats = ami.getVoIPchanStats('iax2', self._codecList)
+            sipstats = self._ami.getVoIPchanStats('sip', self._codecList)
+            iax2stats = self._ami.getVoIPchanStats('iax2', self._codecList)
             if stats:
                 for field in self._codecList:
                     self.setGraphVal('asterisk_voip_codecs', field,
@@ -239,7 +317,7 @@ class MuninAsteriskPlugin(MuninPlugin):
                                  sipstats.get('other') + iax2stats.get('other'))
         
         if self.hasGraph('asterisk_conferences'):
-            stats = ami.getConferenceStats()
+            stats = self._ami.getConferenceStats()
             if stats:
                 self.setGraphVal('asterisk_conferences', 'rooms', 
                                  stats.get('active_conferences'))
@@ -247,7 +325,7 @@ class MuninAsteriskPlugin(MuninPlugin):
                                  stats.get('conference_users'))
 
         if self.hasGraph('asterisk_voicemail'):
-            stats = ami.getVoicemailStats()
+            stats = self._ami.getVoicemailStats()
             if stats:
                 self.setGraphVal('asterisk_voicemail', 'accounts', 
                                  stats.get('accounts'))
@@ -259,10 +337,48 @@ class MuninAsteriskPlugin(MuninPlugin):
                                  stats.get('total_messages'))
 
         if self.hasGraph('asterisk_trunks') and len(self._trunkList) > 0:
-            stats = ami.getTrunkStats(self._trunkList)
+            stats = self._ami.getTrunkStats(self._trunkList)
             for trunk in self._trunkList:
                 self.setGraphVal('asterisk_trunks', trunk[0], 
                                  stats.get(trunk[0]))
+                
+        if self._queues is not None:
+            total_answer = 0
+            total_abandon = 0
+            for queue in self._queue_list:
+                stats = self._queues[queue]
+                if self.hasGraph('asterisk_queue_len'):
+                    self.setGraphVal('asterisk_queue_len', queue,
+                                     stats.get('queue_len'))
+                if self.hasGraph('asterisk_queue_avg_hold'):
+                    self.setGraphVal('asterisk_queue_avg_hold', queue,
+                                     stats.get('avg_holdtime'))
+                if self.hasGraph('asterisk_queue_avg_talk'):
+                    self.setGraphVal('asterisk_queue_avg_talk', queue,
+                                     stats.get('avg_talktime'))
+                if self.hasGraph('asterisk_queue_calls'):
+                    total_abandon += stats.get('calls_abandoned')
+                    total_answer += stats.get('calls_completed')
+                if self.hasGraph('asterisk_queue_abandon_pcent'):
+                    prev_stats = self._queues_prev.get(queue)
+                    val = 0
+                    if prev_stats is not None:
+                        abandon = (stats.get('calls_abandoned', 0) -
+                                   prev_stats.get('calls_abandoned', 0))
+                        answer = (stats.get('calls_completed', 0) -
+                                  prev_stats.get('calls_completed', 0))
+                        if answer >= 0 and abandon >= 0:
+                            total = abandon + answer
+                            if total > 0:
+                                val = 100.0 * float(abandon) / float(total)
+                    self.setGraphVal('asterisk_queue_abandon_pcent', 
+                                     queue, val)
+            if self.hasGraph('asterisk_queue_calls'):
+                    self.setGraphVal('asterisk_queue_calls', 'abandon', 
+                                     total_abandon)
+                    self.setGraphVal('asterisk_queue_calls', 'answer', 
+                                     total_answer)
+
 
 
 if __name__ == "__main__":

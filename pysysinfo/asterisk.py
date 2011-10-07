@@ -680,7 +680,7 @@ class AsteriskInfo:
                     if mobj:
                         if not info_dict.has_key(ctxt):
                             info_dict[ctxt] = {}
-                        info_dict[ctxt][mobj.group(1).lower()] = mobj.group(2).lower()
+                        info_dict[ctxt][mobj.group(1).lower()] = int(mobj.group(2).lower())
                     elif i == 0:
                         ctxt = line.strip().lower()
                     i += 1    
