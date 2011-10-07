@@ -231,7 +231,7 @@ class MuninAsteriskPlugin(MuninPlugin):
                                    info='Number of calls in queue %s.' % queue)
                 self.appendGraph('asterisk_queue_len', graph)
             if self.graphEnabled('asterisk_queue_avg_hold'):
-                graph = MuninGraph('Asterisk - Queues - Average Hold Time', 
+                graph = MuninGraph('Asterisk - Queues - Average Hold Time (sec)', 
                     'Asterisk',
                     info='Asterisk - Queues - Average Hold Time.',
                     args='--base 1000 --lower-limit 0')
@@ -240,7 +240,7 @@ class MuninAsteriskPlugin(MuninPlugin):
                                    info='Average hold time for queue %s.' % queue)
                 self.appendGraph('asterisk_queue_avg_hold', graph)
             if self.graphEnabled('asterisk_queue_avg_talk'):
-                graph = MuninGraph('Asterisk - Queues - Average Talk Time', 
+                graph = MuninGraph('Asterisk - Queues - Average Talk Time (sec)', 
                     'Asterisk',
                     info='Asterisk - Queues - Average Talk Time.).',
                     args='--base 1000 --lower-limit 0')
@@ -268,6 +268,28 @@ class MuninAsteriskPlugin(MuninPlugin):
                                    info='Abandoned vs. total calls for queue %s.' 
                                         % queue)
                 self.appendGraph('asterisk_queue_abandon_pcent', graph)
+        
+        self._fax_stats = None
+        if (self.graphEnabled('asterisk_fax_attempts')
+            or self.graphEnabled('asterisk_fax_errors')):
+            if self._ami is None:
+                self._ami = AsteriskInfo(self._amihost, self._amiport, 
+                                         self._amiuser, self._amipass)
+            self._fax_stats = self._ami.getFaxStatsCounters()
+        
+        if self._fax_stats:
+            if self.graphEnabled('asterisk_fax_stats'):
+                graph = MuninGraph('Asterisk - Fax Stats', 
+                    'Asterisk', period='minute',
+                    info='Asterisk - Fax - Fax Recv / Send Attempts per minute.',
+                    args='--base 1000 --lower-limit 0')
+                graph.addField('send', 'send', type='DERIVE', draw='AREASTACK',
+                               info='Fax send attempts per minute.')
+                graph.addField('recv', 'recv', type='DERIVE', draw='AREASTACK',
+                               info='Fax receive attempts per minute.')
+                graph.addField('fail', 'fail', type='DERIVE', draw='LINE2',
+                               info='Failed fax attempts per minute.')
+                self.appendGraph('asterisk_fax_attempts', graph)
 
     def retrieveVals(self):
         """Retrive values for graphs."""
@@ -378,6 +400,17 @@ class MuninAsteriskPlugin(MuninPlugin):
                                      total_abandon)
                     self.setGraphVal('asterisk_queue_calls', 'answer', 
                                      total_answer)
+
+        if self._fax_stats is not None:
+            if self.hasGraph('asterisk_fax_attempts'):
+                stats = self._fax_stats.get('general')
+                if stats is not None:
+                    self.setGraphVal('asterisk_fax_attempts', 'send', 
+                                     stats.get('transmit attempts'))
+                    self.setGraphVal('asterisk_fax_attempts', 'recv', 
+                                     stats.get('receive attempts'))
+                    self.setGraphVal('asterisk_fax_attempts', 'fail', 
+                                     stats.get('failed faxes'))
 
 
 
