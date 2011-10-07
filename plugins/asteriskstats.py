@@ -228,7 +228,7 @@ class MuninAsteriskPlugin(MuninPlugin):
                     info='Asterisk - Queues - Number of calls in queues.',
                     args='--base 1000 --lower-limit 0')
                 for queue in self._queue_list:
-                    graph.addField(queue, queue, type='GAUGE', draw='LINE2',
+                    graph.addField(queue, queue, type='GAUGE', draw='AREASTACK',
                                    info='Number of calls in queue %s.' % queue)
                 self.appendGraph('asterisk_queue_len', graph)
             if self.graphEnabled('asterisk_queue_avg_hold'):
