@@ -120,7 +120,7 @@ class MuninDiskIOplugin(MuninPlugin):
         
                 
     def retrieveVals(self):
-        """Retrive values for graphs."""
+        """Retrieve values for graphs."""
         if self._diskList:
             self._fetchDevAll('disk', self._diskList, 
                               self._info.getDiskStats)

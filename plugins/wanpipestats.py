@@ -151,7 +151,7 @@ class MuninWanpipePlugin(MuninPlugin):
             self.appendGraph('wanpipe_pri_rxlevel', graph)
         
     def retrieveVals(self):
-        """Retrive values for graphs."""
+        """Retrieve values for graphs."""
         for iface in self._ifaceList:
             if self._reqIfaceList is None or iface in self._reqIfaceList:
                 if (self.graphEnabled('wanpipe_traffic') 

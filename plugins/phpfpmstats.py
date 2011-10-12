@@ -92,7 +92,7 @@ class MuninPHPfpmPlugin(MuninPlugin):
         
         
     def retrieveVals(self):
-        """Retrive values for graphs."""
+        """Retrieve values for graphs."""
         fpminfo = PHPfpmInfo(self._host, self._port, self._user, self._password, 
                              self._monpath, self._ssl)
         stats = fpminfo.getStats()

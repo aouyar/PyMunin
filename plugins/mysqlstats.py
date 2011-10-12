@@ -173,7 +173,7 @@ class MuninMySQLplugin(MuninPlugin):
             self.appendGraph('mysql_threads', graph)
                     
     def retrieveVals(self):
-        """Retrive values for graphs."""
+        """Retrieve values for graphs."""
         self._genStats = None
         if self.hasGraph('mysql_connections'):
             if self._genStats is None:

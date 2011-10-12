@@ -104,7 +104,7 @@ class MuninNTPhostOffsetsPlugin(MuninPlugin):
             self.appendGraph('ntp_host_delays', graph)
 
     def retrieveVals(self):
-        """Retrive values for graphs."""
+        """Retrieve values for graphs."""
         ntpinfo = NTPinfo()
         ntpstats = ntpinfo.getHostOffsets(self._remoteHosts)
         if ntpstats:

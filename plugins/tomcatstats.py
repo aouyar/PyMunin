@@ -170,7 +170,7 @@ class MuninTomcatPlugin(MuninPlugin):
 #                    self.appendGraph(name, graph)
         
     def retrieveVals(self):
-        """Retrive values for graphs."""
+        """Retrieve values for graphs."""
         if self.hasGraph('tomcat_memory'):
             stats = self._tomcatInfo.getMemoryStats()
             self.setGraphVal('tomcat_memory', 'used', 

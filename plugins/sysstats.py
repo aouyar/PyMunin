@@ -51,7 +51,7 @@ __status__ = "Development"
 
 
 class MuninSysStatsPlugin(MuninPlugin):
-    """Multigraph Munin Plugin for monitoring NTP Peer.
+    """Multigraph Munin Plugin for monitoring System Resource Usage Stats.
 
     """
     plugin_name = 'sysstats'
@@ -206,7 +206,7 @@ class MuninSysStatsPlugin(MuninPlugin):
             self.appendGraph('sys_vm_swapping', graph)
 
     def retrieveVals(self):
-        """Retrive values for graphs."""
+        """Retrieve values for graphs."""
         if self.hasGraph('sys_loadavg'):
             self._loadstats = self._sysinfo.getLoadAvg()
             if self._loadstats:

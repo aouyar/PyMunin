@@ -88,7 +88,7 @@ class MuninNTPhostOffsetPlugin(MuninPlugin):
             self.appendGraph(graphName, graph)
 
     def retrieveVals(self):
-        """Retrive values for graphs."""
+        """Retrieve values for graphs."""
         ntpinfo = NTPinfo()
         stats = ntpinfo.getHostOffset(self._remoteHost)
         if stats:

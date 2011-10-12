@@ -135,7 +135,7 @@ class MuninPHPapcPlugin(MuninPlugin):
             self.appendGraph('php_apc_expunge', graph)
         
     def retrieveVals(self):
-        """Retrive values for graphs."""
+        """Retrieve values for graphs."""
         apcinfo = APCinfo(self._host, self._port, self._user, self._password, 
                           self._monpath, self._ssl)
         stats = apcinfo.getAllStats()

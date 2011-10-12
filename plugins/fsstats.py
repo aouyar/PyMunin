@@ -85,7 +85,7 @@ class MuninFreeswitchPlugin(MuninPlugin):
             self.appendGraph('fs_channels', graph)
 
     def retrieveVals(self):
-        """Retrive values for graphs."""
+        """Retrieve values for graphs."""
         fs = FSinfo(self._fshost, self._fsport, self._fspass)
         if self.hasGraph('fs_calls'):
             count = fs.getCallCount()

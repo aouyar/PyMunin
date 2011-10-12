@@ -116,7 +116,7 @@ class MuninNetIfacePlugin(MuninPlugin):
 
         
     def retrieveVals(self):
-        """Retrive values for graphs."""
+        """Retrieve values for graphs."""
         for iface in self._ifaceList:
             stats = self._ifaceStats.get(iface)
             graph_name = 'netiface_traffic_%s' % iface

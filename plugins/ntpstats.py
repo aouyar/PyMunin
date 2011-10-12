@@ -78,7 +78,7 @@ class MuninNTPstatsPlugin(MuninPlugin):
             self.appendGraph('ntp_peer_stats', graph)
 
     def retrieveVals(self):
-        """Retrive values for graphs."""
+        """Retrieve values for graphs."""
         ntpinfo = NTPinfo()
         stats = ntpinfo.getPeerStats()
         if stats:

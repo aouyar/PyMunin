@@ -113,7 +113,7 @@ class MuninNginxPlugin(MuninPlugin):
             self.appendGraph('nginx_requests', graph)
             
     def retrieveVals(self):
-        """Retrive values for graphs."""
+        """Retrieve values for graphs."""
         nginxInfo = NginxInfo(self._host, self._port,
                                 self._user, self._password, 
                                 self._statuspath, self._ssl)

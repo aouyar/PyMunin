@@ -294,7 +294,7 @@ class MuninPgPlugin(MuninPlugin):
                 self.appendGraph('pg_tup_insert_detail', graph)
             
     def retrieveVals(self):
-        """Retrive values for graphs."""                
+        """Retrieve values for graphs."""                
         stats = self._dbconn.getDatabaseStats()
         databases = stats.get('databases')
         totals = stats.get('totals')

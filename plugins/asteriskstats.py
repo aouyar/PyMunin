@@ -293,7 +293,7 @@ class MuninAsteriskPlugin(MuninPlugin):
                 self.appendGraph('asterisk_fax_attempts', graph)
 
     def retrieveVals(self):
-        """Retrive values for graphs."""
+        """Retrieve values for graphs."""
         if self._ami is None:
             self._ami = AsteriskInfo(self._amihost, self._amiport, 
                                      self._amiuser, self._amipass)

@@ -283,7 +283,7 @@ class MuninMemcachedPlugin(MuninPlugin):
             self.appendGraph('memcached_hitpct', graph)
             
     def retrieveVals(self):
-        """Retrive values for graphs."""
+        """Retrieve values for graphs."""
         if self._stats is None:
             serverInfo = MemcachedInfo(self._host,  self._port)
             stats = serverInfo.getStats()

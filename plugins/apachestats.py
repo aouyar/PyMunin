@@ -106,7 +106,7 @@ class MuninApachePlugin(MuninPlugin):
             self.appendGraph('apache_workers', graph)
         
     def retrieveVals(self):
-        """Retrive values for graphs."""
+        """Retrieve values for graphs."""
         apacheInfo = ApacheInfo(self._host, self._port,
                                 self._user, self._password, 
                                 self._statuspath, self._ssl)

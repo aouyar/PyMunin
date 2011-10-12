@@ -115,7 +115,7 @@ class MuninDiskUsagePlugin(MuninPlugin):
             self.appendGraph(name, graph)
         
     def retrieveVals(self):
-        """Retrive values for graphs."""
+        """Retrieve values for graphs."""
         name = 'diskspace'
         if self.hasGraph(name):
             for fspath in self._fslist:
