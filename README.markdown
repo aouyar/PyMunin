@@ -53,6 +53,7 @@ included:
 * PHP APC - PHP Cache
 * PHP FPM (FastCGI Process Manager)
 * PostgreSQL Database
+* Processes and Threads
 * System Resources 
   (Load, CPU, Memory, Processes, Interrupts, Paging, Swapping, etc.)
 * Sangoma Wanpipe Telephony Interfaces
