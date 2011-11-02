@@ -2,6 +2,7 @@
 
 """
 
+import re
 import subprocess
 
 __author__ = "Ali Onur Uyar"
@@ -28,6 +29,65 @@ procStatusNames = {'D': 'uninterruptable_sleep',
                    'Z': 'defunct'} 
 
 
+class ProcessFilter:
+    
+    def __init__(self):
+        self._filters = {}
+    
+    def registerFilter(self, column, patterns, is_regex=False, 
+                       ignore_case=False):
+        if isinstance(patterns, (str, unicode)):
+            patterns = (patterns,)
+        elif not isinstance(patterns, (tuple, list)):
+            raise ValueError("The patterns parameter must either be as string "
+                             "or a tuple / list of strings.")
+        if is_regex:
+            if ignore_case:
+                flags = re.IGNORECASE
+            else:
+                flags = 0
+            patterns = [re.compile(pattern, flags) for pattern in patterns]
+        elif ignore_case:
+            patterns = [pattern.lower() for pattern in patterns]
+        self._filters[column] = (patterns, is_regex, ignore_case)
+                
+    def unregisterFilter(self, column):
+        if self._filters.has_key(column):
+            del self._filters[column]
+            
+    def checkFilter(self, headers, table):
+        result = []
+        column_idxs = {}
+        for column in self._filters.keys():
+            try:
+                column_idxs[column] = headers.index(column)
+            except ValueError:
+                raise ValueError('Invalid column name %s in filter.' 
+                                 % filter[0])
+        for row in table:
+            for (column, (patterns, 
+                          is_regex, 
+                          ignore_case)) in self._filters.items():
+                col_idx = column_idxs[column]
+                col_val = row[col_idx]
+                if is_regex:
+                    for pattern in patterns:
+                        if pattern.search(col_val):
+                            break
+                    else:
+                        break
+                else:
+                    if ignore_case:
+                        col_val = col_val.lower()
+                    if col_val in patterns:
+                        pass
+                    else:
+                        break
+            else:
+                result.append(row)
+        return result
+             
+    
 class ProcessInfo:
     """Class to retrieve stats for processes."""
     
@@ -50,56 +110,55 @@ class ProcessInfo:
             raise Exception('Execution of command %s failed.' % psCmd)
         return out.splitlines()
     
-    def getProcList(self, field_list=['uid', 'cmd',],
-                    user_list=None, cmd_list=None, 
-                    threads=False):
+    def getProcList(self, field_list=['uid', 'cmd',], threads=False):
         """Execute ps command with custom output format with columns from fields
         positional arguments and return result as a nested list.
         
         @param field_list: Fields included in the output.
                            Default: uid, cmd
-        @param user_list:  Filter processes by user name or id.
-        @param cmd_list:   Filter processes by command name.
         @param threads:    If True, include threads in output. 
         @return:           List of headers and list of rows and columns.
         
         """
         args = []
-        stats = {}
         if threads:
             args.append('-T')
         args.append('-o')
         args.append(','.join(field_list))
-        filter = False
-        if user_list is not None:
-            args.append('-u')
-            args.append(','.join(user_list))
-            filter = True
-        if cmd_list is not None:
-            args.append('-C')
-            args.append(','.join(cmd_list))
-            filter = True
-        if not filter:
-            args.append('-e')
+        args.append('-e')
         lines = self.execProcCmd(*args)    
         if len(lines) > 1:
-            headers = lines[0].split()
-            stats = [line.split() for line in lines[1:]] 
+            headers = []
+            field_ranges = []
+            header_line = lines[0]
+            colfields = re.findall('(\S+)(\s*)', header_line)
+            start = 0
+            for (header, space) in colfields:
+                headers.append(header.lower())
+                if len(space) != 0:
+                    end = start + len(header) + len(space)
+                else:
+                    end = None
+                field_ranges.append((start, end))
+                start = end
+            stats = []
+            for line in lines[1:]:
+                cols = []
+                for (start, end) in field_ranges:
+                    cols.append(line[start:end].strip())
+                stats.append(cols)
             return {'headers': headers, 'stats': stats}
         else:
             return None
     
-    def getProcDict(self, field_list=['uid', 'cmd',],
-                    user_list=None, cmd_list=None,
-                    threads=False):
+    def getProcDict(self, field_list=['uid', 'cmd',], threads=False):
         """Execute ps command with custom output format with columns from fields
-        positional arguments and return result as a nested dictionary.
+        positional arguments and return result as a nested dictionary with the 
+        key PID or SPID.
         
         @param field_list: Fields included in the output.
                            Default: uid, cmd
                            (PID or SPID column is included by default.)
-        @param user_list:  Filter processes by user name or id.
-        @param cmd_list:   Filter processes by command name.
         @param threads:    If True, include threads in output.
         @return:           Nested dictionary indexed by:
                              PID for process info.
@@ -107,18 +166,23 @@ class ProcessInfo:
         
         """
         stats = {}
+        num_cols = len(field_list)
         if threads:
             key = 'spid'
         else:
             key = 'pid'
-        field_list.append(key)
-        result = self.getProcList(field_list, user_list, cmd_list, threads)
+        try:
+            key_idx = field_list.index(key)
+        except ValueError:
+            field_list.append(key)
+            key_idx = len(field_list) - 1
+        result = self.getProcList(field_list, threads)
         if result is not None:
-            headers = result['headers'][:-1]
+            headers = result['headers'][:num_cols]
             lines = result['stats']
             if len(lines) > 1:
                 for cols in lines:
-                    stats[cols[-1]] = dict(zip(headers, cols[:-1]))
+                    stats[cols[key_idx]] = dict(zip(headers, cols[:num_cols]))
             return stats
         else:
             return None
@@ -152,7 +216,3 @@ class ProcessInfo:
                 'prio': prio, 
                 'locked_in_mem': locked_in_mem, 
                 'total': total}
-    
-    
-    
-    
