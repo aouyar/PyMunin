@@ -26,7 +26,14 @@ procStatusNames = {'D': 'uninterruptable_sleep',
                    'T': 'stopped',
                    'W': 'paging',
                    'X': 'dead',
-                   'Z': 'defunct'} 
+                   'Z': 'defunct'}
+psFieldWidth = {'args': 64,
+                'cmd': 64,
+                'command': 64,
+                's': 4,
+                'stat': 8,
+                'state': 4,}
+psDefaultFieldWidth = 16
 
 
 class ProcessFilter:
@@ -111,6 +118,49 @@ class ProcessInfo:
         return out.splitlines()
     
     def getProcList(self, field_list=['uid', 'cmd',], threads=False):
+        """Execute ps command with custom output format with columns from 
+        field_list and return result as a nested list.
+        
+        The Standard Format Specifiers from ps man page must be used in the
+        field_list.
+        
+        @param field_list: Fields included in the output.
+                           Default: uid, cmd
+        @param threads:    If True, include threads in output. 
+        @return:           List of headers and list of rows and columns.
+        
+        """
+        args = []
+        headers = [f.lower() for f in field_list]
+        args.append('--no-headers')
+        args.append('-e')
+        if threads:
+            args.append('-T')
+        field_ranges = []
+        fmt_strs = []
+        start = 0
+        for header in headers:
+            field_width = psFieldWidth.get(header, psDefaultFieldWidth)
+            fmt_strs.append('%s:%d' % (header, field_width))
+            end = start + field_width
+            field_ranges.append((start,end))
+            start = end
+        args.append('-o')
+        args.append(','.join(fmt_strs))
+        lines = self.execProcCmd(*args)
+        if len(lines) > 0:
+            stats = []
+            for line in lines:
+                cols = []
+                for (start, end) in field_ranges:
+                    cols.append(line[start:end].strip())
+                stats.append(cols)
+            return {'headers': headers, 'stats': stats}
+        else:
+            return None
+        
+    def getFilteredProcList(self, field_list=['uid', 'cmd',], threads=False,
+                            **kwargs):
         """Execute ps command with custom output format with columns from fields
         positional arguments and return result as a nested list.
         
@@ -120,41 +170,36 @@ class ProcessInfo:
         @return:           List of headers and list of rows and columns.
         
         """
-        args = []
-        if threads:
-            args.append('-T')
-        args.append('-o')
-        args.append(','.join(field_list))
-        args.append('-e')
-        lines = self.execProcCmd(*args)    
-        if len(lines) > 1:
-            headers = []
-            field_ranges = []
-            header_line = lines[0]
-            colfields = re.findall('(\S+)(\s*)', header_line)
-            start = 0
-            for (header, space) in colfields:
-                headers.append(header.lower())
-                if len(space) != 0:
-                    end = start + len(header) + len(space)
-                else:
-                    end = None
-                field_ranges.append((start, end))
-                start = end
-            stats = []
-            for line in lines[1:]:
-                cols = []
-                for (start, end) in field_ranges:
-                    cols.append(line[start:end].strip())
-                stats.append(cols)
-            return {'headers': headers, 'stats': stats}
+        pfilter = ProcessFilter()
+        for (key, patterns) in kwargs.items():
+            if key.endswith('_regex'):
+                col = key[:-len('_regex')]
+                is_regex = True
+            else:
+                col = key
+                is_regex = False
+            if col.endswith('_ic'):
+                col = col[:-len('_ic')]
+                ignore_case = True
+            else:
+                ignore_case = False
+            pfilter.registerFilter(col, patterns, is_regex, ignore_case)
+            if not col in field_list:
+                field_list.append(col)
+        pinfo = self.getProcList(field_list, threads)
+        if pinfo:
+            stats = pfilter.checkFilter(pinfo['headers'], pinfo['stats'])
+            return {'headers': pinfo['headers'], 'stats': stats}
         else:
             return None
     
     def getProcDict(self, field_list=['uid', 'cmd',], threads=False):
-        """Execute ps command with custom output format with columns from fields
-        positional arguments and return result as a nested dictionary with the 
-        key PID or SPID.
+        """Execute ps command with custom output format with columns format with 
+        columns from field_list and return result as a nested dictionary with 
+        the key PID or SPID.
+        
+        The Standard Format Specifiers from ps man page must be used in the
+        field_list.
         
         @param field_list: Fields included in the output.
                            Default: uid, cmd
