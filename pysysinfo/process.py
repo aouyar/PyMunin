@@ -27,9 +27,10 @@ procStatusNames = {'D': 'uninterruptable_sleep',
                    'W': 'paging',
                    'X': 'dead',
                    'Z': 'defunct'}
-psFieldWidth = {'args': 64,
-                'cmd': 64,
-                'command': 64,
+
+psFieldWidth = {'args': 128,
+                'cmd': 128,
+                'command': 128,
                 's': 4,
                 'stat': 8,
                 'state': 4,}
@@ -37,12 +38,27 @@ psDefaultFieldWidth = 16
 
 
 class ProcessFilter:
+    """Class for filtering results of ps command based on filters on values of
+    columns."""
     
     def __init__(self):
+        """Constructor."""
         self._filters = {}
     
     def registerFilter(self, column, patterns, is_regex=False, 
                        ignore_case=False):
+        """Register filter on column of ps output.
+        
+        @param column:      The column header. The Standard Format Specifiers 
+                            from ps man page must used as column names.
+        @param patterns:    A single pattern or a list of patterns used for 
+                            matching column values.
+        @param is_regex:    The patterns will be treated as regex if True, the 
+                            column values will be tested for equality with the
+                            patterns otherwise.
+        @param ignore_case: Case insensitive matching will be used if True.
+        
+        """
         if isinstance(patterns, (str, unicode)):
             patterns = (patterns,)
         elif not isinstance(patterns, (tuple, list)):
@@ -59,10 +75,24 @@ class ProcessFilter:
         self._filters[column] = (patterns, is_regex, ignore_case)
                 
     def unregisterFilter(self, column):
+        """Un register filter on column of ps output.
+        
+        @param column: The column header. The Standard Format Specifiers 
+                       from ps man page must used as column names.
+        
+        """
         if self._filters.has_key(column):
             del self._filters[column]
             
-    def checkFilter(self, headers, table):
+    def applyFilter(self, headers, table):
+        """Apply filter on ps command result.
+        
+        @param headers: List of column headers.
+        @param table:   Nested list of rows and columns of ps command output.
+        @return:        Nested list of rows and columns of ps command output
+                        filtered using registered filters.
+                        
+        """
         result = []
         column_idxs = {}
         for column in self._filters.keys():
@@ -204,7 +234,7 @@ class ProcessInfo:
                 field_list.append(col)
         pinfo = self.getProcList(field_list, threads)
         if pinfo:
-            stats = pfilter.checkFilter(pinfo['headers'], pinfo['stats'])
+            stats = pfilter.applyFilter(pinfo['headers'], pinfo['stats'])
             return {'headers': pinfo['headers'], 'stats': stats}
         else:
             return None
