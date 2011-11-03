@@ -161,12 +161,28 @@ class ProcessInfo:
         
     def getFilteredProcList(self, field_list=['uid', 'cmd',], threads=False,
                             **kwargs):
-        """Execute ps command with custom output format with columns from fields
-        positional arguments and return result as a nested list.
+        """Execute ps command with custom output format with columns columns from 
+        field_list, select lines using the filters defined by kwargs and return 
+        result as a nested list.
+        
+        The Standard Format Specifiers from ps man page must be used in the
+        field_list and filters.
         
         @param field_list: Fields included in the output.
                            Default: uid, cmd
-        @param threads:    If True, include threads in output. 
+        @param threads:    If True, include threads in output.
+        @param **kwargs:   Filters are keyword variables. Each keyword must 
+                           correspond to a field name and an optional suffix:
+                           field:          Field equal to value or in list of 
+                                           values.
+                           field_ic:       Field equal to value or in list of 
+                                           values, using case insensitive 
+                                           comparison.
+                           field_regex:    Field matches regex value or matches
+                                           with any regex in list of values.
+                           field_ic_regex: Field matches regex value or matches
+                                           with any regex in list of values 
+                                           using case insensitive match.                                  
         @return:           List of headers and list of rows and columns.
         
         """
@@ -195,7 +211,27 @@ class ProcessInfo:
     
     def getProcDict(self, field_list=['uid', 'cmd',], threads=False):
         """Execute ps command with custom output format with columns format with 
-        columns from field_list and return result as a nested dictionary with 
+        columns from field_list, select lines using the filters defined by kwargs 
+        and return result as a nested dictionary with the key PID or SPID.
+        
+        The Standard Format Specifiers from ps man page must be used in the
+        field_list.
+        
+        @param field_list: Fields included in the output.
+                           Default: uid, cmd
+                           (PID or SPID column is included by default.)
+        @param threads:    If True, include threads in output.
+        @return:           Nested dictionary indexed by:
+                             PID for process info.
+                             SPID for thread info.
+        
+        """
+        return self.getFilteredProcDict(field_list, threads)
+        
+    def getFilteredProcDict(self, field_list=['uid', 'cmd',], threads=False,
+                            **kwargs):
+        """Execute ps command with custom output format with columns format with 
+        columns from field_list, and return result as a nested dictionary with 
         the key PID or SPID.
         
         The Standard Format Specifiers from ps man page must be used in the
@@ -205,6 +241,18 @@ class ProcessInfo:
                            Default: uid, cmd
                            (PID or SPID column is included by default.)
         @param threads:    If True, include threads in output.
+        @param **kwargs:   Filters are keyword variables. Each keyword must 
+                           correspond to a field name and an optional suffix:
+                           field:          Field equal to value or in list of 
+                                           values.
+                           field_ic:       Field equal to value or in list of 
+                                           values, using case insensitive 
+                                           comparison.
+                           field_regex:    Field matches regex value or matches
+                                           with any regex in list of values.
+                           field_ic_regex: Field matches regex value or matches
+                                           with any regex in list of values 
+                                           using case insensitive match. 
         @return:           Nested dictionary indexed by:
                              PID for process info.
                              SPID for thread info.
@@ -221,7 +269,10 @@ class ProcessInfo:
         except ValueError:
             field_list.append(key)
             key_idx = len(field_list) - 1
-        result = self.getProcList(field_list, threads)
+        if len(kwargs) > 0:
+            result = self.getFilteredProcList(field_list, threads, **kwargs)
+        else:
+            result = self.getProcList(field_list, threads)
         if result is not None:
             headers = result['headers'][:num_cols]
             lines = result['stats']
