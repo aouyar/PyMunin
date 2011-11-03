@@ -142,7 +142,7 @@ class ProcessInfo:
         for header in headers:
             field_width = psFieldWidth.get(header, psDefaultFieldWidth)
             fmt_strs.append('%s:%d' % (header, field_width))
-            end = start + field_width
+            end = start + field_width + 1
             field_ranges.append((start,end))
             start = end
         args.append('-o')
