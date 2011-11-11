@@ -31,7 +31,7 @@ class NetstatInfo:
         """Execute ps command with positional params args and return result as 
         list of lines.
         
-        @param *args: Positional params for ps command.
+        @param *args: Positional params for netstat command.
         @return:      List of output lines
         
         """
@@ -46,9 +46,9 @@ class NetstatInfo:
                     include_listen=True, only_listen=False,
                     show_users=False, show_procs=False,
                     resolve_hosts=False, resolve_ports=False, resolve_users=True):
-        """Execute netstat command and return result as a nested list.
+        """Execute netstat command and return result as a nested dictionary.
          
-        @return:           List of headers and list of rows and columns.
+        @return: List of headers and list of rows and columns.
         
         """
         headers = ['proto', 'ipversion', 'recvq', 'sendq', 
