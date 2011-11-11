@@ -2,6 +2,7 @@
 
 """
 
+import re
 import subprocess
 
 __author__ = "Ali Onur Uyar"
@@ -50,6 +51,8 @@ class NetstatInfo:
         @return:           List of headers and list of rows and columns.
         
         """
+        headers = ['proto', 'ipversion', 'recvq', 'sendq', 
+                   'localaddr', 'localport','foreignaddr', 'foreignport']
         args = []
         args.append('--protocol=inet')
         if tcp:
@@ -64,10 +67,18 @@ class NetstatInfo:
             args.append('-4')
         if ipv6:
             args.append('-6')
-        if show_users:
-            args.append('-e')
         if show_procs:
             args.append('-p')
+        if show_users:
+            args.append('-e')
+            regexp = re.compile('(tcp|udp)(\d*)\s+(\d+)\s+(\d+)\s+'
+                                '(\S+):(\w+)\s+(\S+):(\w+|\*)\s+'
+                                '(\w*)\s+(\w+)\s+(\d+)\s*$')
+            headers.extend(['user', 'inode'])
+        else:
+            regexp = re.compile('(tcp|udp)(\d*)\s+(\d+)\s+(\d+)\s+'
+                                '(\S+):(\w+)\s+(\S+):(\w+|\*)\s+'
+                                '(\w*)\s*$')
         if not resolve_hosts:
             args.append('--numeric-hosts')
         if not resolve_ports:
@@ -75,5 +86,10 @@ class NetstatInfo:
         if not resolve_users:
             args.append('--numeric-users')
         lines = self.execNetstatCmd(*args)
-        return lines
+        stats = []
+        for line in lines[2:]:
+            mobj = regexp.match(line)
+            if mobj is not None:
+                stats.append(mobj.groups())
+        return {'headers:': headers, 'stats': stats}
 
