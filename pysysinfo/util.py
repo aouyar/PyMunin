@@ -151,3 +151,93 @@ class SoftwareVersion(tuple):
         
         """
         return self._versionstr
+
+
+class TableFilter:
+    """Class for filtering rows of tables based on filters on values of columns.
+    
+    The tables are represented as nested lists (list of lists of columns.)
+    
+    """
+    
+    def __init__(self):
+        """Initialize Filter."""
+        self._filters = {}
+    
+    def registerFilter(self, column, patterns, is_regex=False, 
+                       ignore_case=False):
+        """Register filter on a column of table.
+        
+        @param column:      The column name.
+        @param patterns:    A single pattern or a list of patterns used for 
+                            matching column values.
+        @param is_regex:    The patterns will be treated as regex if True, the 
+                            column values will be tested for equality with the
+                            patterns otherwise.
+        @param ignore_case: Case insensitive matching will be used if True.
+        
+        """
+        if isinstance(patterns, basestring):
+            patterns = (patterns,)
+        elif not isinstance(patterns, (tuple, list)):
+            raise ValueError("The patterns parameter must either be as string "
+                             "or a tuple / list of strings.")
+        if is_regex:
+            if ignore_case:
+                flags = re.IGNORECASE
+            else:
+                flags = 0
+            patterns = [re.compile(pattern, flags) for pattern in patterns]
+        elif ignore_case:
+            patterns = [pattern.lower() for pattern in patterns]
+        self._filters[column] = (patterns, is_regex, ignore_case)
+        
+                    
+    def unregisterFilter(self, column):
+        """Unregister filter on a column of the table.
+        
+        @param column: The column header.
+        
+        """
+        if self._filters.has_key(column):
+            del self._filters[column]
+            
+    def applyFilter(self, headers, table):
+        """Apply filter on ps command result.
+        
+        @param headers: List of column headers.
+        @param table:   Nested list of rows and columns.
+        @return:        Nested list of rows and columns filtered using 
+                        registered filters.
+                        
+        """
+        result = []
+        column_idxs = {}
+        for column in self._filters.keys():
+            try:
+                column_idxs[column] = headers.index(column)
+            except ValueError:
+                raise ValueError('Invalid column name %s in filter.' 
+                                 % filter[0])
+        for row in table:
+            for (column, (patterns, 
+                          is_regex, 
+                          ignore_case)) in self._filters.items():
+                col_idx = column_idxs[column]
+                col_val = row[col_idx]
+                if is_regex:
+                    for pattern in patterns:
+                        if pattern.search(col_val):
+                            break
+                    else:
+                        break
+                else:
+                    if ignore_case:
+                        col_val = col_val.lower()
+                    if col_val in patterns:
+                        pass
+                    else:
+                        break
+            else:
+                result.append(row)
+        return result

@@ -2,8 +2,8 @@
 
 """
 
-import re
 import subprocess
+from util import TableFilter
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
@@ -36,94 +36,6 @@ psFieldWidth = {'args': 128,
                 'state': 4,}
 psDefaultFieldWidth = 16
 
-
-class ProcessFilter:
-    """Class for filtering results of ps command based on filters on values of
-    columns."""
-    
-    def __init__(self):
-        """Constructor."""
-        self._filters = {}
-    
-    def registerFilter(self, column, patterns, is_regex=False, 
-                       ignore_case=False):
-        """Register filter on column of ps output.
-        
-        @param column:      The column header. The Standard Format Specifiers 
-                            from ps man page must used as column names.
-        @param patterns:    A single pattern or a list of patterns used for 
-                            matching column values.
-        @param is_regex:    The patterns will be treated as regex if True, the 
-                            column values will be tested for equality with the
-                            patterns otherwise.
-        @param ignore_case: Case insensitive matching will be used if True.
-        
-        """
-        if isinstance(patterns, basestring):
-            patterns = (patterns,)
-        elif not isinstance(patterns, (tuple, list)):
-            raise ValueError("The patterns parameter must either be as string "
-                             "or a tuple / list of strings.")
-        if is_regex:
-            if ignore_case:
-                flags = re.IGNORECASE
-            else:
-                flags = 0
-            patterns = [re.compile(pattern, flags) for pattern in patterns]
-        elif ignore_case:
-            patterns = [pattern.lower() for pattern in patterns]
-        self._filters[column] = (patterns, is_regex, ignore_case)
-                
-    def unregisterFilter(self, column):
-        """Un register filter on column of ps output.
-        
-        @param column: The column header. The Standard Format Specifiers 
-                       from ps man page must used as column names.
-        
-        """
-        if self._filters.has_key(column):
-            del self._filters[column]
-            
-    def applyFilter(self, headers, table):
-        """Apply filter on ps command result.
-        
-        @param headers: List of column headers.
-        @param table:   Nested list of rows and columns of ps command output.
-        @return:        Nested list of rows and columns of ps command output
-                        filtered using registered filters.
-                        
-        """
-        result = []
-        column_idxs = {}
-        for column in self._filters.keys():
-            try:
-                column_idxs[column] = headers.index(column)
-            except ValueError:
-                raise ValueError('Invalid column name %s in filter.' 
-                                 % filter[0])
-        for row in table:
-            for (column, (patterns, 
-                          is_regex, 
-                          ignore_case)) in self._filters.items():
-                col_idx = column_idxs[column]
-                col_val = row[col_idx]
-                if is_regex:
-                    for pattern in patterns:
-                        if pattern.search(col_val):
-                            break
-                    else:
-                        break
-                else:
-                    if ignore_case:
-                        col_val = col_val.lower()
-                    if col_val in patterns:
-                        pass
-                    else:
-                        break
-            else:
-                result.append(row)
-        return result
-             
     
 class ProcessInfo:
     """Class to retrieve stats for processes."""
@@ -216,7 +128,7 @@ class ProcessInfo:
         @return:           List of headers and list of rows and columns.
         
         """
-        pfilter = ProcessFilter()
+        pfilter = TableFilter()
         for (key, patterns) in kwargs.items():
             if key.endswith('_regex'):
                 col = key[:-len('_regex')]
