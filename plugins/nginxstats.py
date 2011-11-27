@@ -12,6 +12,7 @@ Multigraph Plugin - Graph Structure
    - nginx_activeconn
    - nginx_connections
    - nginx_requests
+   - nginx_requestsperconn
 
    
 Environment Variables
@@ -49,6 +50,13 @@ __version__ = "0.8"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
+
+
+numSamples = 5
+"""Number of samples to store for calculating the running average for number of
+requests por connection.
+
+"""
 
 
 class MuninNginxPlugin(MuninPlugin):
@@ -106,14 +114,24 @@ class MuninNginxPlugin(MuninPlugin):
         if self.graphEnabled('nginx_requests'):
             graph = MuninGraph('Nginx - Requests per Second', 
                 'Nginx',
-                info='Request per second to Nginx Web Server.',
+                info='Requests per second to Nginx Web Server.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('requests', 'requests', draw='LINE2', type='DERIVE', 
                            min=0, info="Requests handled by Nginx per second.")
             self.appendGraph('nginx_requests', graph)
             
+        if self.graphEnabled('nginx_requestsperconn'):
+            graph = MuninGraph('Nginx - Requests per Connection', 
+                'Nginx',
+                info='Requests per handled connections for Nginx Web Server.',
+                args='--base 1000 --lower-limit 0')
+            graph.addField('requests', 'requests', draw='LINE2', type='GAUGE', 
+                           min=0, info="Average number of requests per"
+                                       " connections handled by Nginx.")
+            self.appendGraph('nginx_requestsperconn', graph)
+            
     def retrieveVals(self):
-        """Retrieve values for graphs."""
+        """Retrieve values for graphs."""   
         nginxInfo = NginxInfo(self._host, self._port,
                                 self._user, self._password, 
                                 self._statuspath, self._ssl)
@@ -131,6 +149,24 @@ class MuninNginxPlugin(MuninPlugin):
                                  stats['accepts'] - stats['handled'])
             if self.hasGraph('nginx_requests'):
                 self.setGraphVal('nginx_requests', 'requests', stats['requests'])
+            if self.hasGraph('nginx_requestsperconn'):
+                curr_stats = (stats['handled'], stats['requests'])
+                hist_stats = self.restoreState()
+                if hist_stats:
+                    prev_stats = hist_stats[0]
+                else:
+                    hist_stats = []
+                    prev_stats = (0,0)
+                conns = max(curr_stats[0] - prev_stats[0], 0)
+                reqs = max(curr_stats[1] - prev_stats[1], 0)
+                if conns > 0:
+                    self.setGraphVal('nginx_requestsperconn', 'requests',
+                                     float(reqs) / float(conns))
+                else:
+                    self.setGraphVal('nginx_requestsperconn', 'requests', 0)
+                hist_stats.append(curr_stats)
+                self.saveState(hist_stats[-numSamples:])
+                print hist_stats
                 
                 
 if __name__ == "__main__":
