@@ -3,6 +3,7 @@
 """
 
 import subprocess
+import re
 from util import TableFilter
 
 __author__ = "Ali Onur Uyar"
@@ -59,7 +60,7 @@ class ProcessInfo:
             raise Exception('Execution of command %s failed.' % psCmd)
         return out.splitlines()
     
-    def getProcList(self, field_list=['uid', 'cmd',], threads=False):
+    def getProcList(self, field_list=['pid', 'user', 'cmd',], threads=False):
         """Execute ps command with custom output format with columns from 
         field_list and return result as a nested list.
         
@@ -67,7 +68,7 @@ class ProcessInfo:
         field_list.
         
         @param field_list: Fields included in the output.
-                           Default: uid, cmd
+                           Default: pid, user, cmd
         @param threads:    If True, include threads in output. 
         @return:           List of headers and list of rows and columns.
         
@@ -101,7 +102,7 @@ class ProcessInfo:
         else:
             return None
         
-    def getFilteredProcList(self, field_list=['uid', 'cmd',], threads=False,
+    def getFilteredProcList(self, field_list=['pid', 'user', 'cmd',], threads=False,
                             **kwargs):
         """Execute ps command with custom output format with columns columns from 
         field_list, select lines using the filters defined by kwargs and return 
@@ -111,7 +112,7 @@ class ProcessInfo:
         field_list and filters.
         
         @param field_list: Fields included in the output.
-                           Default: uid, cmd
+                           Default: pid, user, cmd
         @param threads:    If True, include threads in output.
         @param **kwargs:   Filters are keyword variables. Each keyword must 
                            correspond to a field name and an optional suffix:
@@ -129,29 +130,19 @@ class ProcessInfo:
         
         """
         pfilter = TableFilter()
-        for (key, patterns) in kwargs.items():
-            if key.endswith('_regex'):
-                col = key[:-len('_regex')]
-                is_regex = True
-            else:
-                col = key
-                is_regex = False
-            if col.endswith('_ic'):
-                col = col[:-len('_ic')]
-                ignore_case = True
-            else:
-                ignore_case = False
-            pfilter.registerFilter(col, patterns, is_regex, ignore_case)
+        pfilter.registerFilters(**kwargs)
+        for key in kwargs:
+            col = re.sub('(_ic)?(_regex)?$', '', key)
             if not col in field_list:
                 field_list.append(col)
         pinfo = self.getProcList(field_list, threads)
         if pinfo:
-            stats = pfilter.applyFilter(pinfo['headers'], pinfo['stats'])
+            stats = pfilter.applyFilters(pinfo['headers'], pinfo['stats'])
             return {'headers': pinfo['headers'], 'stats': stats}
         else:
             return None
     
-    def getProcDict(self, field_list=['uid', 'cmd',], threads=False):
+    def getProcDict(self, field_list=['user', 'cmd',], threads=False):
         """Execute ps command with custom output format with columns format with 
         columns from field_list, select lines using the filters defined by kwargs 
         and return result as a nested dictionary with the key PID or SPID.
@@ -160,7 +151,7 @@ class ProcessInfo:
         field_list.
         
         @param field_list: Fields included in the output.
-                           Default: uid, cmd
+                           Default: user, cmd
                            (PID or SPID column is included by default.)
         @param threads:    If True, include threads in output.
         @return:           Nested dictionary indexed by:
@@ -170,7 +161,7 @@ class ProcessInfo:
         """
         return self.getFilteredProcDict(field_list, threads)
         
-    def getFilteredProcDict(self, field_list=['uid', 'cmd',], threads=False,
+    def getFilteredProcDict(self, field_list=['user', 'cmd',], threads=False,
                             **kwargs):
         """Execute ps command with custom output format with columns format with 
         columns from field_list, and return result as a nested dictionary with 
@@ -180,7 +171,7 @@ class ProcessInfo:
         field_list.
         
         @param field_list: Fields included in the output.
-                           Default: uid, cmd
+                           Default: user, cmd
                            (PID or SPID column is included by default.)
         @param threads:    If True, include threads in output.
         @param **kwargs:   Filters are keyword variables. Each keyword must 
