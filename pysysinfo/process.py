@@ -59,7 +59,7 @@ class ProcessFilter:
         @param ignore_case: Case insensitive matching will be used if True.
         
         """
-        if isinstance(patterns, (str, unicode)):
+        if isinstance(patterns, basestring):
             patterns = (patterns,)
         elif not isinstance(patterns, (tuple, list)):
             raise ValueError("The patterns parameter must either be as string "
