@@ -25,6 +25,9 @@ Environment Variables
   statuspath:     Path for Nginx Web Server Status Page.
                   (Default: server-status)
   ssl:            Use SSL if yes. (Default: no)
+  samples:        Number of samples to collect for calculating running averages.
+                  (Six samples for 30 minute running average are stored by 
+                  default.)
   include_graphs: Comma separated list of enabled graphs. 
                   (All graphs enabled by default.)
   exclude_graphs: Comma separated list of disabled graphs.
@@ -32,6 +35,7 @@ Environment Variables
   Example:
     [nginxstats]
         env.include_graphs nginx_activeconn
+        env.samples 3
 
 """
 # Munin  - Magic Markers
@@ -52,11 +56,8 @@ __email__ = "aouyar at gmail.com"
 __status__ = "Development"
 
 
-numSamples = 5
-"""Number of samples to store for calculating the running average for number of
-requests por connection.
-
-"""
+defaultNumSamples = 6
+"""Number of samples to store for calculating the running averages."""
 
 
 class MuninNginxPlugin(MuninPlugin):
@@ -81,7 +82,8 @@ class MuninNginxPlugin(MuninPlugin):
         self._user = self.envGet('user')
         self._password = self.envGet('password')
         self._statuspath = self.envGet('statuspath')
-        self._ssl = self.envCheckFlag('ssl', False)  
+        self._ssl = self.envCheckFlag('ssl', False)
+        self._numSamples = self.envGet('samples', defaultNumSamples)  
         
         if self.graphEnabled('nginx_activeconn'):
             graph = MuninGraph('Nginx - Active Connections', 
@@ -165,7 +167,7 @@ class MuninNginxPlugin(MuninPlugin):
                 else:
                     self.setGraphVal('nginx_requestsperconn', 'requests', 0)
                 hist_stats.append(curr_stats)
-                self.saveState(hist_stats[-numSamples:])
+                self.saveState(hist_stats[-self._numSamples:])
                 print hist_stats
                 
                 
