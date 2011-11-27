@@ -102,26 +102,52 @@ class NestedDict(dict):
 
     
 class SoftwareVersion(tuple):
-    """Class for parsing, storing and comparing version strings. 
+    """Class for parsing, storing and comparing versions.
     
-    Version strings must begin with integer numbers separated by dots and may 
-    and with any string. The version string is broken down into its components
-    and stored as a tuple.All standard operations for tuple class are supported.
+    All standard operations for tuple class are supported.
     
     """
-    def __init__(self, versionstr):
-        self._versionstr = versionstr
+    def __init__(self, version):
+        """Initialize the new instance of class.
         
-    def __new__(cls, versionstr):
-        mobj = re.match('(?P<version>\d+(\.\d+)*)(?P<suffix>.*)$', versionstr)
-        if mobj:
-            version = [int(i) for i in mobj.groupdict()['version'].split('.')]
-            suffix = mobj.groupdict()['suffix'].strip()
-            if len(suffix) > 0:
-                version.append(suffix)
-            return tuple.__new__(cls, version)
+        @param version: Version must either be a string or a tuple of integers
+                        or strings representing integers. 
+    
+        Version strings must begin with integer numbers separated by dots and 
+        may end with any string.
+        
+        """
+        self._versionstr = '.'.join([str(v) for v in self])
+                   
+    def __new__(cls, version):
+        """Static method for creating a new instance which is a subclass of 
+        immutable tuple type. Versions are parsed and stored as a tuple of 
+        integers internally.
+        
+        @param cls:     Class
+        @param version: Version must either be a string or a tuple of integers
+                        or strings representing integers. 
+    
+        Version strings must begin with integer numbers separated by dots and 
+        may end with any string.
+        
+        """
+        if isinstance(version, basestring):
+            mobj = re.match('(?P<version>\d+(\.\d+)*)(?P<suffix>.*)$', version)
+            if mobj:
+                version = [int(i) for i in mobj.groupdict()['version'].split('.')]
+                return tuple.__new__(cls, version)
+            else:
+                raise ValueError('Invalid version string format.')
         else:
-            raise ValueError('Invalid version string format.')
+            try:
+                return tuple.__new__(cls, [int(v) for v in version])
+            except:
+                raise TypeError("Version must either be a string or an iterable"
+                                " of integers.")
         
     def __str__(self):
+        """
+        
+        """
         return self._versionstr
