@@ -168,7 +168,6 @@ class MuninNginxPlugin(MuninPlugin):
                     self.setGraphVal('nginx_requestsperconn', 'requests', 0)
                 hist_stats.append(curr_stats)
                 self.saveState(hist_stats[-self._numSamples:])
-                print hist_stats
                 
                 
 if __name__ == "__main__":
