@@ -204,8 +204,9 @@ class TableFilter:
     def registerFilters(self, **kwargs):
         """Register multiple filters at once.
         
-        @param **kwargs: Filters are keyword variables. Each keyword must 
-                         correspond to a field name and an optional suffix:
+        @param **kwargs: Multiple filters are registered using keyword 
+                         variables. Each keyword must correspond to a field name 
+                         with an optional suffix:
                          field:          Field equal to value or in list of 
                                          values.
                          field_ic:       Field equal to value or in list of 

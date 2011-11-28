@@ -60,7 +60,7 @@ class ProcessInfo:
             raise Exception('Execution of command %s failed.' % psCmd)
         return out.splitlines()
     
-    def getProcList(self, field_list=['pid', 'user', 'cmd',], threads=False):
+    def parseProcCmd(self, field_list=['pid', 'user', 'cmd',], threads=False):
         """Execute ps command with custom output format with columns from 
         field_list and return result as a nested list.
         
@@ -102,8 +102,8 @@ class ProcessInfo:
         else:
             return None
         
-    def getFilteredProcList(self, field_list=['pid', 'user', 'cmd',], threads=False,
-                            **kwargs):
+    def getProcList(self, field_list=['pid', 'user', 'cmd',], threads=False,
+                    **kwargs):
         """Execute ps command with custom output format with columns columns from 
         field_list, select lines using the filters defined by kwargs and return 
         result as a nested list.
@@ -114,8 +114,10 @@ class ProcessInfo:
         @param field_list: Fields included in the output.
                            Default: pid, user, cmd
         @param threads:    If True, include threads in output.
-        @param **kwargs:   Filters are keyword variables. Each keyword must 
-                           correspond to a field name and an optional suffix:
+        @param **kwargs:   Keyword variables are used for filtering the results
+                           depending on the values of the columns. Each keyword 
+                           must correspond to a field name with an optional 
+                           suffix:
                            field:          Field equal to value or in list of 
                                            values.
                            field_ic:       Field equal to value or in list of 
@@ -129,40 +131,23 @@ class ProcessInfo:
         @return:           List of headers and list of rows and columns.
         
         """
-        pfilter = TableFilter()
-        pfilter.registerFilters(**kwargs)
         for key in kwargs:
             col = re.sub('(_ic)?(_regex)?$', '', key)
             if not col in field_list:
                 field_list.append(col)
-        pinfo = self.getProcList(field_list, threads)
+        pinfo = self.parseProcCmd(field_list, threads)
         if pinfo:
-            stats = pfilter.applyFilters(pinfo['headers'], pinfo['stats'])
-            return {'headers': pinfo['headers'], 'stats': stats}
+            if len(kwargs) > 0:
+                pfilter = TableFilter()
+                pfilter.registerFilters(**kwargs)
+                stats = pfilter.applyFilters(pinfo['headers'], pinfo['stats'])
+                return {'headers': pinfo['headers'], 'stats': stats}
+            else:
+                return pinfo
         else:
             return None
-    
-    def getProcDict(self, field_list=['user', 'cmd',], threads=False):
-        """Execute ps command with custom output format with columns format with 
-        columns from field_list, select lines using the filters defined by kwargs 
-        and return result as a nested dictionary with the key PID or SPID.
         
-        The Standard Format Specifiers from ps man page must be used in the
-        field_list.
-        
-        @param field_list: Fields included in the output.
-                           Default: user, cmd
-                           (PID or SPID column is included by default.)
-        @param threads:    If True, include threads in output.
-        @return:           Nested dictionary indexed by:
-                             PID for process info.
-                             SPID for thread info.
-        
-        """
-        return self.getFilteredProcDict(field_list, threads)
-        
-    def getFilteredProcDict(self, field_list=['user', 'cmd',], threads=False,
-                            **kwargs):
+    def getProcDict(self, field_list=['user', 'cmd',], threads=False, **kwargs):
         """Execute ps command with custom output format with columns format with 
         columns from field_list, and return result as a nested dictionary with 
         the key PID or SPID.
@@ -174,8 +159,10 @@ class ProcessInfo:
                            Default: user, cmd
                            (PID or SPID column is included by default.)
         @param threads:    If True, include threads in output.
-        @param **kwargs:   Filters are keyword variables. Each keyword must 
-                           correspond to a field name and an optional suffix:
+        @param **kwargs:   Keyword variables are used for filtering the results
+                           depending on the values of the columns. Each keyword 
+                           must correspond to a field name with an optional 
+                           suffix:
                            field:          Field equal to value or in list of 
                                            values.
                            field_ic:       Field equal to value or in list of 
@@ -202,10 +189,7 @@ class ProcessInfo:
         except ValueError:
             field_list.append(key)
             key_idx = len(field_list) - 1
-        if len(kwargs) > 0:
-            result = self.getFilteredProcList(field_list, threads, **kwargs)
-        else:
-            result = self.getProcList(field_list, threads)
+        result = self.getProcList(field_list, threads, **kwargs)
         if result is not None:
             headers = result['headers'][:num_cols]
             lines = result['stats']
@@ -216,13 +200,27 @@ class ProcessInfo:
         else:
             return None
     
-    def getProcStatStatus(self, threads=False):
+    def getProcStatStatus(self, threads=False, **kwargs):
         """Return process counts per status and priority.
         
+        @param **kwargs: Keyword variables are used for filtering the results
+                         depending on the values of the columns. Each keyword 
+                         must correspond to a field name with an optional 
+                         suffix:
+                         field:          Field equal to value or in list of 
+                                         values.
+                         field_ic:       Field equal to value or in list of 
+                                         values, using case insensitive 
+                                         comparison.
+                         field_regex:    Field matches regex value or matches
+                                         with any regex in list of values.
+                         field_ic_regex: Field matches regex value or matches
+                                         with any regex in list of values 
+                                         using case insensitive match.
         @return: Dictionary of process counters.
         
         """
-        procs = self.getProcList(['stat',], threads=threads)
+        procs = self.getProcList(['stat',], threads=threads, **kwargs)
         status = dict(zip(procStatusNames.values(), 
                           [0,] * len(procStatusNames)))
         prio = {'high': 0, 'low': 0, 'norm': 0, 'locked_in_mem': 0}
