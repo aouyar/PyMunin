@@ -246,8 +246,7 @@ class TableFilter:
             try:
                 column_idxs[column] = headers.index(column)
             except ValueError:
-                raise ValueError('Invalid column name %s in filter.' 
-                                 % filter[0])
+                raise ValueError('Invalid column name %s in filter.' % column)
         for row in table:
             for (column, (patterns, 
                           is_regex, 
