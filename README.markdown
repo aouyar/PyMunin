@@ -48,6 +48,7 @@ included:
 * Memcached
 * MySQL Database
 * Network Interface Traffic and Errors
+* Network Connection Stats (netstat)
 * Nginx Web Server
 * NTP - Time Server
 * PHP APC - PHP Cache
