@@ -68,14 +68,11 @@ class PgInfo:
             self._conn = psycopg2.connect(**self._connParams)
         else:
             self._conn = psycopg2.connect('')
-        ver_str = str(self._conn.server_version)
-        ver_tuple = []
-        if len(ver_str) % 2 == 1:
-            ver_tuple.append(int(ver_str[0]))
-            ver_str = ver_str[1:]
-        for idx in range(0, len(ver_str), 2):
-            ver_tuple.append(int(ver_str[idx:idx+2]))
-        self._version = util.SoftwareVersion(ver_tuple)
+        try:
+            ver_str = self._conn.get_parameter_status('server_version')
+        except AttributeError:
+            ver_str = self.getParam('server_version')
+        self._version = util.SoftwareVersion(ver_str)
     
     def _createStatsDict(self, headers, rows):
         """Utility method that returns database stats as a nested dictionary.
