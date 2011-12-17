@@ -80,7 +80,7 @@ class ApacheInfo:
         fp.close()
         self._statusDict = {}
         for line in response.splitlines():
-            mobj = re.match('(\S.*\S)\s*:\s*([\w\.]+)$', line)
+            mobj = re.match('(\S.*\S)\s*:\s*(\S+)\s*$', line)
             if mobj:
                 self._statusDict[mobj.group(1)] = util.parse_value(mobj.group(2))
         if self._statusDict.has_key('Scoreboard'):
