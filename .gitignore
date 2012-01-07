@@ -1,0 +1,11 @@
+*.py[co]
+.project
+.pydevproject
+*~
+*.db
+*.orig
+docs/_build/*
+dist/*
+build/*
+*.egg-info/*
+.coverage
