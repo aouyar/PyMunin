@@ -1,0 +1,4 @@
+include README.markdown
+include COPYING.txt
+include download.txt
+recursive-include ext *
