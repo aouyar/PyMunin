@@ -169,7 +169,10 @@ class MuninNginxPlugin(MuninPlugin):
                 hist_stats.append(curr_stats)
                 self.saveState(hist_stats[-self._numSamples:])
                 
-                
-if __name__ == "__main__":
+
+def main():
     sys.exit(muninMain(MuninNginxPlugin))
 
+                
+if __name__ == "__main__":
+    main()

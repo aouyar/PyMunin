@@ -135,5 +135,9 @@ class MuninNetstatsPlugin(MuninPlugin):
                 self.setGraphVal('netstat_conn_server', srv, numconn)
 
 
-if __name__ == "__main__":
+def main():
     sys.exit(muninMain(MuninNetstatsPlugin))
+
+
+if __name__ == "__main__":
+    main()

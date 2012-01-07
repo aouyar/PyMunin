@@ -123,5 +123,9 @@ class MuninNTPhostOffsetsPlugin(MuninPlugin):
                                          hoststats.get('delay'))
 
 
-if __name__ == "__main__":
+def main():
     sys.exit(muninMain(MuninNTPhostOffsetsPlugin))
+
+
+if __name__ == "__main__":
+    main()

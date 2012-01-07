@@ -146,8 +146,11 @@ class MuninDiskUsagePlugin(MuninPlugin):
             
         """
         return self.envCheckFilter('fstypes', fstype)
+
+
+def main():
+    sys.exit(muninMain(MuninDiskUsagePlugin))
             
 
 if __name__ == "__main__":
-    sys.exit(muninMain(MuninDiskUsagePlugin))
-
+    main()

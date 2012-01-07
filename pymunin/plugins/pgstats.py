@@ -373,7 +373,9 @@ class MuninPgPlugin(MuninPlugin):
         return self.envCheckFilter('db', name)
               
 
-
-if __name__ == "__main__":
+def main():
     sys.exit(muninMain(MuninPgPlugin))
 
+
+if __name__ == "__main__":
+    main()

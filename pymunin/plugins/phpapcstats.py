@@ -174,8 +174,11 @@ class MuninPHPapcPlugin(MuninPlugin):
                              stats['cache_sys']['expunges'])
             self.setGraphVal('php_apc_expunge', 'usercache', 
                              stats['cache_user']['expunges'])
+
             
-       
-if __name__ == "__main__":
+def main():
     sys.exit(muninMain(MuninPHPapcPlugin))
 
+
+if __name__ == "__main__":
+    main()

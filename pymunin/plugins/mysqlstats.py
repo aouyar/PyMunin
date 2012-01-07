@@ -236,7 +236,9 @@ class MuninMySQLplugin(MuninPlugin):
         return self.envCheckFilter('engine', name)
               
 
-
-if __name__ == "__main__":
+def main()
     sys.exit(muninMain(MuninMySQLplugin))
 
+
+if __name__ == "__main__":
+    main()

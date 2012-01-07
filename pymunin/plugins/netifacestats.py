@@ -139,5 +139,9 @@ class MuninNetIfacePlugin(MuninPlugin):
         return self.envCheckFilter('ifaces', iface)
 
 
-if __name__ == "__main__":
+def main():
     sys.exit(muninMain(MuninNetIfacePlugin))
+
+
+if __name__ == "__main__":
+    main()

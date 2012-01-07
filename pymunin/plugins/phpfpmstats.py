@@ -106,8 +106,11 @@ class MuninPHPfpmPlugin(MuninPlugin):
                              stats['idle processes'])
             self.setGraphVal('php_fpm_processes', 'total', 
                              stats['total processes'])
-            
+
+
+def main():
+    sys.exit(muninMain(MuninPHPfpmPlugin))
+        
        
 if __name__ == "__main__":
-    sys.exit(muninMain(MuninPHPfpmPlugin))
-
+    main()

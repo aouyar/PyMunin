@@ -214,7 +214,9 @@ class MuninTomcatPlugin(MuninPlugin):
         return self.envCheckFilter('ports', str(port))
 
 
-
-if __name__ == "__main__":
+def main():
     sys.exit(muninMain(MuninTomcatPlugin))
 
+
+if __name__ == "__main__":
+    main()
