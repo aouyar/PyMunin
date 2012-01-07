@@ -1,6 +1,8 @@
 import os
+import pkgutil
 from setuptools import setup, find_packages
 import pymunin
+import pymunin.plugins
 
 
 def read_file(filename):
@@ -13,7 +15,17 @@ def read_file(filename):
         return ''
 
 
-setup(pip 
+console_scripts = []
+for importer, modname, ispkg in pkgutil.iter_modules(pymunin.plugins.__path__):
+    params = {
+        'script_name': modname,
+        'script_path': u'%s.%s' % (pymunin.plugins.__name__,  modname),
+        'entry': 'main',
+    }
+    console_scripts.append(u'%(script_name)s = %(script_path)s:%(entry)s' % params)
+
+
+setup( 
     name='PyMunin',
     version=pymunin.__version__,
     author=pymunin.__author__,
@@ -33,4 +45,5 @@ setup(pip
         'Operating System :: OS Independent',
     ],
     long_description=read_file('README.markdown'),
+    entry_points={'console_scripts': console_scripts},
 )
