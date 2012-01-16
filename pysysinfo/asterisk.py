@@ -453,22 +453,25 @@ class AsteriskInfo:
                 
         return info_dict
 
-    def getVoIPchanStats(self, chan, 
+    def getVoIPchanStats(self, chantype, 
                          codec_list=('ulaw', 'alaw', 'gsm', 'g729')):
         """Query Asterisk Manager Interface for SIP / IAX2 Channel / Codec Stats.
         
         CLI Commands - sip show channels
                        iax2 show channnels
         
-        @param chan: Must be 'sip' or 'iax2'.
-        @codec_list: List of codec names to parse.
-                     (Codecs not in the list are summed up to the other count.)
-        @return:     Dictionary of statistics counters for Active VoIP Channels.
+        @param chantype:   Must be 'sip' or 'iax2'.
+        @param codec_list: List of codec names to parse.
+                           (Codecs not in the list are summed up to the other 
+                           count.)
+        @return:           Dictionary of statistics counters for Active VoIP 
+                           Channels.
 
         """
-        if chan.lower() == 'iax2':
+        chan = chantype.lower()
+        if chan == 'iax2':
             cmd = "iax2 show channels"
-        elif chan.lower() == 'sip':
+        elif chan == 'sip':
             cmd = "sip show channels"
         else:
             raise AttributeError("Invalid channel type in query for Channel Stats.")
@@ -481,7 +484,8 @@ class AsteriskInfo:
             try:
                 idx = headers.index('Form')
             except:
-                raise Exception("Error in parsing header line of Channel Stats.")
+                raise Exception("Error in parsing header line of %s channel stats." 
+                                % chan)
         codec_list = tuple(codec_list) + ('other', 'none')
         info_dict = dict([(k,0) for k in codec_list])
         for line in lines[1:-1]:
