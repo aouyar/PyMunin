@@ -1,2 +1,2 @@
-Check http://aouyar.github.com/PyMunin/ to get the most recent versionof the 
+Check http://aouyar.github.com/PyMunin/ to get the most recent version of the 
 PyMunin Multi graph Munin Plugins and documentation.
