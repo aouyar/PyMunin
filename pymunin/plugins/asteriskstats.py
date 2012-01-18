@@ -414,6 +414,9 @@ class MuninAsteriskPlugin(MuninPlugin):
                                      stats.get('failed faxes'))
 
 
+def main():
+    sys.exit(muninMain(MuninAsteriskPlugin))
+
 
 if __name__ == "__main__":
-    sys.exit(muninMain(MuninAsteriskPlugin))
+    main()

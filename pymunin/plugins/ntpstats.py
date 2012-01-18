@@ -94,5 +94,9 @@ class MuninNTPstatsPlugin(MuninPlugin):
                                  stats.get('jitter'))
 
 
-if __name__ == "__main__":
+def main():
     sys.exit(muninMain(MuninNTPstatsPlugin))
+
+
+if __name__ == "__main__":
+    main()

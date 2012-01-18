@@ -419,6 +419,9 @@ class MuninMemcachedPlugin(MuninPlugin):
                                          round(val,  2))
 
 
-if __name__ == "__main__":
+def main():
     sys.exit(muninMain(MuninMemcachedPlugin))
 
+
+if __name__ == "__main__":
+    main()

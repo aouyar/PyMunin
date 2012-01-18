@@ -122,6 +122,9 @@ class MuninApachePlugin(MuninPlugin):
             self.setGraphVal('apache_workers', 'max', stats['MaxWorkers'])
 
 
-if __name__ == "__main__":
+def main():
     sys.exit(muninMain(MuninApachePlugin))
 
+
+if __name__ == "__main__":
+    main()

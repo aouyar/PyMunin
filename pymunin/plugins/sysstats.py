@@ -271,5 +271,9 @@ class MuninSysStatsPlugin(MuninPlugin):
                                  self._vmstats['pswpout'])
 
 
-if __name__ == "__main__":
+def main():
     sys.exit(muninMain(MuninSysStatsPlugin))
+
+
+if __name__ == "__main__":
+    main()

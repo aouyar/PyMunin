@@ -129,6 +129,9 @@ class MuninProcStatsPlugin(MuninPlugin):
                                      stats[prefix]['prio'].get(stat_key))
         
 
+def main():
+    sys.exit(muninMain(MuninProcStatsPlugin))
+
 
 if __name__ == "__main__":
-    sys.exit(muninMain(MuninProcStatsPlugin))
+    main()
