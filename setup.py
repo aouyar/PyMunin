@@ -1,6 +1,8 @@
 import os
 import pkgutil
+import shutil
 from setuptools import setup, find_packages
+from  setuptools.command.install  import  install  as  _install
 import pymunin
 import pymunin.plugins
 
@@ -15,17 +17,34 @@ def read_file(filename):
         return ''
 
 
+SCRIPT_PREFIX = u'pymunin'
 console_scripts = []
+script_names = []
 for importer, modname, ispkg in pkgutil.iter_modules(pymunin.plugins.__path__):
     params = {
-        'script_name': modname,
+        'script_name': u'%s-%s' % (SCRIPT_PREFIX, modname),
         'script_path': u'%s.%s' % (pymunin.plugins.__name__,  modname),
         'entry': 'main',
     }
+    script_names.append(modname)
     console_scripts.append(u'%(script_name)s = %(script_path)s:%(entry)s' % params)
 
 
-setup( 
+class install(_install): 
+    "Extend base install class to provide a post-install step."
+
+    def run(self): 
+        _install.run(self)
+        for name in script_names:
+            # FIXME: This requires write permission to /usr/share/munin/plugins
+            # which is default owned by root
+            source = os.path.join(self.install_scripts, u'%s-%s' % (SCRIPT_PREFIX, name))
+            destination = os.path.join('/usr/share/munin/plugins', name)
+            shutil.copy(source, destination)
+
+
+setup(
+    cmdclass={'install': install},
     name='PyMunin',
     version=pymunin.__version__,
     author=pymunin.__author__,
