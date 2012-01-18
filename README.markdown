@@ -103,17 +103,21 @@ Installation
 
 It is easiest to install using [pip](http://www.pip-installer.org/):
 
-    pip install git+https://github.com/mlavin/PyMunin.git#egg=PyMunin
+    pip install git+https://github.com/aouyar/PyMunin.git#egg=PyMunin
 
 This will unpack the plugins as console scripts into the install _bin_
-directory. The location will be_/usr/local/bin/_ if installed globally or 
+directory. Each of the scripts will be prefixed with pymunin (i.e. pymunin-apachestats).
+The location will be _/usr/local/bin/_ if installed globally or 
 _$VIRTUAL_ENV/bin/_ if installed in with [virtualenv](http://www.virtualenv.org/).
+
+This will attempt to install the plugins to _/usr/share/munin/plugins_. If it fails
+it will create a _pymunin-install_ script for you to use to copy the plugins from
+the _bin_ directory to _/usr/share/munin/plugins_. The pymunin prefix will be dropped
+in the process.
 
   
 ### Installation of the Plugins ###
 
-* Copy the scripts in the _bin_ directory to the _Munin Plugins_ 
-  directory (ex. _/usr/share/munin/plugins_).
 * Enable the plugins just like the standard plugins by creating a symbolic links 
   in the _Munin Plugins Configuration Directory_ (_/etc/munin/plugins_).
 * Configuration files for plugins can be created in the _Munin Plugins
