@@ -242,7 +242,10 @@ class MuninDiskIOplugin(MuninPlugin):
             if self.hasGraph(name):
                 self.setGraphVal(name, dev, stats['ios_active'])
         
-        
-if __name__ == "__main__":
+
+def main():
     sys.exit(muninMain(MuninDiskIOplugin))
 
+
+if __name__ == "__main__":
+    main()

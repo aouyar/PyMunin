@@ -101,5 +101,9 @@ class MuninNTPhostOffsetPlugin(MuninPlugin):
                 self.setGraphVal(graph_name, 'delay', stats.get('delay'))
 
 
-if __name__ == "__main__":
+def main():
     sys.exit(muninMain(MuninNTPhostOffsetPlugin))
+
+
+if __name__ == "__main__":
+    main()

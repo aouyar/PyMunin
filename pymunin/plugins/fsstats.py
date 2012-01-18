@@ -94,7 +94,10 @@ class MuninFreeswitchPlugin(MuninPlugin):
             count = fs.getChannelCount()
             self.setGraphVal('fs_channels', 'channels', count)
 
-        
+
+def main():
+    sys.exit(muninMain(MuninFreeswitchPlugin))
+
 
 if __name__ == "__main__":
-    sys.exit(muninMain(MuninFreeswitchPlugin))
+    main()

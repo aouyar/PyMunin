@@ -197,5 +197,9 @@ class MuninWanpipePlugin(MuninPlugin):
         return self.envCheckFilter('ifaces', iface)
 
 
-if __name__ == "__main__":
+def main():
     sys.exit(muninMain(MuninWanpipePlugin))
+
+
+if __name__ == "__main__":
+    main()

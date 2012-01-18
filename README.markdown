@@ -101,16 +101,23 @@ Installation
 
 ### Installation of the Libraries ###
 
-* The _pysysinfo_ directory should be placed in _PYTHON_ search path or in the 
-  _Munin Plugins_ directory (ex. _/usr/share/munin/plugins_).
-* The _plugins/pymunin_ directory should be placed in _PYTHON_ search path or in 
-  the _Munin Plugins_ directory (ex. _/usr/share/munin/plugins_).
+It is easiest to install using [pip](http://www.pip-installer.org/):
+
+    pip install git+https://github.com/aouyar/PyMunin.git#egg=PyMunin
+
+This will unpack the plugins as console scripts into the install _bin_
+directory. Each of the scripts will be prefixed with pymunin (i.e. pymunin-apachestats).
+The location will be _/usr/local/bin/_ if installed globally or 
+_$VIRTUAL_ENV/bin/_ if installed in with [virtualenv](http://www.virtualenv.org/).
+
+This will attempt to install the plugins to _/usr/share/munin/plugins_. If it fails
+it will create a _pymunin-install_ script for you to use to copy the plugins from
+the _bin_ directory to _/usr/share/munin/plugins_. The pymunin prefix will be dropped
+in the process.
+
   
 ### Installation of the Plugins ###
 
-* Copy the plugin scripts in the directory _plugins_ to the _Munin Plugins_ 
-  directory (ex. _/usr/share/munin/plugins_) and remove the file extension
-  '_py_'.
 * Enable the plugins just like the standard plugins by creating a symbolic links 
   in the _Munin Plugins Configuration Directory_ (_/etc/munin/plugins_).
 * Configuration files for plugins can be created in the _Munin Plugins
