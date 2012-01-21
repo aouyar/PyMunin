@@ -236,7 +236,7 @@ class MuninMySQLplugin(MuninPlugin):
         return self.envCheckFilter('engine', name)
               
 
-def main()
+def main():
     sys.exit(muninMain(MuninMySQLplugin))
 
 
