@@ -3,7 +3,6 @@ import errno
 import os
 import pkgutil
 import shutil
-import stat
 from setuptools import setup, find_packages
 from  setuptools.command.install  import  install  as  _install
 import pymunin
@@ -55,10 +54,15 @@ class install(_install):
                     destination = os.path.join(munin_plugin_dir, name)
                     shutil.copy(source, destination)
             except IOError, e:
-                if e.errno == errno.EACCES:
-                    # Access denied
-                    print "*" * 60
-                    print "You do not have permission to install the plugins to %s" % munin_plugin_dir
+                if e.errno in  (errno.EACCES, errno.ENOENT):
+                    # Access denied or file/directory not found.
+                    print "*" * 78
+                    if e.errno == errno.EACCES:
+                        print ("You do not have permission to install the plugins to %s." 
+                               % munin_plugin_dir)
+                    if e.errno == errno.ENOENT:
+                        print ("Failed installing the plugins to %s. "
+                               "File or directory not found." % munin_plugin_dir)
                     script = os.path.join(self.install_scripts, 'pymunin-install')
                     with open(script, 'w') as f:
                         f.write('#!/bin/sh\n')
@@ -70,8 +74,10 @@ class install(_install):
                             destination = os.path.join(munin_plugin_dir, name)
                             f.write('cp %s %s\n' % (source, destination))
                     os.chmod(script, 0755)
-                    print "You will need to copy using 'sudo pymunin-install'"
-                    print "*" * 60
+                    print ("You will need to copy manually using the script: %s\n"
+                           "Example: sudo %s"
+                           % (script, script))
+                    print "*" * 78
                 else:
                     # Raise original exception
                     raise
