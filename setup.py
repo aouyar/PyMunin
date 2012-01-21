@@ -5,8 +5,11 @@ import pkgutil
 import shutil
 from setuptools import setup, find_packages
 from  setuptools.command.install  import  install  as  _install
-import pymunin
+import pymunin #@UnusedImport
 import pymunin.plugins
+
+
+SCRIPT_PREFIX = u'pymunin'
 
 
 def read_file(filename):
@@ -19,12 +22,8 @@ def read_file(filename):
         return ''
 
 
-SCRIPT_PREFIX = u'pymunin'
-
 console_scripts = []
-
 plugin_names = []
-
 
 for importer, modname, ispkg in pkgutil.iter_modules(pymunin.plugins.__path__):
     params = {
