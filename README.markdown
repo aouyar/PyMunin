@@ -28,7 +28,14 @@ The plugins consist of the following components:
 Although the solution is focused on implementing _Multigraph Plugins_ the module
 also supports simple single graph plugins.
 
-The initial design of the solution was inspired by 
+
+Contributions
+-------------
+
+* Initial packaging of the code was done 
+by [mlavin](https://github.com/mlavin) (Mark Lavin).
+PyMunin is installable pip / easy_install thanks to Mark. :-)  
+* The initial design of the solution was inspired by 
 [python-munin](https://github.com/samuel/python-munin) 
 by [samuel](https://github.com/samuel) (Samuel Stauffer).
 
