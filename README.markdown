@@ -19,9 +19,9 @@ More information on Multigraph Plugins can be found in the
 
 The plugins consist of the following components:
 
-* The _pymunin_ module _(./plugins/pymunin)_ implements the base classes for
+* The _pymunin_ module _(./pymunin)_ implements the base classes for
   developing Munin plugins.
-* The plugin logic is implemented in the plugin scripts in _./plugins_.
+* The plugin logic is implemented in the plugin scripts in _./pymunin/plugins_.
 * The actual data retrieval logic is separated from the plugins to facilitate
   code reuse. Individual modules in the directory _./pysysinfo_ implement classes 
   for getting the monitoring data and returning them in dictionary objects. 
