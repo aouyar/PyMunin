@@ -3,6 +3,9 @@ PyMunin - Python Multigraph Munin Plugins
 
 Python Module for developing Munin Multigraph Monitoring Plugins.
 
+More detailed documentation for the project and sample graphs for plugins are 
+published in the [PyMunin Project Web Page](http://aouyar.github.com/PyMunin/)
+
 Regular Munin Plugins employ one-plugin one-graph logic and require the 
 execution of a script for data retrieval for each graph.
 Multigraph plugins permit retrieval of data for multiple graphs in one execution 
@@ -103,34 +106,25 @@ _GPL License Version 3_ or later.
 
 See the _COPYING_ file that acompanies the code for full licensing information.
 
+
 Installation
 ------------
 
-### Installation of the Libraries ###
 
-It is easiest to install using [pip](http://www.pip-installer.org/):
+The easiest way to install the code is to use [pip](http://www.pip-installer.org/):
 
-    pip install git+https://github.com/aouyar/PyMunin.git#egg=PyMunin
+* Install the newest version from [PyPI](http://pypi.python.org):
+	pip install PyMunin
+* Install the latest development versión:
+	pip install git+https://github.com/aouyar/PyMunin.git#egg=PyMunin
 
-This will unpack the plugins as console scripts into the install _bin_
-directory. Each of the scripts will be prefixed with pymunin (i.e. pymunin-apachestats).
-The location will be _/usr/local/bin/_ if installed globally or 
-_$VIRTUAL_ENV/bin/_ if installed in with [virtualenv](http://www.virtualenv.org/).
+The other option is to download and uncompress the code and execute the included
+_setup.py_ script for installation:
+	./setup.py install
 
-This will attempt to install the plugins to _/usr/share/munin/plugins_. If it fails
-it will create a _pymunin-install_ script for you to use to copy the plugins from
-the _bin_ directory to _/usr/share/munin/plugins_. The pymunin prefix will be dropped
-in the process.
-
-  
-### Installation of the Plugins ###
-
-* Enable the plugins just like the standard plugins by creating a symbolic links 
-  in the _Munin Plugins Configuration Directory_ (_/etc/munin/plugins_).
-* Configuration files for plugins can be created in the _Munin Plugins
-  Configuration Directory_ (_/etc/munin/plugin-conf.d_). The environment 
-  variables used by the plugin scripts are documented in the header part of the
-  script code.
+For detailed instructions on the installation process please check the 
+project documentation at
+ [PyMunin Project Web Page](http://aouyar.github.com/PyMunin/).
 
 
 Troubleshooting
