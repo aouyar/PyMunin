@@ -19,7 +19,7 @@ __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = []
 __license__ = "GPL"
-__version__ = "0.9"
+__version__ = "0.9.1"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
@@ -63,6 +63,7 @@ class AsteriskInfo:
         self._asterisk_version = None
         self._modules = None
         self._applications = None
+        self._chantypes = None
 
         if autoInit:
             if self._amiuser is None or self._amipass is None:
@@ -288,6 +289,24 @@ class AsteriskInfo:
             if mobj:
                 self._applications.add(mobj.group(1).lower())
                 
+    def _initChannelTypesList(self):
+        """Query Asterisk Manager Interface to initialize internal list of 
+        supported channel types.
+        
+        CLI Command - core show applications
+        
+        """
+        if self.checkVersion('1.4'):
+            cmd = "core show channeltypes"
+        else:
+            cmd = "show channeltypes"
+        cmdresp = self.executeCommand(cmd)
+        self._chantypes = set()
+        for line in cmdresp.splitlines()[2:]:
+            mobj = re.match('\s*(\S+)\s+.*\s+(yes|no)\s+', line)
+            if mobj:
+                self._chantypes.add(mobj.group(1).lower())
+                
     def getAsteriskVersion(self):
         """Returns Asterisk version string.
         
@@ -327,6 +346,17 @@ class AsteriskInfo:
             self._initApplicationList()
         return app in self._applications
     
+    def hasChannelType(self, chan):
+        """Returns True if chan is among the supported channel types.
+        
+        @param app: Module name.
+        @return:    Boolean 
+        
+        """
+        if self._chantypes is None:
+            self._initChannelTypesList()
+        return chan in self._chantypes
+    
     def getModuleList(self):
         """Returns list of loaded modules.
         
@@ -346,6 +376,17 @@ class AsteriskInfo:
         if self._applications is None:
             self._initApplicationList()
         return list(self._applications)
+
+    def getChannelTypesList(self):
+        """Returns list of supported channel types.
+        
+        @return: List
+        
+        """
+        if self._chantypes is None:
+            self._initChannelTypesList()
+        return list(self._chantypes)
+        
     
     def getCodecList(self):
         """Query Asterisk Manager Interface for defined codecs.
@@ -421,19 +462,22 @@ class AsteriskInfo:
 
         return info_dict
 
-    def getPeerStats(self, chan):
+    def getPeerStats(self, chantype):
         """Query Asterisk Manager Interface for SIP / IAX2 Peer Stats.
         
         CLI Command - sip show peers
                       iax2 show peers
         
-        @param chan: Must be 'sip' or 'iax2'.
-        @return:     Dictionary of statistics counters for VoIP Peers.
+        @param chantype: Must be 'sip' or 'iax2'.
+        @return:         Dictionary of statistics counters for VoIP Peers.
 
         """
-        if chan.lower() == 'iax2':
+        chan = chantype.lower()
+        if not self.hasChannelType(chan):
+            return None
+        if chan == 'iax2':
             cmd = "iax2 show peers"
-        elif chan.lower() == 'sip':
+        elif chan == 'sip':
             cmd = "sip show peers"
         else:
             raise AttributeError("Invalid channel type in query for Peer Stats.")
@@ -469,6 +513,8 @@ class AsteriskInfo:
 
         """
         chan = chantype.lower()
+        if not self.hasChannelType(chan):
+            return None
         if chan == 'iax2':
             cmd = "iax2 show channels"
         elif chan == 'sip':
@@ -505,6 +551,14 @@ class AsteriskInfo:
                 else:
                     info_dict['other'] += 1
         return info_dict
+    
+    def hasConference(self):
+        """Returns True if system has support for Meetme Conferences.
+        
+        @return: Boolean
+        
+        """
+        return self.hasModule('app_meetme.so')
 
     def getConferenceStats(self):
         """Query Asterisk Manager Interface for Conference Room Stats.
@@ -514,6 +568,8 @@ class AsteriskInfo:
         @return: Dictionary of statistics counters for Conference Rooms.
 
         """
+        if not self.hasConference():
+            return None
         if self.checkVersion('1.6'):
             cmd = "meetme list"
         else:
@@ -529,6 +585,14 @@ class AsteriskInfo:
 
         return info_dict
 
+    def hasVoicemail(self):
+        """Returns True if system has support for Voicemail.
+        
+        @return: Boolean
+        
+        """
+        return self.hasModule('app_voicemail.so')
+
     def getVoicemailStats(self):
         """Query Asterisk Manager Interface for Voicemail Stats.
         
@@ -537,6 +601,8 @@ class AsteriskInfo:
         @return: Dictionary of statistics counters for Voicemail Accounts.
 
         """
+        if not self.hasVoicemail():
+            return None
         if self.checkVersion('1.4'):
             cmd = "voicemail show users"
         else:
@@ -600,6 +666,14 @@ class AsteriskInfo:
                                 continue
         return info_dict
     
+    def hasQueue(self):
+        """Returns True if system has support for Queues.
+        
+        @return: Boolean
+        
+        """
+        return self.hasModule('app_queue.so')
+    
     def getQueueStats(self):
         """Query Asterisk Manager Interface for Queue Stats.
         
@@ -608,6 +682,8 @@ class AsteriskInfo:
         @return: Dictionary of queue stats.
         
         """
+        if not self.hasQueue():
+            return None
         info_dict = {}
         if self.checkVersion('1.4'):
             cmd = "queue show"
@@ -665,6 +741,14 @@ class AsteriskInfo:
                     continue
         return info_dict
     
+    def hasFax(self):
+        """Returns True if system has support for faxing.
+        
+        @return: Boolean
+        
+        """
+        return self.hasModule('res_fax.so')
+    
     def getFaxStatsCounters(self):
         """Query Asterisk Manager Interface for Fax Stats.
         
@@ -673,24 +757,23 @@ class AsteriskInfo:
         @return: Dictionary of fax stats.
         
         """
-        if self.hasModule('res_fax.so'):
-            info_dict = {}
-            cmdresp = self.executeCommand('fax show stats')
-            ctxt = 'general'
-            for section in cmdresp.strip().split('\n\n')[1:]:
-                i = 0
-                for line in section.splitlines():
-                    mobj = re.match('(\S.*\S)\s*:\s*(\d+)\s*$', line)
-                    if mobj:
-                        if not info_dict.has_key(ctxt):
-                            info_dict[ctxt] = {}
-                        info_dict[ctxt][mobj.group(1).lower()] = int(mobj.group(2).lower())
-                    elif i == 0:
-                        ctxt = line.strip().lower()
-                    i += 1    
-            return info_dict
-        else:
+        if not self.hasFax():
             return None
+        info_dict = {}
+        cmdresp = self.executeCommand('fax show stats')
+        ctxt = 'general'
+        for section in cmdresp.strip().split('\n\n')[1:]:
+            i = 0
+            for line in section.splitlines():
+                mobj = re.match('(\S.*\S)\s*:\s*(\d+)\s*$', line)
+                if mobj:
+                    if not info_dict.has_key(ctxt):
+                        info_dict[ctxt] = {}
+                    info_dict[ctxt][mobj.group(1).lower()] = int(mobj.group(2).lower())
+                elif i == 0:
+                    ctxt = line.strip().lower()
+                i += 1    
+        return info_dict
 
     def getFaxStatsSessions(self):
         """Query Asterisk Manager Interface for Fax Stats.
@@ -700,31 +783,30 @@ class AsteriskInfo:
         @return: Dictionary of fax stats.
         
         """
-        if self.hasModule('res_fax.so'):
-            info_dict = {}
-            info_dict['total'] = 0
-            fax_types = ('g.711', 't.38')
-            fax_operations = ('send', 'recv')
-            fax_states = ('uninitialized', 'initialized', 'open', 
-                          'active', 'inactive', 'complete', 'unknown',)
-            info_dict['type'] = dict([(k,0) for k in fax_types])
-            info_dict['operation'] = dict([(k,0) for k in fax_operations])
-            info_dict['state'] = dict([(k,0) for k in fax_states])
-            cmdresp = self.executeCommand('fax show sessions')
-            sections = cmdresp.strip().split('\n\n')
-            if len(sections) >= 3:
-                for line in sections[1][1:]:
-                    cols = re.split('\s\s+', line)
-                    if len(cols) == 7:
-                        info_dict['total'] += 1
-                        if cols[3].lower() in fax_types:
-                            info_dict['type'][cols[3].lower()] += 1
-                        if cols[4] == 'receive':
-                            info_dict['operation']['recv'] += 1
-                        elif cols[4] == 'send':
-                            info_dict['operation']['send'] += 1
-                        if cols[5].lower() in fax_states:
-                            info_dict['state'][cols[5].lower()] += 1
-            return info_dict
-        else:
+        if not self.hasFax():
             return None
+        info_dict = {}
+        info_dict['total'] = 0
+        fax_types = ('g.711', 't.38')
+        fax_operations = ('send', 'recv')
+        fax_states = ('uninitialized', 'initialized', 'open', 
+                      'active', 'inactive', 'complete', 'unknown',)
+        info_dict['type'] = dict([(k,0) for k in fax_types])
+        info_dict['operation'] = dict([(k,0) for k in fax_operations])
+        info_dict['state'] = dict([(k,0) for k in fax_states])
+        cmdresp = self.executeCommand('fax show sessions')
+        sections = cmdresp.strip().split('\n\n')
+        if len(sections) >= 3:
+            for line in sections[1][1:]:
+                cols = re.split('\s\s+', line)
+                if len(cols) == 7:
+                    info_dict['total'] += 1
+                    if cols[3].lower() in fax_types:
+                        info_dict['type'][cols[3].lower()] += 1
+                    if cols[4] == 'receive':
+                        info_dict['operation']['recv'] += 1
+                    elif cols[4] == 'send':
+                        info_dict['operation']['send'] += 1
+                    if cols[5].lower() in fax_states:
+                        info_dict['state'][cols[5].lower()] += 1
+        return info_dict

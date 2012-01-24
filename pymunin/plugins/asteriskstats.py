@@ -20,7 +20,7 @@ Multigraph Plugin - Graph Structure
    - asterisk_queue_avg_talk
    - asterisk_queue_calls
    - asterisk_queue_abandon_pcent
-   - asterisk_fax_stats
+   - asterisk_fax_attempts
 
 
 Environment Variables
@@ -71,7 +71,7 @@ __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = []
 __license__ = "GPL"
-__version__ = "0.9"
+__version__ = "0.9.1"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
@@ -99,7 +99,10 @@ class MuninAsteriskPlugin(MuninPlugin):
         self._amiport = self.envGet('amiport')
         self._amiuser = self.envGet('amiuser')
         self._amipass = self.envGet('amipass')
-        self._ami = None
+        
+                
+        self._ami = AsteriskInfo(self._amihost, self._amiport, 
+                                 self._amiuser, self._amipass)
         
         self._codecList = (self.envGetList('codecs') 
                            or ['alaw', 'ulaw', 'gsm', 'g729'])
@@ -108,11 +111,12 @@ class MuninAsteriskPlugin(MuninPlugin):
         for chanstr in (self.envGetList('channels') 
                         or ['dahdi', 'zap', 'sip', 'iax2', 'local']):
             chan = chanstr.lower()
-            if chan in ('zap', 'dahdi'):
-                if 'dahdi' not in self._chanList:
-                    self._chanList.append('dahdi')
-            else:
-                self._chanList.append(chan)
+            if self._ami.hasChannelType(chan):
+                if chan in ('zap', 'dahdi'):
+                    if 'dahdi' not in self._chanList:
+                        self._chanList.append('dahdi')
+                else:
+                    self._chanList.append(chan)
                 
         self._trunkList = []
         for trunk_entry in self.envGetList('trunks', None):
@@ -120,7 +124,7 @@ class MuninAsteriskPlugin(MuninPlugin):
                     or re.match('(.*)=(.*)$',  trunk_entry,  re.IGNORECASE))
             if mobj:
                 self._trunkList.append(mobj.groups())
-                
+                 
         if self.graphEnabled('asterisk_calls'):
             graph = MuninGraph('Asterisk - Call Stats', 'Asterisk',
                 info='Asterisk - Information on Calls.', period='minute',
@@ -141,7 +145,8 @@ class MuninAsteriskPlugin(MuninPlugin):
                 graph.addField('mix', 'mix', type='GAUGE', draw='LINE2')
             self.appendGraph('asterisk_channels', graph)
 
-        if self.graphEnabled('asterisk_peers_sip'):
+        if (self.graphEnabled('asterisk_peers_sip') 
+            and self._ami.hasChannelType('sip')):
             graph = MuninGraph('Asterisk - VoIP Peers - SIP', 'Asterisk',
                 info='Asterisk - Information on SIP VoIP Peers.',
                 args='--base 1000 --lower-limit 0')
@@ -150,7 +155,8 @@ class MuninAsteriskPlugin(MuninPlugin):
                 graph.addField(field, field, type='GAUGE', draw='AREASTACK')
             self.appendGraph('asterisk_peers_sip', graph)
 
-        if self.graphEnabled('asterisk_peers_iax2'):
+        if (self.graphEnabled('asterisk_peers_iax2') 
+            and self._ami.hasChannelType('iax2')):
             graph = MuninGraph('Asterisk - VoIP Peers - IAX2', 'Asterisk',
                 info='Asterisk - Information on IAX2 VoIP Peers.',
                 args='--base 1000 --lower-limit 0')
@@ -159,7 +165,9 @@ class MuninAsteriskPlugin(MuninPlugin):
                 graph.addField(field, field, type='GAUGE', draw='AREASTACK')
             self.appendGraph('asterisk_peers_iax2', graph)
 
-        if self.graphEnabled('asterisk_voip_codecs'):
+        if (self.graphEnabled('asterisk_voip_codecs') 
+            and (self._ami.hasChannelType('sip') 
+                 or self._ami.hasChannelType('iax2'))):
             graph = MuninGraph('Asterisk - VoIP Codecs for Active Channels', 
                 'Asterisk',
                 info='Asterisk - Codecs for Active VoIP Channels (SIP/IAX2)',
@@ -169,7 +177,8 @@ class MuninAsteriskPlugin(MuninPlugin):
             graph.addField('other', 'other', type='GAUGE', draw='AREASTACK')
             self.appendGraph('asterisk_voip_codecs', graph)
 
-        if self.graphEnabled('asterisk_conferences'):
+        if (self.graphEnabled('asterisk_conferences') 
+            and self._ami.hasConference()):
             graph = MuninGraph('Asterisk - Conferences', 'Asterisk',
                 info='Asterisk - Information on Meetme Conferences',
                 args='--base 1000 --lower-limit 0')
@@ -179,7 +188,8 @@ class MuninAsteriskPlugin(MuninPlugin):
                 info='Total number of users in conferences.')
             self.appendGraph('asterisk_conferences', graph)
 
-        if self.graphEnabled('asterisk_voicemail'):
+        if (self.graphEnabled('asterisk_voicemail')
+            and self._ami.hasVoicemail()):
             graph = MuninGraph('Asterisk - Voicemail', 'Asterisk',
                 info='Asterisk - Information on Voicemail Accounts',
                 args='--base 1000 --lower-limit 0')
@@ -204,14 +214,12 @@ class MuninAsteriskPlugin(MuninPlugin):
         
         self._queues = None
         self._queue_list = None
-        if (self.graphEnabled('asterisk_queue_len')
-            or self.graphEnabled('asterisk_queue_avg_hold')
-            or self.graphEnabled('asterisk_queue_avg_talk')
-            or self.graphEnabled('asterisk_queue_calls')
-            or self.graphEnabled('asterisk_queue_abandon_pcent')):
-            if self._ami is None:
-                self._ami = AsteriskInfo(self._amihost, self._amiport, 
-                                         self._amiuser, self._amipass)
+        if ((self.graphEnabled('asterisk_queue_len')
+             or self.graphEnabled('asterisk_queue_avg_hold')
+             or self.graphEnabled('asterisk_queue_avg_talk')
+             or self.graphEnabled('asterisk_queue_calls')
+             or self.graphEnabled('asterisk_queue_abandon_pcent'))
+            and self._ami.hasQueue()):
             self._queues = self._ami.getQueueStats()
             self._queue_list = [queue for queue in self._queues.keys()
                                 if self.envCheckFilter('queues', queue)]
@@ -270,16 +278,8 @@ class MuninAsteriskPlugin(MuninPlugin):
                                         % queue)
                 self.appendGraph('asterisk_queue_abandon_pcent', graph)
         
-        self._fax_stats = None
-        if (self.graphEnabled('asterisk_fax_attempts')
-            or self.graphEnabled('asterisk_fax_errors')):
-            if self._ami is None:
-                self._ami = AsteriskInfo(self._amihost, self._amiport, 
-                                         self._amiuser, self._amipass)
-            self._fax_stats = self._ami.getFaxStatsCounters()
-        
-        if self._fax_stats:
-            if self.graphEnabled('asterisk_fax_stats'):
+        if self._ami.hasFax():
+            if self.graphEnabled('asterisk_fax_attempts'):
                 graph = MuninGraph('Asterisk - Fax Stats', 
                     'Asterisk', period='minute',
                     info='Asterisk - Fax - Fax Recv / Send Attempts per minute.',
@@ -294,10 +294,6 @@ class MuninAsteriskPlugin(MuninPlugin):
 
     def retrieveVals(self):
         """Retrieve values for graphs."""
-        if self._ami is None:
-            self._ami = AsteriskInfo(self._amihost, self._amiport, 
-                                     self._amiuser, self._amipass)
-
         if self.hasGraph('asterisk_calls') or self.hasGraph('asterisk_channels'):
             stats = self._ami.getChannelStats(self._chanList)
             if  self.hasGraph('asterisk_calls')  and stats:
@@ -330,14 +326,16 @@ class MuninAsteriskPlugin(MuninPlugin):
                                      field, stats.get(field))
         
         if self.hasGraph('asterisk_voip_codecs'):
-            sipstats = self._ami.getVoIPchanStats('sip', self._codecList)
-            iax2stats = self._ami.getVoIPchanStats('iax2', self._codecList)
+            sipstats = self._ami.getVoIPchanStats('sip', self._codecList) or {}
+            iax2stats = self._ami.getVoIPchanStats('iax2', self._codecList) or {}
             if stats:
                 for field in self._codecList:
                     self.setGraphVal('asterisk_voip_codecs', field,
-                                     sipstats.get(field) + iax2stats.get(field))
+                                     sipstats.get(field,0) 
+                                     + iax2stats.get(field, 0))
                 self.setGraphVal('asterisk_voip_codecs', 'other',
-                                 sipstats.get('other') + iax2stats.get('other'))
+                                 sipstats.get('other', 0) 
+                                 + iax2stats.get('other', 0))
         
         if self.hasGraph('asterisk_conferences'):
             stats = self._ami.getConferenceStats()
@@ -401,10 +399,10 @@ class MuninAsteriskPlugin(MuninPlugin):
                                      total_abandon)
                     self.setGraphVal('asterisk_queue_calls', 'answer', 
                                      total_answer)
-
-        if self._fax_stats is not None:
+                    
             if self.hasGraph('asterisk_fax_attempts'):
-                stats = self._fax_stats.get('general')
+                fax_stats = self._ami.getFaxStatsCounters()
+                stats = fax_stats.get('general')
                 if stats is not None:
                     self.setGraphVal('asterisk_fax_attempts', 'send', 
                                      stats.get('transmit attempts'))
