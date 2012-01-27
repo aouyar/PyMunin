@@ -110,7 +110,6 @@ See the _COPYING_ file that acompanies the code for full licensing information.
 Installation
 ------------
 
-
 The easiest way to install the code is to use [pip](http://www.pip-installer.org/):
 
 * Install the newest version from [PyPI](http://pypi.python.org):
