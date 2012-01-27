@@ -12,7 +12,7 @@ Wild Card Plugin
 
 Multigraph Plugin - Graph Structure
    - ntp_host_stratum_
-   - ntp_host_offset_
+   - ntp_host_stat_
 
 
 Environment Variables
@@ -75,8 +75,8 @@ class MuninNTPhostOffsetPlugin(MuninPlugin):
             graph.addField('stratum', 'stratum', type='GAUGE', draw='LINE2')
             self.appendGraph(graphName, graph)
 
-        if self.graphEnabled('ntp_host_offset'):
-            graphName = 'ntp_host_offset_%s' % self._remoteHost
+        if self.graphEnabled('ntp_host_stat'):
+            graphName = 'ntp_host_stat_%s' % self._remoteHost
             graph = MuninGraph('NTP Offset of Host %s' % self._remoteHost, 'Time',
                 info=('NTP Offset of Host %s relative to current node.' 
                       % self._remoteHost),
@@ -95,7 +95,7 @@ class MuninNTPhostOffsetPlugin(MuninPlugin):
             graph_name = 'ntp_host_stratum_%s' % self._remoteHost
             if self.hasGraph(graph_name):
                 self.setGraphVal(graph_name, 'stratum', stats.get('stratum'))
-            graph_name = 'ntp_host_offset_%s' % self._remoteHost
+            graph_name = 'ntp_host_stat_%s' % self._remoteHost
             if self.hasGraph(graph_name):
                 self.setGraphVal(graph_name, 'offset', stats.get('offset'))
                 self.setGraphVal(graph_name, 'delay', stats.get('delay'))
