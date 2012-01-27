@@ -114,7 +114,8 @@ class MuninPlugin:
         self._dirtyConfig = False
         if (self.plugin_name is not None and argv is not None and len(argv) > 0 
             and re.search('_$', self.plugin_name)):
-            mobj = re.match("%s(\S+)$" % self.plugin_name, argv[0])
+            mobj = re.match("%s(\S+)$" % self.plugin_name, 
+                            os.path.basename(argv[0]))
             if mobj:
                 self.arg0 = mobj.group(1)
         self._parseEnv()
