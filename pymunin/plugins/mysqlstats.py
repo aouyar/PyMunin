@@ -18,6 +18,7 @@ Multigraph Plugin - Graph Structure
    
 
 Environment Variables
+
   host:           MySQL Server IP. 
                   (Defaults to UNIX socket if not provided.)
   port:           MySQL Server Port (3306 by default.)

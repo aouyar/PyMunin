@@ -37,6 +37,7 @@ class PHPfpmInfo:
         @param password: Password. (Not needed unless authentication is required 
                          to access status page.
         @param monpath:  PHP FPM  path relative to Document Root.
+                         (Default: fpm_status.php)
         @param ssl:      Use SSL if True. (Default: False)
             
         """

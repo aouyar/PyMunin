@@ -16,11 +16,12 @@ Multigraph Plugin - Graph Structure
 
    
 Environment Variables
+
   host:           Nginx Web Server Host. (Default: 127.0.0.1)
   port:           Nginx Web Server Port. (Default: 80, SSL: 443)
   user:           User in case authentication is required for access to 
                   server-status page.
-  password:       User in case authentication is required for access 
+  password:       Password in case authentication is required for access 
                   to server-status page.
   statuspath:     Path for Nginx Web Server Status Page.
                   (Default: server-status)

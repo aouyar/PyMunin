@@ -24,6 +24,7 @@ Multigraph Plugin - Graph Structure
     - memcached_hitpct
 
 Environment Variables
+
   host:           Memcached Server IP. (127.0.0.1 by default.)
   port:           Memcached Server Port (11211 by default.)
   include_graphs: Comma separated list of enabled graphs.

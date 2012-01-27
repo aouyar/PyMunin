@@ -25,9 +25,6 @@ Multigraph Plugin - Graph Structure
 
 Environment Variables
 
-  include_graphs: Comma separated list of enabled graphs.
-                  (All graphs enabled by default.)
-  exclude_graphs: Comma separated list of disabled graphs.
   amihost:        IP of Asterisk Server. (Default: 127.0.0.1)
   amiport:        Asterisk Manager Interface Port. (Default: 5038)
   amiuser:        Asterisk Manager Interface User.
@@ -45,6 +42,9 @@ Environment Variables
   include_queues: Comma separated list of queues to include in  graphs.
                   (All queues included by default.)
   exclude_queues: Comma separated list of queues to exclude from graphs.
+  include_graphs: Comma separated list of enabled graphs.
+                  (All graphs enabled by default.)
+  exclude_graphs: Comma separated list of disabled graphs.
 
   Note: Channel, codec and trunk expressions are case insensitive.
 

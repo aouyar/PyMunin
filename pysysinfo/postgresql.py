@@ -29,10 +29,16 @@ class PgInfo:
         """Initialize connection to PostgreSQL Database.
         
         @param host:     PostgreSQL Host
+                         (Defaults to UNIX socket if not provided.)
         @param port:     PostgreSQL Port
-        @param database: PostgreSQL Schema
+                         (Defaults to 5432 for network connections.)
+        @param database: PostgreSQL Database
+                         (The default is the login the for connecting user.)
         @param user:     PostgreSQL User
+                         (The default is the login of OS user for UNIX sockets.
+                         Must be specified for network connections.)
         @param password: PostgreSQL Password
+                         (Attempt login without password by default.)
         @param autoInit: If True connect to PostgreSQL Database on instantiation.
             
         """

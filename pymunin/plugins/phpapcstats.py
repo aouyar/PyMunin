@@ -18,11 +18,12 @@ Multigraph Plugin - Graph Structure
 
    
 Environment Variables
+
   host:           Web Server Host. (Default: 127.0.0.1)
   port:           Web Server Port. (Default: 80, SSL: 443)
   user:           User in case authentication is required for access to 
                   APC Status page.
-  password:       User in case authentication is required for access to 
+  password:       Password in case authentication is required for access to 
                   APC Status page.
   monpath:        APC status script path relative to Document Root.
   ssl:            Use SSL if yes. (Default: no)

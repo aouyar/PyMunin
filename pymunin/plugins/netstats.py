@@ -15,13 +15,14 @@ Multigraph Plugin - Graph Structure
 
 Environment Variables
 
-  include_graphs:    Comma separated list of enabled graphs.
-                     (All graphs enabled by default.)
-  exclude_graphs:    Comma separated list of disabled graphs.
   list_server_ports: Comma separated list of Name:PortNumber tuples for services
                      that are to be monitored in the netstat_server_conn graph.
                      A service can be associated to multiple port numbers
                      separated by colon.
+  include_graphs:    Comma separated list of enabled graphs.
+                     (All graphs enabled by default.)
+  exclude_graphs:    Comma separated list of disabled graphs.
+  
 
   Example:
     [netstats]

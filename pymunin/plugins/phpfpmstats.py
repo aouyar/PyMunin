@@ -14,13 +14,15 @@ Multigraph Plugin - Graph Structure
    - php_fpm_processes
    
 Environment Variables
+
   host:           Web Server Host. (Default: 127.0.0.1)
   port:           Web Server Port. (Default: 80, SSL: 443)
   user:           User in case authentication is required for access to 
-                  APC Status page.
+                  FPM Status page.
   password:       User in case authentication is required for access to 
-                  APC Status page.
-  monpath:        APC status script path relative to Document Root.
+                  FPM Status page.
+  monpath:        FPM status page path relative to Document Root.
+                  (Default: fpm_status.php)
   ssl:            Use SSL if yes. (Default: no)
   include_graphs: Comma separated list of enabled graphs. 
                   (All graphs enabled by default.)

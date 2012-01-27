@@ -16,13 +16,13 @@ Multigraph Plugin - Graph Structure
 
 Environment Variables
 
+  include_ifaces: Comma separated list of wanpipe interfaces to include in 
+                  graphs. (All Wanpipe Interfaces are monitored by default.)
+  exclude_ifaces: Comma separated list of wanpipe interfaces to exclude from 
+                  graphs.
   include_graphs: Comma separated list of enabled graphs.
                   (All graphs enabled by default.)
   exclude_graphs: Comma separated list of disabled graphs.
-  include_ifaces: Comma separated list of wanpipe interfaces to include in 
-                  graphs. (All Network Interfaces are monitored by default.)
-  exclude_ifaces: Comma separated list of wanpipe interfaces to exclude from 
-                  graphs.
 
   Example:
     [wanpipestats]

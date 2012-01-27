@@ -14,12 +14,12 @@ Multigraph Plugin - Graph Structure
 
 Environment Variables
 
+  fshost:        FreeSWITCH Server (Default: 127.0.0.1)
+  fsport:        FreeSWITCH Event Socket Port (Default: 8021)
+  fspass:        FreeSWITCH Event Socket Password
   include_graphs: Comma separated list of enabled graphs.
                   (All graphs enabled by default.)
   exclude_graphs: Comma separated list of disabled graphs.
-  fshost:        IP of Asterisk Server (Default: 127.0.0.1)
-  fsport:        Asterisk Manager Interface Port (Default: 5038)
-  fspass:        Asterisk Manager Interface Password
   
 
   Example:
