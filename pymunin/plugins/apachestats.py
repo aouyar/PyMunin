@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """apachestats - Munin Plugin to monitor stats for Apache Web Server.
 
 Requirements

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """procstats - Munin Plugin to monitor process / thread stats.
 
 

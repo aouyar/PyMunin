@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """netstats - Munin Plugin to monitor network stats.
 
 

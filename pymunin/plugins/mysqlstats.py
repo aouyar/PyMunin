@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """mysqlstats - Munin Plugin to monitor stats for MySQL Database Server.
 
 Requirements

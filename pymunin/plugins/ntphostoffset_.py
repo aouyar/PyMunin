@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """ntphostoffset_ - Munin Plugin to monitor time offset of remote host using NTP.
 
 Requirements

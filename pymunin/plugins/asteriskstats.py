@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """asteriskstats - Munin Plugin to monitor Asterisk through Manager Interface.
 
 Requirements

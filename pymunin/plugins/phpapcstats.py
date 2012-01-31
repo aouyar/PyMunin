@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """phpapcstats - Munin Plugin for monitoring PHP APC Cache.
 
 Requirements

@@ -1,4 +1,3 @@
-#!/usr/bin/python
 """Implements MemcachedInfo Class for gathering stats from Memcached.
 
 The statistics are obtained by connecting to and querying the Memcached. 

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """phpfpmstats - Munin Plugin for monitoring PHP FPM (Fast Process Manager).
 
 Requirements

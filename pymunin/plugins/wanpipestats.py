@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """wanpipestats - Munin Plugin to monitor Wanpipe Interfaces.
 
 Requirements

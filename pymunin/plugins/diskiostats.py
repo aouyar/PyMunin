@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """diskiostats - Munin Plugin to monitor Disk I/O.
 
 Requirements - NA

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """fsstats - Munin Plugin to monitor FreeSWITCH through the Event Socket 
 Interface.
 

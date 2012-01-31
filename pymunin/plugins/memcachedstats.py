@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """memcachedstats - Munin Plugin to monitor stats for Memcached Server.
 
 Requirements

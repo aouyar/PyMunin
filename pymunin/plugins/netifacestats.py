@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """netifacestats - Munin Plugin to monitor Network Interfaces.
 
 Requirements

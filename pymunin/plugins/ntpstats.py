@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """ntpstats - Munin Plugin to monitor stats of active synchronization peer.
 
 Requirements

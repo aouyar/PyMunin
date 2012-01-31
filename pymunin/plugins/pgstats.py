@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """pgstats - Munin Plugin to monitor stats for PostgreSQL Database Server.
 
 Requirements

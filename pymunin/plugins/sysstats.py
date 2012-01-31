@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """sysstats - Munin Plugin to monitor system resource usage stats.
 CPU, memory, processes, forks, interrupts, context switches, paging, 
 swapping, etc.

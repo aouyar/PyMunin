@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """diskusagestats - Munin Plugin to monitor disk space and inode usage of 
 filesystems.
 

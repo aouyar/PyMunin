@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """nginxstats - Munin Plugin to monitor stats for Nginx Web Server.
 
 Requirements

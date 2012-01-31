@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """tomcatstats - Munin Plugin to monitor Apache Tomcat Application Server.
 
 Requirements
