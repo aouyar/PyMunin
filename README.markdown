@@ -32,17 +32,6 @@ Although the solution is focused on implementing _Multigraph Plugins_ the module
 also supports simple single graph plugins.
 
 
-Contributions
--------------
-
-* Initial packaging of the code was done 
-by [mlavin](https://github.com/mlavin) (Mark Lavin).
-PyMunin is installable pip / easy_install thanks to Mark. :-)  
-* The initial design of the solution was inspired by 
-[python-munin](https://github.com/samuel/python-munin) 
-by [samuel](https://github.com/samuel) (Samuel Stauffer).
-
-
 Munin Plugins
 -------------
 
@@ -82,22 +71,6 @@ The documentation for the project and sample graphs for plugins will be
 published in the [PyMunin Project Web Page](http://aouyar.github.com/PyMunin/)
 
 
-Collaboration
--------------
-
-I would be happy to receive suggestions on improving the code for developing 
-Munin Plugins. Alternatively you can use the _Issues_ functionality of _GitHub_ 
-to document problems and to propose improvements. You can use the internal 
-messaging system of _GitHub_ or my e-mail address in case you prefer to 
-contact me directly.
-
-I hope that by sharing the code, the existing plugins will get more testing and 
-receive improvements, and many more Multigraph plugins will be developed 
-collaboratively.
-
-I would be glad to receive some sample graphs from anyone using the plugins.
-
-
 Licensing
 ---------
 
@@ -105,6 +78,29 @@ _PyMunin_ is copyrighted free software made available under the terms of the
 _GPL License Version 3_ or later.
 
 See the _COPYING_ file that acompanies the code for full licensing information.
+
+
+Credits
+-------
+
+_PyMunin_ has been developed 
+by [aouyar](https://github.com/aouyar) (Ali Onur Uyar).
+
+Some of the people that have knowingly or unknowingly contributed with the 
+development are:
+
+* Initial packaging of the code was done 
+by [mlavin](https://github.com/mlavin) (Mark Lavin).
+PyMunin is installable pip / easy_install thanks to Mark. :-)  
+* The initial design of the solution was inspired by 
+[python-munin](https://github.com/samuel/python-munin) 
+by [samuel](https://github.com/samuel) (Samuel Stauffer).
+* Many plugins were inspired by existing _Munin Plugins_developed by other 
+people. (Before developing any plugins, I always try to check existing 
+solutions.)
+
+I hope that more people will be using PyMunin for developing plugins in the 
+future.
 
 
 Installation
@@ -133,3 +129,19 @@ On error plugins return short error messages by default. Plugin debugging must
 be enabled to return full trace for exceptions.
 
 To enable plugin debugging in _munin-run_ use the _--pidebug_ option. 
+
+
+Collaboration
+-------------
+
+I would be happy to receive suggestions on improving the code for developing 
+Munin Plugins. Alternatively you can use the _Issues_ functionality of _GitHub_ 
+to document problems and to propose improvements. You can use the internal 
+messaging system of _GitHub_ or my e-mail address in case you prefer to 
+contact me directly.
+
+I hope that by sharing the code, the existing plugins will get more testing and 
+receive improvements, and many more Multigraph plugins will be developed 
+collaboratively.
+
+I would be glad to receive some sample graphs from anyone using the plugins.
