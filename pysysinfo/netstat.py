@@ -69,7 +69,14 @@ class NetstatInfo:
                    'localaddr', 'localport','foreignaddr', 'foreignport', 
                    'state']
         args = []
-        args.append('--protocol=inet')
+        proto = []
+        if ipv4:
+            proto.append('inet')
+        if ipv6:
+            proto.append('inet6')
+        if len(proto) > 0:
+            args.append('-A')
+            args.append(','.join(proto))
         if tcp:
             args.append('-t')
         if udp:
@@ -78,10 +85,6 @@ class NetstatInfo:
             args.append('-l')
         elif include_listen:
             args.append('-a')
-        if ipv4:
-            args.append('-4')
-        if ipv6:
-            args.append('-6')
         regexp_str = ('(tcp|udp)(\d*)\s+(\d+)\s+(\d+)\s+'
                       '(\S+):(\w+)\s+(\S+):(\w+|\*)\s+(\w*)')
         if show_users:
