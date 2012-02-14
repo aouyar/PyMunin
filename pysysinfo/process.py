@@ -60,21 +60,21 @@ class ProcessInfo:
             raise Exception('Execution of command %s failed.' % psCmd)
         return out.splitlines()
     
-    def parseProcCmd(self, field_list=['pid', 'user', 'cmd',], threads=False):
+    def parseProcCmd(self, fields=['pid', 'user', 'cmd',], threads=False):
         """Execute ps command with custom output format with columns from 
-        field_list and return result as a nested list.
+        fields and return result as a nested list.
         
-        The Standard Format Specifiers from ps man page must be used in the
-        field_list.
+        The Standard Format Specifiers from ps man page must be used for the
+        fields parameter.
         
-        @param field_list: Fields included in the output.
-                           Default: pid, user, cmd
-        @param threads:    If True, include threads in output. 
-        @return:           List of headers and list of rows and columns.
+        @param fields:  List of fields included in the output.
+                        Default: pid, user, cmd
+        @param threads: If True, include threads in output. 
+        @return:        List of headers and list of rows and columns.
         
         """
         args = []
-        headers = [f.lower() for f in field_list]
+        headers = [f.lower() for f in fields]
         args.append('--no-headers')
         args.append('-e')
         if threads:
@@ -102,35 +102,36 @@ class ProcessInfo:
         else:
             return None
         
-    def getProcList(self, field_list=['pid', 'user', 'cmd',], threads=False,
+    def getProcList(self, fields=['pid', 'user', 'cmd',], threads=False,
                     **kwargs):
-        """Execute ps command with custom output format with columns columns from 
-        field_list, select lines using the filters defined by kwargs and return 
+        """Execute ps command with custom output format with columns columns 
+        from fields, select lines using the filters defined by kwargs and return 
         result as a nested list.
         
-        The Standard Format Specifiers from ps man page must be used in the
-        field_list and filters.
+        The Standard Format Specifiers from ps man page must be used for the
+        fields parameter.
         
-        @param field_list: Fields included in the output.
-                           Default: pid, user, cmd
-        @param threads:    If True, include threads in output.
-        @param **kwargs:   Keyword variables are used for filtering the results
-                           depending on the values of the columns. Each keyword 
-                           must correspond to a field name with an optional 
-                           suffix:
-                           field:          Field equal to value or in list of 
-                                           values.
-                           field_ic:       Field equal to value or in list of 
-                                           values, using case insensitive 
-                                           comparison.
-                           field_regex:    Field matches regex value or matches
-                                           with any regex in list of values.
-                           field_ic_regex: Field matches regex value or matches
-                                           with any regex in list of values 
-                                           using case insensitive match.                                  
-        @return:           List of headers and list of rows and columns.
+        @param fields:   Fields included in the output.
+                         Default: pid, user, cmd
+        @param threads:  If True, include threads in output.
+        @param **kwargs: Keyword variables are used for filtering the results
+                         depending on the values of the columns. Each keyword 
+                         must correspond to a field name with an optional 
+                         suffix:
+                         field:          Field equal to value or in list of 
+                                         values.
+                         field_ic:       Field equal to value or in list of 
+                                         values, using case insensitive 
+                                         comparison.
+                         field_regex:    Field matches regex value or matches
+                                         with any regex in list of values.
+                         field_ic_regex: Field matches regex value or matches
+                                         with any regex in list of values 
+                                         using case insensitive match.                                  
+        @return:         List of headers and list of rows and columns.
         
         """
+        field_list = list(fields)
         for key in kwargs:
             col = re.sub('(_ic)?(_regex)?$', '', key)
             if not col in field_list:
@@ -147,38 +148,39 @@ class ProcessInfo:
         else:
             return None
         
-    def getProcDict(self, field_list=['user', 'cmd',], threads=False, **kwargs):
+    def getProcDict(self, fields=['user', 'cmd',], threads=False, **kwargs):
         """Execute ps command with custom output format with columns format with 
-        columns from field_list, and return result as a nested dictionary with 
+        columns from fields, and return result as a nested dictionary with 
         the key PID or SPID.
         
-        The Standard Format Specifiers from ps man page must be used in the
-        field_list.
+        The Standard Format Specifiers from ps man page must be used for the 
+        fields parameter.
         
-        @param field_list: Fields included in the output.
-                           Default: user, cmd
-                           (PID or SPID column is included by default.)
-        @param threads:    If True, include threads in output.
-        @param **kwargs:   Keyword variables are used for filtering the results
-                           depending on the values of the columns. Each keyword 
-                           must correspond to a field name with an optional 
-                           suffix:
-                           field:          Field equal to value or in list of 
-                                           values.
-                           field_ic:       Field equal to value or in list of 
-                                           values, using case insensitive 
-                                           comparison.
-                           field_regex:    Field matches regex value or matches
-                                           with any regex in list of values.
-                           field_ic_regex: Field matches regex value or matches
-                                           with any regex in list of values 
-                                           using case insensitive match. 
-        @return:           Nested dictionary indexed by:
-                             PID for process info.
-                             SPID for thread info.
+        @param fields:   Fields included in the output.
+                         Default: user, cmd
+                         (PID or SPID column is included by default.)
+        @param threads:  If True, include threads in output.
+        @param **kwargs: Keyword variables are used for filtering the results
+                         depending on the values of the columns. Each keyword 
+                         must correspond to a field name with an optional 
+                         suffix:
+                         field:          Field equal to value or in list of 
+                                         values.
+                         field_ic:       Field equal to value or in list of 
+                                         values, using case insensitive 
+                                         comparison.
+                         field_regex:    Field matches regex value or matches
+                                         with any regex in list of values.
+                         field_ic_regex: Field matches regex value or matches
+                                         with any regex in list of values 
+                                         using case insensitive match. 
+        @return:         Nested dictionary indexed by:
+                           PID for process info.
+                           SPID for thread info.
         
         """
         stats = {}
+        field_list = list(fields)
         num_cols = len(field_list)
         if threads:
             key = 'spid'

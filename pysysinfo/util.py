@@ -178,8 +178,10 @@ class TableFilter:
         
         """
         if isinstance(patterns, basestring):
-            patterns = (patterns,)
-        elif not isinstance(patterns, (tuple, list)):
+            patt_list = (patterns,)
+        elif isinstance(patterns, (tuple, list)):
+            patt_list = list(patterns)
+        else:
             raise ValueError("The patterns parameter must either be as string "
                              "or a tuple / list of strings.")
         if is_regex:
@@ -187,10 +189,10 @@ class TableFilter:
                 flags = re.IGNORECASE
             else:
                 flags = 0
-            patterns = [re.compile(pattern, flags) for pattern in patterns]
+            patt_exprs = [re.compile(pattern, flags) for pattern in patt_list]
         elif ignore_case:
-            patterns = [pattern.lower() for pattern in patterns]
-        self._filters[column] = (patterns, is_regex, ignore_case)
+            patt_exprs = [pattern.lower() for pattern in patt_list]
+        self._filters[column] = (patt_exprs, is_regex, ignore_case)
                     
     def unregisterFilter(self, column):
         """Unregister filter on a column of the table.
