@@ -190,8 +190,11 @@ class TableFilter:
             else:
                 flags = 0
             patt_exprs = [re.compile(pattern, flags) for pattern in patt_list]
-        elif ignore_case:
-            patt_exprs = [pattern.lower() for pattern in patt_list]
+        else:
+            if ignore_case:
+                patt_exprs = [pattern.lower() for pattern in patt_list]
+            else:
+                patt_exprs = patt_list
         self._filters[column] = (patt_exprs, is_regex, ignore_case)
                     
     def unregisterFilter(self, column):
