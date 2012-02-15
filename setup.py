@@ -1,10 +1,10 @@
-from __future__ import with_statement
 import errno
 import os
 import pkgutil
 import shutil
+import glob
 from setuptools import setup, find_packages
-from  setuptools.command.install  import  install  as  _install
+from  setuptools.command.install import install as _install
 import pymunin #@UnusedImport
 import pymunin.plugins
 
@@ -22,11 +22,19 @@ def read_file(filename):
     except IOError:
         return ''
 
+if hasattr(pkgutil, "iter_modules"): # Python > 2.5
+    modules = [modname for importer, modname, ispkg in 
+               pkgutil.iter_modules(pymunin.plugins.__path__)]
+else:
+    modules = []
+    for path in glob.glob(os.path.join(pymunin.plugins.__path__[0], 
+                                       u'[A-Za-z]*.py')):
+        file = os.path.basename(path)
+        modules.append(file[:-3])
 
 console_scripts = []
 plugin_names = []
-
-for importer, modname, ispkg in pkgutil.iter_modules(pymunin.plugins.__path__):
+for modname in modules:
     params = {
         'script_name': u'%s-%s' % (PYMUNIN_SCRIPT_FILENAME_PREFIX, modname),
         'script_path': u'%s.%s' % (pymunin.plugins.__name__,  modname),
@@ -66,7 +74,8 @@ class install(_install):
                         print ("Failed installing the plugins to %s. "
                                "File or directory not found." % munin_plugin_dir)
                     script = os.path.join(self.install_scripts, 'pymunin-install')
-                    with open(script, 'w') as f:
+                    f = open(script, 'w')
+                    try:
                         f.write('#!/bin/sh\n')
                         for name in plugin_names:
                             source = os.path.join(
@@ -75,6 +84,8 @@ class install(_install):
                             )
                             destination = os.path.join(munin_plugin_dir, name)
                             f.write('cp %s %s\n' % (source, destination))
+                    finally:
+                        f.close()
                     os.chmod(script, 0755)
                     print ("You will need to copy manually using the script: %s\n"
                            "Example: sudo %s"
