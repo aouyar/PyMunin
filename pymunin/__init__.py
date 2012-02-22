@@ -15,7 +15,7 @@ __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = ["Samuel Stauffer"]
 __license__ = "GPL"
-__version__ = "0.9.6"
+__version__ = "0.9.7"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
@@ -333,8 +333,8 @@ class MuninPlugin:
             raise AttributeError("Simple Munin Plugins cannot have more than one graph.")
         if self._graphDict.has_key(parent_name):
             if not self._subGraphDict.has_key(parent_name):
-                self._subGraphDict['parent_name'] = {}
-            self._subGraphDict['parent_name']['graph_name'] = graph
+                self._subGraphDict[parent_name] = {}
+            self._subGraphDict[parent_name][graph_name] = graph
         else:
             raise AttributeError("Invalid parent graph name %s used for subgraph %s."
                 % (parent_name,  graph_name))
@@ -449,8 +449,8 @@ class MuninPlugin:
             print
         if self._nestedGraphs and self._subGraphDict:
             for (parent_name, subgraphs) in self._subGraphDict.iteritems():
-                for (graph_name,  graph) in subgraphs:
-                    print "multigraph %s.%s" % (parent_name,  graph_name)
+                for (graph_name,  graph) in subgraphs.iteritems():
+                    print "multigraph %s.%s" % (parent_name, graph_name)
                     print graph.getConfig()
                     print
         return True
@@ -479,7 +479,7 @@ class MuninPlugin:
             print
         if self._nestedGraphs and self._subGraphDict:
             for (parent_name, subgraphs) in self._subGraphDict.iteritems():
-                for (graph_name,  graph) in subgraphs:
+                for (graph_name,  graph) in subgraphs.iteritems():
                     print "multigraph %s.%s" % (parent_name,  graph_name)
                     print graph.getVals()
                     print
