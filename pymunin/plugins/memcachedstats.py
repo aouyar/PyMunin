@@ -73,7 +73,7 @@ class MuninMemcachedPlugin(MuninPlugin):
         MuninPlugin.__init__(self, argv, env, debug)
         
         self._host = self.envGet('host')
-        self._port = self.envGet('port')
+        self._port = self.envGet('port', None, int)
         
         self._stats = None
         self._prev_stats = self.restoreState()

@@ -65,7 +65,7 @@ class MuninFreeswitchPlugin(MuninPlugin):
         MuninPlugin.__init__(self, argv, env, debug)
 
         self._fshost = self.envGet('fshost')
-        self._fsport = self.envGet('fsport')
+        self._fsport = self.envGet('fsport', None, int)
         self._fspass = self.envGet('fspass')
 
         if self.graphEnabled('fs_calls'):

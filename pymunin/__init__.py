@@ -15,7 +15,7 @@ __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = ["Samuel Stauffer"]
 __license__ = "GPL"
-__version__ = "0.9.7"
+__version__ = "0.9.8"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
@@ -23,6 +23,7 @@ __status__ = "Development"
 
 maxLabelLenGraphSimple = 40
 maxLabelLenGraphDual = 14
+
 
 
 class MuninAttrFilter:
@@ -72,6 +73,7 @@ class MuninAttrFilter:
         Returns True if the attribute is enabled, false otherwise.
         
         @param attr: Name of attribute.
+        @return:     Boolean
         
         """
         return self._attrs.get(attr, self._default)
@@ -122,7 +124,7 @@ class MuninPlugin:
         self.envRegisterFilter('graphs', '^[\w\-]+$')
         self._nestedGraphs = self.envCheckFlag('nested_graphs', True)
                 
-    def _parseEnv(self,  env=None):
+    def _parseEnv(self, env=None):
         """Utility method that parses through environment variables.
         
         Parses for environment variables common to all Munin Plugins:
@@ -131,7 +133,8 @@ class MuninPlugin:
             - nested_graphs
         
         @param env: Dictionary of environment variables.
-                    (Only used for testing. initialized automatically by constructor.
+                    (Only used for testing. initialized automatically by 
+                    constructor.
         
         """
         if not env:
@@ -142,25 +145,35 @@ class MuninPlugin:
             self._stateFile = '/tmp/munin-state-%s' % self.plugin_name
         if env.has_key('MUNIN_CAP_DIRTY_CONFIG'):
             self._dirtyConfig = True
-       
+            
     def envHasKey(self, name):
         """Return True if environment variable with name exists.  
         
         @param name: Name of environtment variable.
+        @return:     True if environment variable is defined.
         
         """
         return self._env.has_key(name)
     
-    def envGet(self, name, default=None):
+    def envGet(self, name, default=None, conv=None):
         """Return value for environment variable or None.  
         
         @param name:    Name of environment variable.
         @param default: Default value if variable is undefined.
+        @param conv:    Function for converting value to desired type.
+        @return:        Value of environment variable.
         
         """
-        return self._env.get(name, default)
+        if self._env.has_key(name):
+            if conv is not None:
+                return conv(self._env.get(name))
+            else:
+                return self._env.get(name)
+        else:
+            return default
+        
     
-    def envGetList(self, name, attr_regex = '^\w+$'):
+    def envGetList(self, name, attr_regex = '^\w+$', conv=None):
         """Parse the plugin environment variables to return list from variable
         with name list_<name>. The value of the variable must be a comma 
         separated list of items.
@@ -170,6 +183,7 @@ class MuninPlugin:
         @param attr_regex: If the regex is defined, the items in the list are 
                            ignored unless they comply with the format dictated 
                            by the match regex.
+        @param conv:       Function for converting value to desired type.
         @return:           List of items.
         
         """
@@ -178,12 +192,16 @@ class MuninPlugin:
         if self._env.has_key(key):
             if attr_regex:
                 recomp = re.compile(attr_regex)
-                for attr in self._env[key].split(','):
-                    attr = attr.strip()
-                    if recomp.search(attr):
-                        item_list.append(attr) 
             else:
-                item_list = [attr.strip() for attr in self._env[key].split(',')]
+                recomp = None
+            for attr in self._env[key].split(','):
+                attr = attr.strip()
+                if recomp is None or recomp.search(attr):
+                    if conv is not None:
+                        item_list.append(conv(attr))
+                    else:
+                        item_list.append(attr)
+                    
         return item_list
     
     def envRegisterFilter(self, name, attr_regex = '^\w+$', default = True):

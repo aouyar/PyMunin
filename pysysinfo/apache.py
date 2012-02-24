@@ -46,7 +46,7 @@ class ApacheInfo:
         else:
             self._host = '127.0.0.1'
         if port is not None:
-            self._port = port
+            self._port = int(port)
         else:
             if ssl:
                 self._port = defaultHTTPSport

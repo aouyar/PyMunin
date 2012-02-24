@@ -80,7 +80,7 @@ class MuninTomcatPlugin(MuninPlugin):
         self.envRegisterFilter('ports', '^\d+$')
         
         self._host = self.envGet('host')
-        self._port = self.envGet('port')
+        self._port = self.envGet('port', None, int)
         self._user = self.envGet('user')
         self._password = self.envGet('password')
         self._ssl = self.envCheckFlag('ssl', False)

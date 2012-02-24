@@ -79,12 +79,12 @@ class MuninNginxPlugin(MuninPlugin):
         MuninPlugin.__init__(self, argv, env, debug)
         
         self._host = self.envGet('host')
-        self._port = self.envGet('port')
+        self._port = self.envGet('port', None, int)
         self._user = self.envGet('user')
         self._password = self.envGet('password')
         self._statuspath = self.envGet('statuspath')
         self._ssl = self.envCheckFlag('ssl', False)
-        self._numSamples = self.envGet('samples', defaultNumSamples)  
+        self._numSamples = self.envGet('samples', defaultNumSamples, int)  
         
         if self.graphEnabled('nginx_activeconn'):
             graph = MuninGraph('Nginx - Active Connections', 

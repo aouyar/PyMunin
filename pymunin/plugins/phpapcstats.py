@@ -72,7 +72,7 @@ class MuninPHPapcPlugin(MuninPlugin):
         MuninPlugin.__init__(self, argv, env, debug)
         
         self._host = self.envGet('host')
-        self._port = self.envGet('port')
+        self._port = self.envGet('port', None, int)
         self._user = self.envGet('user')
         self._monpath = self.envGet('monpath')
         self._password = self.envGet('password')

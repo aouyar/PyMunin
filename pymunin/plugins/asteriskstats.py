@@ -96,11 +96,10 @@ class MuninAsteriskPlugin(MuninPlugin):
 
         self.envRegisterFilter('queues', '^[\w\-]+$')
         self._amihost = self.envGet('amihost')
-        self._amiport = self.envGet('amiport')
+        self._amiport = self.envGet('amiport', None, int)
         self._amiuser = self.envGet('amiuser')
         self._amipass = self.envGet('amipass')
         
-                
         self._ami = AsteriskInfo(self._amihost, self._amiport, 
                                  self._amiuser, self._amipass)
         

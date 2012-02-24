@@ -69,7 +69,7 @@ class MuninApachePlugin(MuninPlugin):
         MuninPlugin.__init__(self, argv, env, debug)
         
         self._host = self.envGet('host')
-        self._port = self.envGet('port')
+        self._port = self.envGet('port', None, int)
         self._user = self.envGet('user')
         self._password = self.envGet('password')
         self._statuspath = self.envGet('statuspath')

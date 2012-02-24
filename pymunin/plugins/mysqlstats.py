@@ -78,7 +78,7 @@ class MuninMySQLplugin(MuninPlugin):
         self.envRegisterFilter('engine', '^\w+$')
         
         self._host = self.envGet('host')
-        self._port = self.envGet('port')
+        self._port = self.envGet('port', None, int)
         self._database = self.envGet('database')
         self._user = self.envGet('user')
         self._password = self.envGet('password')

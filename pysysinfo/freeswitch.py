@@ -42,7 +42,7 @@ class FSinfo:
         """
         # Set Connection Parameters
         self._eslhost = host or '127.0.0.1'
-        self._eslport = port or 8021
+        self._eslport = int(port) or 8021
         self._eslpass = secret or "ClueCon"
         self._eslconn = None
         
