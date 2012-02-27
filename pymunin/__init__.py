@@ -107,6 +107,7 @@ class MuninPlugin:
         self._graphDict = {}
         self._graphNames = []
         self._subGraphDict = {}
+        self._subGraphNames = {}
         self._filters = {}
         self._flags = {}
         self._argv = argv
@@ -125,7 +126,7 @@ class MuninPlugin:
         self._nestedGraphs = self.envCheckFlag('nested_graphs', True)
                 
     def _parseEnv(self, env=None):
-        """Utility method that parses through environment variables.
+        """Private method for parsing through environment variables.
         
         Parses for environment variables common to all Munin Plugins:
             - MUNIN_STATEFILE
@@ -145,6 +146,50 @@ class MuninPlugin:
             self._stateFile = '/tmp/munin-state-%s' % self.plugin_name
         if env.has_key('MUNIN_CAP_DIRTY_CONFIG'):
             self._dirtyConfig = True
+            
+    def _getGraph(self, graph_name, fail_noexist=False):
+        """Private method for returning graph object with name graph_name. 
+        
+        @param graph_name:   Graph Name
+        @param fail_noexist: If true throw exception if there is no graph with
+                             name graph_name.
+        @return:             Graph Object or None
+        """
+        graph = self._graphDict.get(graph_name)
+        if fail_noexist and graph is None:
+            raise AttributeError("Invalid graph name %s", graph_name)
+        else:
+            return graph
+            
+    def _getSubGraph(self, parent_name, graph_name, fail_noexist=False):
+        """Private method for returning subgraph object with name graph_name 
+        and parent graph with name parent_name. 
+        
+        @param  parent_name: Root Graph Name
+        @param  graph_name:  Subgraph Name
+        @param fail_noexist: If true throw exception if there is no subgraph 
+                             with name graph_name.
+        @return:             Graph Object or None
+        """
+        if not self.isMultigraph:
+            raise AttributeError("Simple Munin Plugins cannot have subgraphs.")
+        if self._graphDict.has_key(parent_name) is not None:
+            subgraphs = self._subGraphDict.get(parent_name)
+            if subgraphs is not None:
+                subgraph = subgraphs.get(graph_name)
+                if fail_noexist and subgraph is None:
+                    raise AttributeError("Invalid subgraph name %s"
+                                         "for graph %s.", 
+                                         (graph_name, parent_name))
+                else:
+                    return subgraph
+            else:
+                raise AttributeError("Parent graph %s has no subgraphs."
+                                     % (parent_name,))
+        else:
+            raise AttributeError("Invalid parent graph name %s "
+                                 "for subgraph %s."
+                                 % (parent_name, graph_name))
             
     def envHasKey(self, name):
         """Return True if environment variable with name exists.  
@@ -277,14 +322,14 @@ class MuninPlugin:
         """
         return self._debug
     
-    def graphEnabled(self, name):
+    def graphEnabled(self, graph_name):
         """Utility method to check if graph with the given name is enabled.
         
-        @param name: Name of Root Graph Instance.
-        @return:     Returns True if Root Graph is enabled, False otherwise.
+        @param graph_name: Name of Root Graph Instance.
+        @return:           Returns True if graph is enabled, False otherwise.
             
         """
-        return self.envCheckFilter('graphs', name)
+        return self.envCheckFilter('graphs', graph_name)
         
     def saveState(self,  stateObj):
         """Utility methos to save plugin state stored in stateObj to persistent 
@@ -321,18 +366,18 @@ class MuninPlugin:
             return stateObj
         return None
         
-    def appendGraph(self, name, graph):
+    def appendGraph(self, graph_name, graph):
         """Utility method to associate Graph Object to Plugin.
         
         This utility method is for use in constructor of child classes for
         associating a MuninGraph instances to the plugin.
         
-        @param name:  Graph Name
-        @param graph: MuninGraph Instance
+        @param graph_name:  Graph Name
+        @param graph:       MuninGraph Instance
 
         """
-        self._graphDict[name] = graph
-        self._graphNames.append(name)
+        self._graphDict[graph_name] = graph
+        self._graphNames.append(graph_name)
         if not self.isMultigraph  and len(self._graphNames) > 1:
             raise AttributeError("Simple Munin Plugins cannot have more than one graph.")
         
@@ -348,11 +393,13 @@ class MuninPlugin:
 
         """
         if not self.isMultigraph:
-            raise AttributeError("Simple Munin Plugins cannot have more than one graph.")
+            raise AttributeError("Simple Munin Plugins cannot have subgraphs.")
         if self._graphDict.has_key(parent_name):
             if not self._subGraphDict.has_key(parent_name):
                 self._subGraphDict[parent_name] = {}
+                self._subGraphNames[parent_name] = []
             self._subGraphDict[parent_name][graph_name] = graph
+            self._subGraphNames[parent_name].append(graph_name)
         else:
             raise AttributeError("Invalid parent graph name %s used for subgraph %s."
                 % (parent_name,  graph_name))
@@ -362,48 +409,59 @@ class MuninPlugin:
         
         The private method is for use in retrieveVals() method of child classes.
         
-        @param name:    Graph Name
-        @param valDict: Dictionary of monitored values
+        @param graph_name: Graph Name
+        @param field_name: Field Name.
+        @param val:        Value for field.
 
         """
-        graph = self._graphDict.get(graph_name)
-        if graph is not None:
-            if graph.hasField(field_name):
-                graph.setVal(field_name, val)
-            else:
-                raise AttributeError("Invalid field name %s used for setting "
-                                     "value for graph %s." 
-                                     % (field_name, graph_name))
+        graph = self._getGraph(graph_name, True)
+        if graph.hasField(field_name):
+            graph.setVal(field_name, val)
         else:
-            raise AttributeError("Invalid graph name %s used for setting value." 
-                                 % graph_name)
+            raise AttributeError("Invalid field name %s "
+                                 "for graph %s." 
+                                 % (field_name, graph_name))
     
-    def setSubgraphVal(self,  parent_name,  graph_name,  val):
+    def setSubgraphVal(self,  parent_name,  graph_name, field_name, val):
         """Set Value for Field in Subgraph.
 
         The private method is for use in retrieveVals() method of child
         classes.
         
         @param parent_name: Root Graph Name
-        @param name:        Subgraph Name
-        @param valDict:     Dictionary of monitored values
+        @param graph_name:  Subgraph Name
+        @param field_name:  Field Name.
+        @param val:         Value for field.
 
-        """        
-        graph = self._graphDict.get(parent_name)
-        if graph is not None:
-            graph.setVal("%s.%s" % (parent_name, graph_name),  val)
+        """
+        subgraph = self._getSubGraph(parent_name, graph_name, True)
+        if subgraph.hasField(field_name):
+            subgraph.setVal(field_name, val)
         else:
-            raise AttributeError("Invalid parent graph name %s used "
-                                 "for setting value for subgraph %s."
-                                 % (parent_name, graph_name))
+            raise AttributeError("Invalid field name %s "
+                                 "for subgraph %s "
+                                 "of parent graph %s." 
+                                 % (field_name, graph_name, parent_name))
     
-    def hasGraph(self, name):
+    def hasGraph(self, graph_name):
         """Return true if graph with name is registered to plugin.
         
-        @return: Boolean
+        @param graph_name: Graph Name
+        @return:           Boolean
         
         """
-        return self._graphDict.has_key(name)
+        return self._graphDict.has_key(graph_name)
+    
+    def hasSubgraph(self, parent_name, graph_name):
+        """Return true if Root Graph with name parent_name has a subgraph with 
+        name graph_name.
+        
+        @param parent_name: Root Graph Name
+        @param graph_name:  Subgraph Name
+        @return:            Boolean
+        
+        """
+        return self._getSubGraph(parent_name, graph_name) is not None
             
     def getGraphList(self):
         """Returns list of names of graphs registered to plugin.
@@ -412,23 +470,67 @@ class MuninPlugin:
         
         """
         return self._graphNames
+    
+    def getSubgraphList(self, parent_name):
+        """Returns list of names of subgraphs for Root Graph with name parent_name.
+        
+        @param parent_name: Name of Root Graph.
+        @return -           List of subgraph names.
+        
+        """
+        if not self.isMultigraph:
+            raise AttributeError("Simple Munin Plugins cannot have subgraphs.")
+        if self._graphDict.has_key(parent_name):
+            return self._subGraphNames.get(parent_name) or []
+        else:
+            raise AttributeError("Invalid parent graph name %s."
+                                 % (parent_name,))
 
     def graphHasField(self, graph_name, field_name):
         """Return true if graph with name graph_name has field with 
         name field_name.
         
+        @param graph_name: Graph Name
+        @param field_name: Field Name.
         @return: Boolean
         
         """
-        return self._graphDict[graph_name].hasField(field_name)
+        graph = self._graphDict.get(graph_name, True)
+        return graph.hasField(field_name)
+    
+    def subGraphHasField(self, parent_name, graph_name, field_name):
+        """Return true if subgraph with name graph_name with parent graph with
+        name parent_name has field with name field_name.
+        
+        @param parent_name: Root Graph Name
+        @param graph_name:  Subgraph Name
+        @param field_name:  Field Name.
+        @return:            Boolean
+        
+        """
+        subgraph = self._getSubGraph(parent_name, graph_name, True)
+        return subgraph.hasField(field_name)
             
     def getGraphFieldList(self, graph_name):
         """Returns list of names of fields for graph with name graph_name.
         
-        @return - List of field names for graph.
+        @param graph_name: Graph Name
+        @return:           List of field names for graph.
         
         """
-        return self._graphDict[graph_name].getFieldList()
+        graph = self._getGraph(graph_name, True)
+        return graph.getFieldList()
+    
+    def getSubgraphFieldList(self, parent_name, graph_name):
+        """Returns list of names of fields for graph with name graph_name.
+        
+        @param parent_name: Root Graph Name
+        @param graph_name:  Subgraph Name
+        @return:            List of field names for subgraph.
+        
+        """
+        graph = self._getSubGraph(parent_name, graph_name, True)
+        return graph.getFieldList()
         
     def retrieveVals(self):
         """Initialize measured values for Graphs.
@@ -459,15 +561,16 @@ class MuninPlugin:
         populated.
 
         """
-        for name in self._graphNames:
-            graph = self._graphDict[name]
+        for parent_name in self._graphNames:
+            graph = self._graphDict[parent_name]
             if self.isMultigraph:
-                print "multigraph %s" % name
+                print "multigraph %s" % parent_name
             print graph.getConfig()
             print
-        if self._nestedGraphs and self._subGraphDict:
-            for (parent_name, subgraphs) in self._subGraphDict.iteritems():
-                for (graph_name,  graph) in subgraphs.iteritems():
+        if self._nestedGraphs and self._subGraphDict and self._subGraphNames:
+            for (parent_name, subgraph_names) in self._subGraphNames.iteritems():
+                for graph_name in subgraph_names:
+                    graph = self._subgraphDict[parent_name][graph_name]
                     print "multigraph %s.%s" % (parent_name, graph_name)
                     print graph.getConfig()
                     print
@@ -489,15 +592,16 @@ class MuninPlugin:
 
         """
         self.retrieveVals()
-        for name in self._graphNames:
-            graph = self._graphDict[name]
+        for parent_name in self._graphNames:
+            graph = self._graphDict[parent_name]
             if self.isMultigraph:
-                print "multigraph %s" % name
+                print "multigraph %s" % parent_name
             print graph.getVals()
             print
-        if self._nestedGraphs and self._subGraphDict:
-            for (parent_name, subgraphs) in self._subGraphDict.iteritems():
-                for (graph_name,  graph) in subgraphs.iteritems():
+        if self._nestedGraphs and self._subGraphDict and self._subGraphNames:
+            for (parent_name, subgraph_names) in self._subGraphNames.iteritems():
+                for graph_name in subgraph_names:
+                    graph = self._subgraphDict[parent_name][graph_name]
                     print "multigraph %s.%s" % (parent_name,  graph_name)
                     print graph.getVals()
                     print
