@@ -106,8 +106,8 @@ class MuninPlugin:
         """
         self._graphDict = {}
         self._graphNames = []
-        self._subGraphDict = {}
-        self._subGraphNames = {}
+        self._subgraphDict = {}
+        self._subgraphNames = {}
         self._filters = {}
         self._flags = {}
         self._argv = argv
@@ -174,7 +174,7 @@ class MuninPlugin:
         if not self.isMultigraph:
             raise AttributeError("Simple Munin Plugins cannot have subgraphs.")
         if self._graphDict.has_key(parent_name) is not None:
-            subgraphs = self._subGraphDict.get(parent_name)
+            subgraphs = self._subgraphDict.get(parent_name)
             if subgraphs is not None:
                 subgraph = subgraphs.get(graph_name)
                 if fail_noexist and subgraph is None:
@@ -395,11 +395,11 @@ class MuninPlugin:
         if not self.isMultigraph:
             raise AttributeError("Simple Munin Plugins cannot have subgraphs.")
         if self._graphDict.has_key(parent_name):
-            if not self._subGraphDict.has_key(parent_name):
-                self._subGraphDict[parent_name] = {}
-                self._subGraphNames[parent_name] = []
-            self._subGraphDict[parent_name][graph_name] = graph
-            self._subGraphNames[parent_name].append(graph_name)
+            if not self._subgraphDict.has_key(parent_name):
+                self._subgraphDict[parent_name] = {}
+                self._subgraphNames[parent_name] = []
+            self._subgraphDict[parent_name][graph_name] = graph
+            self._subgraphNames[parent_name].append(graph_name)
         else:
             raise AttributeError("Invalid parent graph name %s used for subgraph %s."
                 % (parent_name,  graph_name))
@@ -481,7 +481,7 @@ class MuninPlugin:
         if not self.isMultigraph:
             raise AttributeError("Simple Munin Plugins cannot have subgraphs.")
         if self._graphDict.has_key(parent_name):
-            return self._subGraphNames.get(parent_name) or []
+            return self._subgraphNames.get(parent_name) or []
         else:
             raise AttributeError("Invalid parent graph name %s."
                                  % (parent_name,))
@@ -567,8 +567,8 @@ class MuninPlugin:
                 print "multigraph %s" % parent_name
             print graph.getConfig()
             print
-        if self._nestedGraphs and self._subGraphDict and self._subGraphNames:
-            for (parent_name, subgraph_names) in self._subGraphNames.iteritems():
+        if self._nestedGraphs and self._subgraphDict and self._subgraphNames:
+            for (parent_name, subgraph_names) in self._subgraphNames.iteritems():
                 for graph_name in subgraph_names:
                     graph = self._subgraphDict[parent_name][graph_name]
                     print "multigraph %s.%s" % (parent_name, graph_name)
@@ -598,8 +598,8 @@ class MuninPlugin:
                 print "multigraph %s" % parent_name
             print graph.getVals()
             print
-        if self._nestedGraphs and self._subGraphDict and self._subGraphNames:
-            for (parent_name, subgraph_names) in self._subGraphNames.iteritems():
+        if self._nestedGraphs and self._subgraphDict and self._subgraphNames:
+            for (parent_name, subgraph_names) in self._subgraphNames.iteritems():
                 for graph_name in subgraph_names:
                     graph = self._subgraphDict[parent_name][graph_name]
                     print "multigraph %s.%s" % (parent_name,  graph_name)
