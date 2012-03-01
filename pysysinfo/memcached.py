@@ -36,9 +36,9 @@ class MemcachedInfo:
         @param autoInit: If True connect to Memcached on init.
 
         """
+        self._conn = None
         self._host = host or '127.0.0.1'
         self._port = int(port) or 11211
-        self._conn = None
         if autoInit:
             self._connect()
     

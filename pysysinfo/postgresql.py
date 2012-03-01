@@ -42,6 +42,7 @@ class PgInfo:
         @param autoInit: If True connect to PostgreSQL Database on instantiation.
             
         """
+        self._conn = None
         self._connParams = {}
         self._version = None
         self._conn = None

@@ -54,11 +54,11 @@ class AsteriskInfo:
 
         """
         # Set Connection Parameters
+        self._conn = None
         self._amihost = host or '127.0.0.1'
         self._amiport = port or 5038
         self._amiuser = user
         self._amipass = password
-        self._conn = None
         self._ami_version = None
         self._asterisk_version = None
         self._modules = None

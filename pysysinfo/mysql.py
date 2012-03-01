@@ -36,6 +36,7 @@ class MySQLinfo:
         @param autoInit: If True connect to MySQL Database on instantiation.
             
         """
+        self._conn = None
         self._connParams = {}
         if host is not None:
             self._connParams['host'] = host

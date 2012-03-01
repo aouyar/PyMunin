@@ -65,6 +65,7 @@ class SquidInfo:
         @param autoInit: If True connect to Apache Tomcat Server on instantiation.
             
         """
+        self._conn = None
         if host is not None:
             self._host = host
         else:
@@ -78,7 +79,6 @@ class SquidInfo:
             authstr = "%s:%s" % (urllib.quote(user), urllib.quote(password))
             self._httpHeaders['Authorization'] = "Basic %s" % authstr
             self._httpHeaders['Proxy-Authorization'] = "Basic %s" % authstr
-        self._conn = None
         if autoInit:
             self._connect()
     
