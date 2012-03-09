@@ -44,6 +44,7 @@ included:
 * Disk Usage
 * Disk I/O
 * FreeSWITCH Soft Switch
+* Lighttpd Web Server
 * Memcached
 * MySQL Database
 * Network Interface Traffic and Errors
