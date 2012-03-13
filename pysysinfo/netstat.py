@@ -3,8 +3,7 @@
 """
 
 import re
-import subprocess
-from util import TableFilter
+import util
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
@@ -36,11 +35,7 @@ class NetstatInfo:
         @return:      List of output lines
         
         """
-        try:
-            out = subprocess.Popen([netstatCmd,] + list(args), 
-                                   stdout=subprocess.PIPE).communicate()[0]
-        except:
-            raise Exception('Execution of command %s failed.' % netstatCmd)
+        out = util.exec_command([netstatCmd,] + list(args))
         return out.splitlines()
     
     def parseNetstatCmd(self, tcp=True, udp=True, ipv4=True, ipv6=True, 
@@ -165,7 +160,7 @@ class NetstatInfo:
                                      resolve_hosts, resolve_ports, resolve_users)
         if pinfo:
             if len(kwargs) > 0:
-                pfilter = TableFilter()
+                pfilter = util.TableFilter()
                 pfilter.registerFilters(**kwargs)
                 stats = pfilter.applyFilters(pinfo['headers'], pinfo['stats'])
                 return {'headers': pinfo['headers'], 'stats': stats}

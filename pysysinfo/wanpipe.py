@@ -4,7 +4,7 @@ Telephony Interfaces.
 """
 
 import re
-import commands
+import util
 import netiface
 
 __author__ = "Ali Onur Uyar"
@@ -18,7 +18,7 @@ __status__ = "Development"
 
 
 # Defaults
-wanpipemonCmd = '/usr/sbin/wanpipemon -i %s -c Ta'
+wanpipemonCmd = '/usr/sbin/wanpipemon'
 
 
 class WanpipeInfo:
@@ -46,20 +46,17 @@ class WanpipeInfo:
 
         """
         info_dict = {}
-        (retval, output) = commands.getstatusoutput(wanpipemonCmd % iface)
-        if retval == 0:
-            for line in output.splitlines():
-                mobj = re.match('^\s*(Line Code Violation|Far End Block Errors|'
-                                'CRC4 Errors|FAS Errors)\s*:\s*(\d+)\s*$', 
-                                line, re.IGNORECASE)
-                if mobj:
-                    info_dict[mobj.group(1).lower().replace(' ', '')] = int(mobj.group(2))
-                    continue
-                mobj = re.match('^\s*(Rx Level)\s*:\s*>{0,1}\s*([-\d\.]+)db\s*', 
-                                line, re.IGNORECASE)
-                if mobj:
-                    info_dict[mobj.group(1).lower().replace(' ', '')] = float(mobj.group(2))
-                    continue
-        else:
-            raise Exception("Execution of command failed: %s" % wanpipemonCmd)
+        output = util.exec_command([wanpipemonCmd, '-i', iface, '-c',  'Ta'])
+        for line in output.splitlines():
+            mobj = re.match('^\s*(Line Code Violation|Far End Block Errors|'
+                            'CRC4 Errors|FAS Errors)\s*:\s*(\d+)\s*$', 
+                            line, re.IGNORECASE)
+            if mobj:
+                info_dict[mobj.group(1).lower().replace(' ', '')] = int(mobj.group(2))
+                continue
+            mobj = re.match('^\s*(Rx Level)\s*:\s*>{0,1}\s*([-\d\.]+)db\s*', 
+                            line, re.IGNORECASE)
+            if mobj:
+                info_dict[mobj.group(1).lower().replace(' ', '')] = float(mobj.group(2))
+                continue
         return info_dict

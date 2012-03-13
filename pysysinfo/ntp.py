@@ -6,7 +6,7 @@ remote NTP servers.
 """
 
 import re
-import commands
+import util
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
@@ -19,8 +19,8 @@ __status__ = "Development"
 
 
 # Defaults
-ntpqCmd = "ntpq -n -c peers"
-ntpdateCmd = "ntpdate -u -q"
+ntpqCmd = "ntpq"
+ntpdateCmd = "ntpdate"
 
 
 class NTPinfo:
@@ -33,18 +33,17 @@ class NTPinfo:
 
         """
         info_dict = {}
-        (retval, output) = commands.getstatusoutput(ntpqCmd)
-        if retval == 0:
-            for line in output.splitlines():
-                mobj = re.match('\*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s+', line)
-                if mobj:
-                    info_dict['ip'] = mobj.group(1)
-                    cols = line.split()
-                    info_dict['stratum'] = int(cols[2])
-                    info_dict['delay'] = float(cols[7]) / 1000.0
-                    info_dict['offset'] = float(cols[8]) / 1000.0
-                    info_dict['jitter'] = float(cols[9]) / 1000.0
-                    return info_dict
+        output = util.exec_command([ntpqCmd, '-n', '-c', 'peers'])
+        for line in output.splitlines():
+            mobj = re.match('\*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s+', line)
+            if mobj:
+                info_dict['ip'] = mobj.group(1)
+                cols = line.split()
+                info_dict['stratum'] = int(cols[2])
+                info_dict['delay'] = float(cols[7]) / 1000.0
+                info_dict['offset'] = float(cols[8]) / 1000.0
+                info_dict['jitter'] = float(cols[9]) / 1000.0
+                return info_dict
         else:
             raise Exception("Execution of command failed: %s" % ntpqCmd)
         return info_dict
@@ -58,17 +57,16 @@ class NTPinfo:
 
         """
         info_dict = {}
-        (retval, output) = commands.getstatusoutput("%s %s" % (ntpdateCmd, host))
-        if retval == 0:
-            for line in output.splitlines():
-                mobj = re.match('server.*,\s*stratum\s+(\d),.*'
-                                'offset\s+([\d\.-]+),.*delay\s+([\d\.]+)\s*$', 
-                                line)
-                if mobj:
-                    info_dict['stratum'] = int(mobj.group(1))
-                    info_dict['delay'] = float(mobj.group(3))
-                    info_dict['offset'] = float(mobj.group(2))
-                    return info_dict
+        output = util.exec_command([ntpdateCmd, '-u', '-q', host])
+        for line in output.splitlines():
+            mobj = re.match('server.*,\s*stratum\s+(\d),.*'
+                            'offset\s+([\d\.-]+),.*delay\s+([\d\.]+)\s*$', 
+                            line)
+            if mobj:
+                info_dict['stratum'] = int(mobj.group(1))
+                info_dict['delay'] = float(mobj.group(3))
+                info_dict['offset'] = float(mobj.group(2))
+                return info_dict
         return info_dict
 
     def getHostOffsets(self, hosts):
@@ -80,18 +78,16 @@ class NTPinfo:
 
         """
         info_dict = {}
-        (retval, output) = commands.getstatusoutput("%s %s" % (ntpdateCmd, 
-                                                               " ".join(hosts)))
-        if retval == 0:
-            for line in output.splitlines():
-                mobj = re.match('server\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}),'
-                                '\s*stratum\s+(\d),.*offset\s+([\d\.-]+),'
-                                '.*delay\s+([\d\.]+)\s*$', line)
-                if mobj:
-                    host_dict = {}
-                    host = mobj.group(1)
-                    host_dict['stratum'] = int(mobj.group(2))
-                    host_dict['delay'] = float(mobj.group(4))
-                    host_dict['offset'] = float(mobj.group(3))
-                    info_dict[host] = host_dict
+        output = util.exec_command([ntpdateCmd, '-u', '-q'] + list(hosts))
+        for line in output.splitlines():
+            mobj = re.match('server\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}),'
+                            '\s*stratum\s+(\d),.*offset\s+([\d\.-]+),'
+                            '.*delay\s+([\d\.]+)\s*$', line)
+            if mobj:
+                host_dict = {}
+                host = mobj.group(1)
+                host_dict['stratum'] = int(mobj.group(2))
+                host_dict['delay'] = float(mobj.group(4))
+                host_dict['offset'] = float(mobj.group(3))
+                info_dict[host] = host_dict
         return info_dict

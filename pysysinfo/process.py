@@ -2,9 +2,8 @@
 
 """
 
-import subprocess
 import re
-from util import TableFilter
+import util
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
@@ -53,11 +52,7 @@ class ProcessInfo:
         @return:      List of output lines
         
         """
-        try:
-            out = subprocess.Popen([psCmd,] + list(args), 
-                                   stdout=subprocess.PIPE).communicate()[0]
-        except:
-            raise Exception('Execution of command %s failed.' % psCmd)
+        out = util.exec_command([psCmd,] + list(args))
         return out.splitlines()
     
     def parseProcCmd(self, fields=['pid', 'user', 'cmd',], threads=False):
@@ -139,7 +134,7 @@ class ProcessInfo:
         pinfo = self.parseProcCmd(field_list, threads)
         if pinfo:
             if len(kwargs) > 0:
-                pfilter = TableFilter()
+                pfilter = util.TableFilter()
                 pfilter.registerFilters(**kwargs)
                 stats = pfilter.applyFilters(pinfo['headers'], pinfo['stats'])
                 return {'headers': pinfo['headers'], 'stats': stats}

@@ -3,6 +3,7 @@
 """
 
 import re
+import subprocess
 
 
 __author__ = "Ali Onur Uyar"
@@ -69,6 +70,32 @@ def socket_read(fp):
         else:
             oldlen = newlen
     return response
+
+
+def exec_command(args, env=None):
+    """Convenience function that executes command and returns result.
+    
+    @param args: Tuple of command and arguments.
+    @param env:  Dictionary of environment variables.
+                 (Environment is not modified if None.)
+    @return:     Command output.
+    
+    """ 
+    try:
+        cmd = subprocess.Popen(args, 
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, 
+                               bufsize=buffSize,
+                               env=env)
+    except OSError, e:
+        raise Exception("Execution of command failed.\n",
+                        "  Command: %s" % ' '.join(args),
+                        "  Error Message: %s" % str(e))
+    out, err = cmd.communicate(None)
+    if cmd.returncode != 0:
+        raise Exception("Execution of command failed with error code: %s\n%s\n" 
+                        % (cmd.returncode, err))
+    return out
 
 
 class NestedDict(dict):
