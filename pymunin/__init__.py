@@ -822,12 +822,12 @@ def muninMain(pluginClass, argv=None, env=None, debug=False):
             return 0
         else:
             return 1
-    except Exception, msg:
+    except Exception, e:
+        print >> sys.stderr, "EXCEPTION: %s" % str(e)
         if debug:
             raise
         else:
-            print >> sys.stderr, "EXCEPTION: %s" % msg
-        return 1
+            return 1
 
 
 def fixLabel(label, maxlen, delim=None, repl='', truncend=True):
