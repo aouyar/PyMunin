@@ -1,4 +1,4 @@
-"""Implements VarnishInfo Class for gathering stats from Varnish Proxy Server.
+"""Implements VarnishInfo Class for gathering stats from Varnish Cache.
 
 The statistics are obtained by running the command varnishstats.
 
@@ -23,21 +23,21 @@ varnishstatCmd = "varnishstat"
 
 
 class VarnishInfo:
-    """Class to retrieve stats from Varnish Proxy Server."""
+    """Class to retrieve stats from Varnish Cache."""
     
     _descDict = {}
     
     def __init__(self, instance=None):
-        """Initialization for monitoring Varnish Proxy Server Instance.
+        """Initialization for monitoring Varnish Cache instance.
         
-        @param instance: Name  of the Varnish Proxy Server instance.
+        @param instance: Name  of the Varnish Cache instance.
                         (Defaults to hostname.)
         """
         self._instance = instance
         
 
     def getStats(self):
-        """Runs varnishstats command to get stats from Varnish Proxy Server.
+        """Runs varnishstats command to get stats from Varnish Cache.
         
         @return: Dictionary of stats.
 
