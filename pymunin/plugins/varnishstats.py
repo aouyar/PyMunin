@@ -9,7 +9,13 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
-   - varnish_
+   - varnish_client_conn
+   - varnish_client_requests
+   - varnish_backend_conn
+   - varnish_backend_requests
+   - varnish_traffic
+   - varnish_workers
+   - varnish_hits
 
    
 Environment Variables
@@ -21,7 +27,7 @@ Environment Variables
 
   Example:
     [varnishstats]
-        env.exclude_graphs varnish_
+        env.exclude_graphs varnish_workers
 
 """
 # Munin  - Magic Markers
