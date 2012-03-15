@@ -19,17 +19,19 @@ __status__ = "Development"
 # DEFAULTS
 #
 
+defaultESLport = 8021
+defaultESLsecret = 'ClueCon'
 conn_timeout = 5
 
 
     
 class FSinfo:
-    """Class that establishes connection to Asterisk Manager Interface
+    """Class that establishes connection to FreeSWITCH ESL Interface
     to retrieve statistics on operation.
 
     """
 
-    def __init__(self, host='127.0.0.1', port=8021, secret="ClueCon", 
+    def __init__(self, host='127.0.0.1', port=defaultESLport, secret="ClueCon", 
                  autoInit=True):
         """Initialize connection to FreeSWITCH ESL Interface.
         
@@ -43,8 +45,8 @@ class FSinfo:
         # Set Connection Parameters
         self._eslconn = None
         self._eslhost = host or '127.0.0.1'
-        self._eslport = int(port) or 8021
-        self._eslpass = secret or "ClueCon"
+        self._eslport = int(port or defaultESLport)
+        self._eslpass = secret or defaultESLsecret
         
         ESL.eslSetLogLevel(0)
         if autoInit:

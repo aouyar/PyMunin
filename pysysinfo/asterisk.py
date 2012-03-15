@@ -29,6 +29,7 @@ __status__ = "Development"
 # DEFAULTS
 #
 
+defaultAMIport = 5038
 confFileFreePBX = '/etc/amportal.conf'
 confFileAMI = '/etc/asterisk/manager.conf'
 connTimeout = 5
@@ -41,8 +42,8 @@ class AsteriskInfo:
 
     """
 
-    def __init__(self, host='127.0.0.1', port=5038, user=None, password=None, 
-                 autoInit=True):
+    def __init__(self, host='127.0.0.1', port=defaultAMIport, 
+                 user=None, password=None, autoInit=True):
         """Initialize connection to Asterisk Manager Interface.
         
         @param host:     Asterisk Host
@@ -56,7 +57,7 @@ class AsteriskInfo:
         # Set Connection Parameters
         self._conn = None
         self._amihost = host or '127.0.0.1'
-        self._amiport = port or 5038
+        self._amiport = int(port or defaultAMIport)
         self._amiuser = user
         self._amipass = password
         self._ami_version = None

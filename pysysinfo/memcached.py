@@ -19,6 +19,7 @@ __email__ = "aouyar at gmail.com"
 __status__ = "Development"
 
 
+defaultMemcachedPort = 11211
 connTimeout = 5
 
 
@@ -28,7 +29,8 @@ class MemcachedInfo:
 
     """
 
-    def __init__(self, host='127.0.0.1', port=11211, autoInit=True):
+    def __init__(self, host='127.0.0.1', port=defaultMemcachedPort, 
+                 autoInit=True):
         """Initialize connection to Memcached.
         
         @param host:     Memcached Host
@@ -38,7 +40,7 @@ class MemcachedInfo:
         """
         self._conn = None
         self._host = host or '127.0.0.1'
-        self._port = int(port) or 11211
+        self._port = int(port or defaultMemcachedPort)
         if autoInit:
             self._connect()
     
