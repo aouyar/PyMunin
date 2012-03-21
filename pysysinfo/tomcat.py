@@ -7,14 +7,13 @@ remote Apache Tomcat Servers.
 
 import sys
 import re
-import urllib
 import util
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = []
 __license__ = "GPL"
-__version__ = "0.9"
+__version__ = "0.9.12"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
@@ -72,16 +71,10 @@ class TomcatInfo:
         @return: ElementTree object of Status Page XML.
         
         """
-        if self._user is not None and self._password is not None:
-            url = "%s://%s:%s@%s:%d/manager/status?XML=true" % (self._proto,
-                urllib.quote(self._user), urllib.quote(self._password), 
-                self._host, self._port)
-        else:
-            url = "%s://%s:%d/manager/status?XML=true" % (self._proto,
-                 self._host, self._port)
-        fp = urllib.urlopen(url)
-        response = util.socket_read(fp)
-        fp.close()
+        url = "%s://%s:%d/manager/status" % (self._proto, self._host, self._port)
+        params = {}
+        params['XML'] = 'true'
+        response = util.get_url(url, self._user, self._password, params)
         tree = ElementTree.XML(response)
         return tree
     

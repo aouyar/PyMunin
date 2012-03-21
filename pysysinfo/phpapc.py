@@ -5,14 +5,13 @@ that must be placed in the Web Server Document Root Directory.
 
 """
 
-import urllib
 import util
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = []
 __license__ = "GPL"
-__version__ = "0.9"
+__version__ = "0.9.12"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
@@ -69,23 +68,15 @@ class APCinfo:
         """Query and parse Web Server Status Page.
         
         """
-        if self._user is not None and self._password is not None:
-            url = "%s://%s:%s@%s:%d/%s" % (self._proto,
-                urllib.quote(self._user), urllib.quote(self._password), 
-                self._host, self._port, self._monpath)
-        else:
-            url = "%s://%s:%d/%s" % (self._proto, self._host, self._port, 
-                                     self._monpath)
-        fp = urllib.urlopen(url)
-        response = util.socket_read(fp)
-        fp.close()
+        url = "%s://%s:%d/%s" % (self._proto, self._host, self._port, 
+                                 self._monpath)
+        response = util.get_url(url, self._user, self._password)
         self._statusDict = {}
         for line in response.splitlines():
             cols = line.split(':')
             if not self._statusDict.has_key(cols[0]):
                 self._statusDict[cols[0]] = {}
             self._statusDict[cols[0]][cols[1]] = util.parse_value(cols[2])
-
     
     def getMemoryStats(self):
         """Return Memory Utilization Stats for APC.

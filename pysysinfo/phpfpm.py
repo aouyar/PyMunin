@@ -6,14 +6,13 @@ The status interface of PHP FastCGI Process Manager must be enabled.
 """
 
 import re
-import urllib
 import util
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = []
 __license__ = "GPL"
-__version__ = "0.8"
+__version__ = "0.9.12"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
@@ -67,16 +66,9 @@ class PHPfpmInfo:
         """Query and parse Web Server Status Page.
         
         """
-        if self._user is not None and self._password is not None:
-            url = "%s://%s:%s@%s:%d/%s" % (self._proto,
-                urllib.quote(self._user), urllib.quote(self._password), 
-                self._host, self._port, self._monpath)
-        else:
-            url = "%s://%s:%d/%s" % (self._proto, self._host, self._port, 
-                                     self._monpath)
-        fp = urllib.urlopen(url)
-        response = util.socket_read(fp)
-        fp.close()
+        url = "%s://%s:%d/%s" % (self._proto, self._host, self._port, 
+                                 self._monpath)
+        response = util.get_url(url, self._user, self._password)
         stats = {}
         for line in response.splitlines():
             mobj = re.match('([\w\s]+):\s+(\w+)$', line)

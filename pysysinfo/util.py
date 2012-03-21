@@ -2,21 +2,24 @@
 
 """
 
+import sys
 import re
 import subprocess
+import urllib, urllib2
 
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = []
 __license__ = "GPL"
-__version__ = "0.9"
+__version__ = "0.9.12"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
 
 
 buffSize = 4096
+timeoutHTTP = 10
 
 
 def parse_value(val, parsebool=False):
@@ -89,13 +92,43 @@ def exec_command(args, env=None):
                                env=env)
     except OSError, e:
         raise Exception("Execution of command failed.\n",
-                        "  Command: %s" % ' '.join(args),
-                        "  Error Message: %s" % str(e))
+                        "  Command: %s\n  Error: %s" % (' '.join(args), str(e)))
     out, err = cmd.communicate(None)
     if cmd.returncode != 0:
         raise Exception("Execution of command failed with error code: %s\n%s\n" 
                         % (cmd.returncode, err))
     return out
+
+
+def get_url(url, user=None, password=None, params=None, use_post=False):
+    if user is not None and password is not None:
+        pwdmgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+        pwdmgr.add_password(None, url, user, password)
+        auth_handler = urllib2.HTTPBasicAuthHandler(pwdmgr)
+        opener = urllib2.build_opener(auth_handler)
+    else:
+        opener = urllib2.build_opener()
+    if params is not None:
+        req_params = urllib.urlencode(params)
+        if use_post:
+            req_url = url
+            data = req_params
+        else:
+            req_url = "%s?%s" % (url, req_params)
+            data = None
+    else:
+        req_url = url
+        data = None
+    try:
+        if sys.version_info[:2] < (2,6):
+            resp = opener.open(req_url, data)
+        else:
+            resp = opener.open(req_url, data, timeoutHTTP)
+    except urllib2.URLError, e:
+        raise Exception("Retrieval of URL failed.\n"
+                        "  url: %s\n  Error: %s" % (url, str(e)))
+    return socket_read(resp)
+        
 
 
 class NestedDict(dict):

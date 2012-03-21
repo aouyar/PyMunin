@@ -6,14 +6,13 @@ page of local and/or remote Apache Web Servers.
 """
 
 import re
-import urllib
 import util
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = []
 __license__ = "GPL"
-__version__ = "0.9"
+__version__ = "0.9.12"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
@@ -68,16 +67,9 @@ class ApacheInfo:
 
     def initStats(self):
         """Query and parse Apache Web Server Status Page."""
-        if self._user is not None and self._password is not None:
-            url = "%s://%s:%s@%s:%d/%s?auto" % (self._proto, 
-                      urllib.quote(self._user), urllib.quote(self._password), 
-                      self._host, self._port, self._statuspath)
-        else:
-            url = "%s://%s:%d/%s?auto"  % (self._proto, self._host, self._port, 
-                                           self._statuspath)
-        fp = urllib.urlopen(url)
-        response = util.socket_read(fp)
-        fp.close()
+        url = "%s://%s:%d/%s?auto"  % (self._proto, self._host, self._port, 
+                                       self._statuspath)
+        response = util.get_url(url, self._user, self._password)
         self._statusDict = {}
         for line in response.splitlines():
             mobj = re.match('(\S.*\S)\s*:\s*(\S+)\s*$', line)
