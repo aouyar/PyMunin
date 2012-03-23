@@ -15,7 +15,7 @@ __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = ["Samuel Stauffer"]
 __license__ = "GPL"
-__version__ = "0.9.12"
+__version__ = "0.9.13"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
@@ -543,7 +543,9 @@ class MuninPlugin:
 
     def autoconf(self):
         """Implements Munin Plugin Auto-Configuration Option.
-
+        
+        @return: True it plugin can be  auto-configured, False otherwise.
+                 
         Auto-configuration is disabled by default. To implement 
         auto-configuration for the Munin Plugin, this method must be overwritten 
         in child class.
@@ -815,6 +817,10 @@ def muninMain(pluginClass, argv=None, env=None, debug=False):
     if env is None:
         env = os.environ
     debug = debug or env.has_key('MUNIN_DEBUG')
+    if len(argv) > 1 and argv[1] == 'autoconf':
+        autoconf = True
+    else:
+        autoconf = False
     try:
         plugin = pluginClass(argv, env, debug)
         ret = plugin.run()
@@ -824,11 +830,15 @@ def muninMain(pluginClass, argv=None, env=None, debug=False):
             return 1
     except Exception, e:
         print >> sys.stderr, "EXCEPTION: %s" % str(e)
+        if autoconf:
+            print "no"
         if debug:
             raise
         else:
-            return 1
-
+            if autoconf:
+                return 0
+            else:
+                return 1
 
 def fixLabel(label, maxlen, delim=None, repl='', truncend=True):
     """Truncate long graph and field labels.

@@ -24,8 +24,8 @@ Environment Variables
 
 """
 # Munin  - Magic Markers
-#%# family=manual
-#%# capabilities=noautoconf nosuggest
+#%# family=auto
+#%# capabilities=autoconf nosuggest
 
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
@@ -92,6 +92,16 @@ class MuninNTPstatsPlugin(MuninPlugin):
                                  stats.get('delay'))
                 self.setGraphVal('ntp_peer_stats', 'jitter', 
                                  stats.get('jitter'))
+                
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        ntpinfo = NTPinfo()
+        stats = ntpinfo.getPeerStats()
+        return len(stats) > 0
 
 
 def main():

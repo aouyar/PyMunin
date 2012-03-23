@@ -34,8 +34,8 @@ Environment Variables
 
 """
 # Munin  - Magic Markers
-#%# family=manual
-#%# capabilities=noautoconf nosuggest
+#%# family=auto
+#%# capabilities=autoconf nosuggest
 
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
@@ -108,6 +108,16 @@ class MuninPHPfpmPlugin(MuninPlugin):
                              stats['idle processes'])
             self.setGraphVal('php_fpm_processes', 'total', 
                              stats['total processes'])
+    
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        fpminfo = PHPfpmInfo(self._host, self._port, self._user, self._password, 
+                             self._monpath, self._ssl)
+        return fpminfo is not None
 
 
 def main():

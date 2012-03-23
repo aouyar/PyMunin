@@ -37,8 +37,8 @@ Environment Variables
 
 """
 # Munin  - Magic Markers
-#%# family=manual
-#%# capabilities=noautoconf nosuggest
+#%# family=auto
+#%# capabilities=autoconf nosuggest
 
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
@@ -418,6 +418,15 @@ class MuninMemcachedPlugin(MuninPlugin):
                             val = 100.0 * hits / total
                         self.setGraphVal('memcached_hitpct',  field_name, 
                                          round(val,  2))
+                        
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        serverInfo = MemcachedInfo(self._host,  self._port)
+        return (serverInfo is not None)
 
 
 def main():

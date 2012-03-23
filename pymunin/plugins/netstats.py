@@ -32,7 +32,7 @@ Environment Variables
 """
 # Munin  - Magic Markers
 #%# family=auto
-#%# capabilities=noautoconf nosuggest
+#%# capabilities=autoconf nosuggest
 
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
@@ -134,6 +134,15 @@ class MuninNetstatsPlugin(MuninPlugin):
                 for port in self._srv_dict[srv]:
                     numconn += stats.get(port, 0)
                 self.setGraphVal('netstat_conn_server', srv, numconn)
+                
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        net_info = NetstatInfo()
+        return len(net_info.getStats()) > 0
 
 
 def main():

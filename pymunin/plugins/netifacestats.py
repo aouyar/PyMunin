@@ -30,7 +30,7 @@ Environment Variables
 """
 # Munin  - Magic Markers
 #%# family=auto
-#%# capabilities=noautoconf nosuggest
+#%# capabilities=autoconf nosuggest
 
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
@@ -138,6 +138,14 @@ class MuninNetIfacePlugin(MuninPlugin):
             
         """
         return self.envCheckFilter('ifaces', iface)
+    
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        return len(self._ifaceList) > 0
 
 
 def main():

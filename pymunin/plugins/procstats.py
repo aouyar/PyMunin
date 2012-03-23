@@ -28,7 +28,7 @@ Environment Variables
 """
 # Munin  - Magic Markers
 #%# family=auto
-#%# capabilities=noautoconf nosuggest
+#%# capabilities=autoconf nosuggest
 
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
@@ -127,6 +127,15 @@ class MuninProcStatsPlugin(MuninPlugin):
                     ('locked', 'locked_in_mem')):
                     self.setGraphVal(graph_name, fname, 
                                      stats[prefix]['prio'].get(stat_key))
+                    
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        proc_info = ProcessInfo()
+        return len(proc_info.getProcList()) > 0
         
 
 def main():

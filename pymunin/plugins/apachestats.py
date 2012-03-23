@@ -34,8 +34,8 @@ Environment Variables
 
 """
 # Munin  - Magic Markers
-#%# family=manual
-#%# capabilities=noautoconf nosuggest
+#%# family=auto
+#%# capabilities=autoconf nosuggest
 
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
@@ -120,6 +120,17 @@ class MuninApachePlugin(MuninPlugin):
             self.setGraphVal('apache_workers', 'busy', stats['BusyWorkers'])
             self.setGraphVal('apache_workers', 'idle', stats['IdleWorkers'])
             self.setGraphVal('apache_workers', 'max', stats['MaxWorkers'])
+            
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        apacheInfo = ApacheInfo(self._host, self._port,
+                                self._user, self._password, 
+                                self._statuspath, self._ssl)
+        return apacheInfo is not None
 
 
 def main():

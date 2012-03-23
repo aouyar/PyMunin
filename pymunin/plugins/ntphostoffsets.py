@@ -29,8 +29,8 @@ Environment Variables
     
 """
 # Munin  - Magic Markers
-#%# family=manual
-#%# capabilities=noautoconf nosuggest
+#%# family=auto
+#%# capabilities=autoconf nosuggest
 
 import sys
 import re
@@ -121,6 +121,16 @@ class MuninNTPhostOffsetsPlugin(MuninPlugin):
                     if self.hasGraph('ntp_host_delays'):
                         self.setGraphVal('ntp_host_delays', hostkey, 
                                          hoststats.get('delay'))
+                        
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        ntpinfo = NTPinfo()
+        ntpstats = ntpinfo.getHostOffsets(self._remoteHosts)
+        return len(ntpstats) > 0
 
 
 def main():

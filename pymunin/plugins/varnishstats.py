@@ -31,8 +31,8 @@ Environment Variables
 
 """
 # Munin  - Magic Markers
-#%# family=manual
-#%# capabilities=noautoconf nosuggest
+#%# family=auto
+#%# capabilities=autoconf nosuggest
 
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
@@ -155,6 +155,14 @@ class MuninVarnishPlugin(MuninPlugin):
             for field_name in self.getGraphFieldList(graph_name):
                 self.setGraphVal(graph_name, field_name, 
                                  self._stats.get(field_name))
+    
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        return len(self._stats) > 0
 
 
 def main():

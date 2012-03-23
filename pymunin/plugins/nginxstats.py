@@ -40,8 +40,8 @@ Environment Variables
 
 """
 # Munin  - Magic Markers
-#%# family=manual
-#%# capabilities=noautoconf nosuggest
+#%# family=auto
+#%# capabilities=autoconf nosuggest
 
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
@@ -169,7 +169,18 @@ class MuninNginxPlugin(MuninPlugin):
                     self.setGraphVal('nginx_requestsperconn', 'requests', 0)
                 hist_stats.append(curr_stats)
                 self.saveState(hist_stats[-self._numSamples:])
-                
+    
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        nginxInfo = NginxInfo(self._host, self._port,
+                                self._user, self._password, 
+                                self._statuspath, self._ssl)
+        return nginxInfo is not None
+    
 
 def main():
     sys.exit(muninMain(MuninNginxPlugin))

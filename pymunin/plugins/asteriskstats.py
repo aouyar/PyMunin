@@ -59,8 +59,8 @@ Environment Variables
 
 """
 # Munin  - Magic Markers
-#%# family=manual
-#%# capabilities=noautoconf nosuggest
+#%# family=auto
+#%# capabilities=autoconf nosuggest
 
 import sys
 import re
@@ -410,6 +410,14 @@ class MuninAsteriskPlugin(MuninPlugin):
                     self.setGraphVal('asterisk_fax_attempts', 'fail', 
                                      stats.get('failed faxes'))
 
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        return self._ami.checkVersion('1.2')
+        
 
 def main():
     sys.exit(muninMain(MuninAsteriskPlugin))

@@ -37,7 +37,7 @@ Environment Variables
 """
 # Munin  - Magic Markers
 #%# family=auto
-#%# capabilities=noautoconf nosuggest
+#%# capabilities=autoconf nosuggest
 
 import sys
 from pymunin import (MuninGraph, MuninPlugin, muninMain, 
@@ -147,6 +147,15 @@ class MuninDiskUsagePlugin(MuninPlugin):
             
         """
         return self.envCheckFilter('fstypes', fstype)
+    
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        # If no exception is thrown during initialization, the plugin should work.
+        return True
 
 
 def main():

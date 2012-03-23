@@ -32,11 +32,10 @@ Environment Variables
 
 """
 # Munin  - Magic Markers
-#%# family=manual
-#%# capabilities=noautoconf nosuggest
+#%# family=auto
+#%# capabilities=autoconf nosuggest
 
 import sys
-import re
 from pymunin import MuninGraph, MuninPlugin, muninMain
 from pysysinfo.wanpipe import WanpipeInfo
 
@@ -195,6 +194,14 @@ class MuninWanpipePlugin(MuninPlugin):
             
         """
         return self.envCheckFilter('ifaces', iface)
+    
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        return len(self._ifaceList) > 0
 
 
 def main():

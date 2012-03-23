@@ -30,8 +30,8 @@ Environment Variables
 
 """
 # Munin  - Magic Markers
-#%# family=manual
-#%# capabilities=noautoconf nosuggest
+#%# family=auto
+#%# capabilities=autoconf nosuggest
 
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
@@ -93,6 +93,15 @@ class MuninFreeswitchPlugin(MuninPlugin):
         if self.hasGraph('fs_channels'):
             count = fs.getChannelCount()
             self.setGraphVal('fs_channels', 'channels', count)
+    
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        fs = FSinfo(self._fshost, self._fsport, self._fspass)
+        return fs is not None
 
 
 def main():

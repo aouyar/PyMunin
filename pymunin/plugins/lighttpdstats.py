@@ -34,8 +34,8 @@ Environment Variables
 
 """
 # Munin  - Magic Markers
-#%# family=manual
-#%# capabilities=noautoconf nosuggest
+#%# family=auto
+#%# capabilities=autoconf nosuggest
 
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
@@ -120,6 +120,17 @@ class MuninLighttpdPlugin(MuninPlugin):
             self.setGraphVal('lighttpd_servers', 'busy', stats['BusyServers'])
             self.setGraphVal('lighttpd_servers', 'idle', stats['IdleServers'])
             self.setGraphVal('lighttpd_servers', 'max', stats['MaxServers'])
+            
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        lighttpdInfo = LighttpdInfo(self._host, self._port,
+                                self._user, self._password, 
+                                self._statuspath, self._ssl)
+        return lighttpdInfo is not None
 
 
 def main():

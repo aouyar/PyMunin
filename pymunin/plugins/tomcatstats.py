@@ -43,8 +43,8 @@ Environment Variables
 
 """
 # Munin  - Magic Markers
-#%# family=manual
-#%# capabilities=noautoconf nosuggest
+#%# family=auto
+#%# capabilities=autoconf nosuggest
 
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
@@ -214,6 +214,14 @@ class MuninTomcatPlugin(MuninPlugin):
             
         """
         return self.envCheckFilter('ports', str(port))
+    
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        return self._tomcatInfo is not None
 
 
 def main():

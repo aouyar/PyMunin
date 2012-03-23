@@ -34,7 +34,7 @@ Environment Variables
 """
 # Munin  - Magic Markers
 #%# family=auto
-#%# capabilities=noautoconf nosuggest
+#%# capabilities=autoconf nosuggest
 
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
@@ -269,6 +269,15 @@ class MuninSysStatsPlugin(MuninPlugin):
                                  self._vmstats['pswpin'])
                 self.setGraphVal('sys_vm_swapping', 'out', 
                                  self._vmstats['pswpout'])
+    
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        # If no exception is thrown during initialization, the plugin should work.
+        return True
 
 
 def main():

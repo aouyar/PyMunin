@@ -39,7 +39,7 @@ Environment Variables
 """
 # Munin  - Magic Markers
 #%# family=auto
-#%# capabilities=noautoconf nosuggest
+#%# capabilities=autoconf nosuggest
 
 import sys
 from pymunin import (MuninGraph, MuninPlugin, muninMain, 
@@ -241,6 +241,15 @@ class MuninDiskIOplugin(MuninPlugin):
             name = 'diskio_%s_active' % namestr
             if self.hasGraph(name):
                 self.setGraphVal(name, dev, stats['ios_active'])
+                
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        # If no exception is thrown during initialization, the plugin should work.
+        return True
         
 
 def main():

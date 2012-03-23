@@ -41,8 +41,8 @@ Environment Variables
 
 """
 # Munin  - Magic Markers
-#%# family=manual
-#%# capabilities=noautoconf nosuggest
+#%# family=auto
+#%# capabilities=autoconf nosuggest
 
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
@@ -235,6 +235,15 @@ class MuninMySQLplugin(MuninPlugin):
             
         """
         return self.envCheckFilter('engine', name)
+    
+    def autoconf(self):
+        """Implements Munin Plugin Auto-Configuration Option.
+        
+        @return: True if plugin can be  auto-configured, False otherwise.
+                 
+        """
+        return (self._dbconn is not None 
+                and len(self._dbconn.getDatabases()) > 0)
               
 
 def main():
