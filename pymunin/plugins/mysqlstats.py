@@ -13,8 +13,10 @@ Multigraph Plugin - Graph Structure
     - mysql_traffic
     - mysql_slowqueries
     - mysql_rowmodifications
+    - mysql_rowreads
     - mysql_tablelocks
     - mysql_threads
+    - mysql_commits_rollbacks
    
 
 Environment Variables
@@ -93,14 +95,14 @@ class MuninMySQLplugin(MuninPlugin):
                 args='--base 1000 --lower-limit 0')
             graph.addField('conn', 'conn', draw='LINE2', 
                 type='DERIVE', min=0,
-                info = 'The number of connection attempts to the MySQL server.')
+                info='The number of connection attempts to the MySQL server.')
             graph.addField('abort_conn', 'abort_conn', draw='LINE2', 
                 type='DERIVE', min=0,
-                info = 'The number of failed attempts to connect to the MySQL server.')
+                info='The number of failed attempts to connect to the MySQL server.')
             graph.addField('abort_client', 'abort_client', draw='LINE2', 
                 type='DERIVE', min=0,
-                info = 'The number of connections that were aborted, because '
-                       'the client died without closing the connection properly.')
+                info='The number of connections that were aborted, because '
+                     'the client died without closing the connection properly.')
             self.appendGraph('mysql_connections', graph)
         
         if self.graphEnabled('mysql_traffic'):
@@ -133,15 +135,36 @@ class MuninMySQLplugin(MuninPlugin):
                 args='--base 1000 --lower-limit 0')
             graph.addField('insert', 'insert', draw='AREASTACK', 
                 type='DERIVE', min=0,
-                info = 'The number of requests to insert a rows into tables.')
+                info='The number of requests to insert a rows into tables.')
             graph.addField('update', 'update', draw='AREASTACK', 
                 type='DERIVE', min=0,
-                info = 'The number of requests to update a rows in a tables.')
+                info='The number of requests to update a rows in a tables.')
             graph.addField('delete', 'delete', draw='AREASTACK', 
                 type='DERIVE', min=0,
-                info = 'The number of requests to delete rows from tables.')
+                info='The number of requests to delete rows from tables.')
             self.appendGraph('mysql_rowmodifications', graph)
-        
+            
+        if self.graphEnabled('mysql_rowreads'):
+            graph = MuninGraph('MySQL - Row Reads per second', 
+                'MySQL',
+                info='MySQL Row Reads per second.',
+                args='--base 1000 --lower-limit 0')
+            for (field, desc) in (('first', 
+                                   'Requests to read first entry in index.'),
+                                  ('key', 
+                                   'Requests to read a row based on a key.'),
+                                  ('next', 
+                                   'Requests to read the next row in key order.'),
+                                  ('prev', 
+                                   'Requests to read the previous row in key order.'),
+                                  ('rnd', 
+                                   'Requests to read a row based on a fixed position.'),
+                                  ('rnd_next', 
+                                   'Requests to read the next row in the data file.'),):
+                graph.addField(field, field, draw='AREASTACK', 
+                    type='DERIVE', min=0, info=desc)
+            self.appendGraph('mysql_rowreads', graph)
+            
         if self.graphEnabled('mysql_tablelocks'):
             graph = MuninGraph('MySQL - Table Locks per second', 
                 'MySQL',
@@ -149,12 +172,12 @@ class MuninMySQLplugin(MuninPlugin):
                 args='--base 1000 --lower-limit 0')
             graph.addField('waited', 'waited', draw='AREASTACK', 
                 type='DERIVE', min=0,
-                info = 'The number of times that a request for a table lock '
-                       'could not be granted immediately and a wait was needed.')
+                info='The number of times that a request for a table lock '
+                     'could not be granted immediately and a wait was needed.')
             graph.addField('immediate', 'immediate', draw='AREASTACK', 
                 type='DERIVE', min=0,
-                info = 'The number of times that a request for a table lock '
-                       'could be granted immediately.')
+                info='The number of times that a request for a table lock '
+                     'could be granted immediately.')
             self.appendGraph('mysql_tablelocks', graph)
         
         if self.graphEnabled('mysql_threads'):
@@ -172,6 +195,19 @@ class MuninMySQLplugin(MuninPlugin):
                            colour='000000',
                            info="Total number of threads.")
             self.appendGraph('mysql_threads', graph)
+            
+        if self.graphEnabled('mysql_commits_rollbacks'):
+            graph = MuninGraph('MySQL - Commits and Rollbacks', 
+                'MySQL',
+                info='MySQL Commits and Rollbacks per second.',
+                args='--base 1000 --lower-limit 0')
+            graph.addField('commit', 'commit', draw='LINE2', 
+                type='DERIVE', min=0,
+                info='The number of commits per second.')
+            graph.addField('rollback', 'rollback', draw='LINE2', 
+                type='DERIVE', min=0,
+                info='The number of rollbacks per second.')
+            self.appendGraph('mysql_commits_rollbacks', graph)
                     
     def retrieveVals(self):
         """Retrieve values for graphs."""
@@ -206,6 +242,12 @@ class MuninMySQLplugin(MuninPlugin):
                              self._genStats.get('Handler_update'))
             self.setGraphVal('mysql_rowmodifications', 'delete',
                              self._genStats.get('Handler_delete'))
+        if self.hasGraph('mysql_rowreads'):
+            if self._genStats is None:
+                self._genStats = self._dbconn.getStats()
+            for field in self.getGraphFieldList('mysql_rowreads'):
+                self.setGraphVal('mysql_rowreads', field, 
+                                 self._genStats.get('Handler_read_%s' % field))
         if self.hasGraph('mysql_tablelocks'):
             if self._genStats is None:
                 self._genStats = self._dbconn.getStats()
@@ -226,6 +268,13 @@ class MuninMySQLplugin(MuninPlugin):
             self.setGraphVal('mysql_threads', 'total',
                              self._genStats.get('Threads_connected') 
                              + self._genStats.get('Threads_cached'))
+        if self.hasGraph('mysql_commits_rollbacks'):
+            if self._genStats is None:
+                self._genStats = self._dbconn.getStats()
+            self.setGraphVal('mysql_commits_rollbacks', 'commit',
+                             self._genStats.get('Handler_commit'))
+            self.setGraphVal('mysql_commits_rollbacks', 'rollback',
+                             self._genStats.get('Handler_rollback'))
             
     def engineIncluded(self, name):
         """Utility method to check if a storage engine is included in graphs.
