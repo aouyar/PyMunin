@@ -84,6 +84,7 @@ class MuninMySQLplugin(MuninPlugin):
         self._database = self.envGet('database')
         self._user = self.envGet('user')
         self._password = self.envGet('password')
+        self._engines = None
         
         self._dbconn = MySQLinfo(self._host, self._port, self._database, 
                               self._user, self._password)
@@ -208,6 +209,27 @@ class MuninMySQLplugin(MuninPlugin):
                 type='DERIVE', min=0,
                 info='The number of rollbacks per second.')
             self.appendGraph('mysql_commits_rollbacks', graph)
+            
+        if self.engineIncluded('innodb'):
+            
+            if self.graphEnabled('mysql_innodb_buffer_pool_util'):
+                graph = MuninGraph('InnoDB - Buffer Pool Utilization (bytes)', 
+                    'MySQL',
+                    info='MySQL Database Server InnoDB Buffer Pool Utilization'
+                         ' in bytes.',
+                    args='--base 1000 --lower-limit 0')
+                graph.addField('dirty', 'dirty', draw='AREASTACK', type='GAUGE', 
+                    info="Buffer pool space used by dirty pages.")
+                graph.addField('clean', 'clean', draw='AREASTACK', type='GAUGE', 
+                    info="Buffer pool space used by clean pages.")
+                graph.addField('misc', 'misc', draw='AREASTACK', type='GAUGE', 
+                    info="Buffer pool space used for administrative overhead.")
+                graph.addField('free', 'free', draw='AREASTACK', type='GAUGE', 
+                    info="Free space in buffer pool.")
+                graph.addField('total', 'total', draw='LINE2', type='GAUGE', 
+                               colour='000000',
+                               info="")
+                self.appendGraph('mysql_innodb_buffer_pool_util', graph)
                     
     def retrieveVals(self):
         """Retrieve values for graphs."""
@@ -276,6 +298,23 @@ class MuninMySQLplugin(MuninPlugin):
             self.setGraphVal('mysql_commits_rollbacks', 'rollback',
                              self._genStats.get('Handler_rollback'))
             
+        if self.engineIncluded('innodb'):
+            
+            if self.hasGraph('mysql_innodb_buffer_pool_util'):
+                if self._genStats is None:
+                    self._genStats = self._dbconn.getStats()
+                self._genStats['Innodb_buffer_pool_pages_clean'] = (
+                    self._genStats.get('Innodb_buffer_pool_pages_data')
+                    - self._genStats.get('Innodb_buffer_pool_pages_dirty'))
+                page_size = int(self._genStats.get('Innodb_page_size'))
+                for field in ('dirty', 'clean', 'misc', 'free', 'total'):
+                    self.setGraphVal('mysql_innodb_buffer_pool_util', 
+                                     field, 
+                                     self._genStats.get('Innodb_buffer_pool_pages_%s'
+                                                        % field)
+                                     * page_size)
+                
+            
     def engineIncluded(self, name):
         """Utility method to check if a storage engine is included in graphs.
         
@@ -283,7 +322,9 @@ class MuninMySQLplugin(MuninPlugin):
         @return:     Returns True if included in graphs, False otherwise.
             
         """
-        return self.envCheckFilter('engine', name)
+        if self._engines is None:
+            self._engines = self._dbconn.getStorageEngines()
+        return self.envCheckFilter('engine', name) and name in self._engines
     
     def autoconf(self):
         """Implements Munin Plugin Auto-Configuration Option.
