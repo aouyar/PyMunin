@@ -17,7 +17,11 @@ Multigraph Plugin - Graph Structure
     - mysql_tablelocks
     - mysql_threads
     - mysql_commits_rollbacks
-   
+    - mysql_innodb_buffer_pool_util
+    - mysql_innodb_buffer_pool_activity
+    - mysql_innodb_buffer_pool_read_reqs
+    - mysql_innodb_row_ops
+
 
 Environment Variables
 
@@ -85,6 +89,7 @@ class MuninMySQLplugin(MuninPlugin):
         self._user = self.envGet('user')
         self._password = self.envGet('password')
         self._engines = None
+        self._genStats = None
         
         self._dbconn = MySQLinfo(self._host, self._port, self._database, 
                               self._user, self._password)
@@ -230,13 +235,56 @@ class MuninMySQLplugin(MuninPlugin):
                                colour='000000',
                                info="")
                 self.appendGraph('mysql_innodb_buffer_pool_util', graph)
+                
+            if self.graphEnabled('mysql_innodb_buffer_pool_activity'):
+                graph = MuninGraph('InnoDB - Buffer Pool Activity (Pages per second)', 
+                    'MySQL',
+                    info='Pages read into, written from and created in buffer pool.',
+                    args='--base 1000 --lower-limit 0')
+                for (field, desc) in (('created',
+                                       'Pages created in the buffer pool without'
+                                       ' reading corresponding disk pages.'),
+                                      ('read', 
+                                       'Pages read into the buffer pool from disk.'),
+                                      ('written', 
+                                       'Pages written to disk from the buffer pool.')):
+                    graph.addField(field, field, draw='LINE2', 
+                                   type='DERIVE', min=0, info=desc)
+                self.appendGraph('mysql_innodb_buffer_pool_activity', graph)
+                
+            if self.graphEnabled('mysql_innodb_buffer_pool_read_reqs'):
+                graph = MuninGraph('InnoDB - Buffer Pool Read Requests per second', 
+                    'MySQL',
+                    info='Read requests satisfied from buffer'
+                         ' pool (hits) vs. disk (misses).',
+                    args='--base 1000 --lower-limit 0')
+                graph.addField('disk', 'disk', draw='AREASTACK', 
+                               type='DERIVE', min=0, 
+                               info='Misses - Logical read requests requiring'
+                                    ' read from disk.')
+                graph.addField('buffer', 'buffer', draw='AREASTACK', 
+                               type='DERIVE', min=0, 
+                               info='Misses - Logical read requests satisfied'
+                                    ' from buffer pool without requiring read'
+                                    ' from disk.')
+                self.appendGraph('mysql_innodb_buffer_pool_read_reqs', graph)
+                    
+            if self.graphEnabled('mysql_innodb_row_ops'):
+                graph = MuninGraph('InnoDB - Row Operations per Second', 
+                    'MySQL',
+                    info='Inserted, updated, deleted, read rows per second.',
+                    args='--base 1000 --lower-limit 0')
+                for field in ('inserted', 'updated', 'deleted', 'read'):
+                    graph.addField(field, field, draw='AREASTACK', 
+                                   type='DERIVE', min=0,
+                                   info="Rows %s per second." % field)
+                self.appendGraph('mysql_innodb_row_ops', graph)
                     
     def retrieveVals(self):
         """Retrieve values for graphs."""
-        self._genStats = None
+        if self._genStats is None:
+            self._genStats = self._dbconn.getStats()
         if self.hasGraph('mysql_connections'):
-            if self._genStats is None:
-                self._genStats = self._dbconn.getStats()
             self.setGraphVal('mysql_connections', 'conn',
                              self._genStats.get('Connections'))
             self.setGraphVal('mysql_connections', 'abort_conn',
@@ -244,20 +292,14 @@ class MuninMySQLplugin(MuninPlugin):
             self.setGraphVal('mysql_connections', 'abort_client',
                              self._genStats.get('Aborted_clients'))
         if self.hasGraph('mysql_traffic'):
-            if self._genStats is None:
-                self._genStats = self._dbconn.getStats()
             self.setGraphVal('mysql_traffic', 'rx',
                              self._genStats.get('Bytes_received'))
             self.setGraphVal('mysql_traffic', 'tx',
                              self._genStats.get('Bytes_sent'))
         if self.graphEnabled('mysql_slowqueries'):
-            if self._genStats is None:
-                self._genStats = self._dbconn.getStats()
             self.setGraphVal('mysql_slowqueries', 'queries',
                              self._genStats.get('Slow_queries'))
         if self.hasGraph('mysql_rowmodifications'):
-            if self._genStats is None:
-                self._genStats = self._dbconn.getStats()
             self.setGraphVal('mysql_rowmodifications', 'insert',
                              self._genStats.get('Handler_write'))
             self.setGraphVal('mysql_rowmodifications', 'update',
@@ -265,21 +307,15 @@ class MuninMySQLplugin(MuninPlugin):
             self.setGraphVal('mysql_rowmodifications', 'delete',
                              self._genStats.get('Handler_delete'))
         if self.hasGraph('mysql_rowreads'):
-            if self._genStats is None:
-                self._genStats = self._dbconn.getStats()
             for field in self.getGraphFieldList('mysql_rowreads'):
                 self.setGraphVal('mysql_rowreads', field, 
                                  self._genStats.get('Handler_read_%s' % field))
         if self.hasGraph('mysql_tablelocks'):
-            if self._genStats is None:
-                self._genStats = self._dbconn.getStats()
             self.setGraphVal('mysql_tablelocks', 'waited',
                              self._genStats.get('Table_locks_waited'))
             self.setGraphVal('mysql_tablelocks', 'immediate',
                              self._genStats.get('Table_locks_immediate'))
         if self.hasGraph('mysql_threads'):
-            if self._genStats is None:
-                self._genStats = self._dbconn.getStats()
             self.setGraphVal('mysql_threads', 'running',
                              self._genStats.get('Threads_running'))
             self.setGraphVal('mysql_threads', 'idle',
@@ -291,8 +327,6 @@ class MuninMySQLplugin(MuninPlugin):
                              self._genStats.get('Threads_connected') 
                              + self._genStats.get('Threads_cached'))
         if self.hasGraph('mysql_commits_rollbacks'):
-            if self._genStats is None:
-                self._genStats = self._dbconn.getStats()
             self.setGraphVal('mysql_commits_rollbacks', 'commit',
                              self._genStats.get('Handler_commit'))
             self.setGraphVal('mysql_commits_rollbacks', 'rollback',
@@ -301,8 +335,6 @@ class MuninMySQLplugin(MuninPlugin):
         if self.engineIncluded('innodb'):
             
             if self.hasGraph('mysql_innodb_buffer_pool_util'):
-                if self._genStats is None:
-                    self._genStats = self._dbconn.getStats()
                 self._genStats['Innodb_buffer_pool_pages_clean'] = (
                     self._genStats.get('Innodb_buffer_pool_pages_data')
                     - self._genStats.get('Innodb_buffer_pool_pages_dirty'))
@@ -313,7 +345,24 @@ class MuninMySQLplugin(MuninPlugin):
                                      self._genStats.get('Innodb_buffer_pool_pages_%s'
                                                         % field)
                                      * page_size)
-                
+            if self.hasGraph('mysql_innodb_buffer_pool_activity'):
+                for field in ('created', 'read', 'written'):
+                    self.setGraphVal('mysql_innodb_buffer_pool_activity', field, 
+                                     self._genStats.get('Innodb_pages_%s' % field))
+            if self.hasGraph('mysql_innodb_buffer_pool_read_reqs'):
+                self.setGraphVal('mysql_innodb_buffer_pool_read_reqs', 'disk', 
+                                 self._genStats.get('Innodb_buffer_pool_reads'))
+                try:
+                    hits = (self._genStats['Innodb_buffer_pool_read_requests']
+                            - self._genStats['Innodb_buffer_pool_reads'])
+                except KeyError:
+                    hits = None
+                self.setGraphVal('mysql_innodb_buffer_pool_read_reqs', 'buffer', 
+                                 hits)
+            if self.hasGraph('mysql_innodb_row_ops'):
+                for field in ('inserted', 'updated', 'deleted', 'read'):
+                    self.setGraphVal('mysql_innodb_row_ops', field, 
+                                     self._genStats.get('Innodb_rows_%s' % field))
             
     def engineIncluded(self, name):
         """Utility method to check if a storage engine is included in graphs.
