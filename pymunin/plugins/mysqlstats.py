@@ -18,6 +18,8 @@ Multigraph Plugin - Graph Structure
     - mysql_threads
     - mysql_commits_rollbacks
     - mysql_qcache_memory
+    - mysql_qcache_hits
+    - mysql_qcache_prunes
     - mysql_myisam_key_buffer_util
     - mysql_myisam_key_read_reqs
     - mysql_innodb_buffer_pool_util
@@ -230,6 +232,34 @@ class MuninMySQLplugin(MuninPlugin):
                 info="Free space (bytes) in Query Cache.")
             self.appendGraph('mysql_qcache_memory', graph)
             
+        if self.graphEnabled('mysql_qcache_hits'):
+            graph = MuninGraph('MySQL - Query Cache - Hits', 
+                'MySQL',
+                info='MySQL Server Query Cache Hits vs. Select Queries.',
+                args='--base 1000 --lower-limit 0')
+            graph.addField('hits', 'hits', draw='AREASTACK', 
+                type='DERIVE', min=0,
+                info='Hits - Number of select queries responded from query cache.')
+            graph.addField('misses', 'misses', draw='AREASTACK', 
+                type='DERIVE', min=0,
+                info='Misses - Number of select queries executed.')
+            self.appendGraph('mysql_qcache_hits', graph)
+            
+        if self.graphEnabled('mysql_qcache_prunes'):
+            graph = MuninGraph('MySQL - Query Cache - Inserts/Prunes per second', 
+                'MySQL',
+                info='MySQL Server Query Cache Inserts and Low Memory Prune'
+                     ' operations per second.',
+                args='--base 1000 --lower-limit 0')
+            graph.addField('insert', 'insert', draw='LINE2', 
+                type='DERIVE', min=0,
+                info='Number of queries added to the query cache.')
+            graph.addField('prune', 'prune', draw='LINE2', 
+                type='DERIVE', min=0,
+                info='The number of queries that were deleted from the'
+                     ' query cache because of low memory.')
+            self.appendGraph('mysql_qcache_prunes', graph)
+            
         if self.engineIncluded('myisam'):
             
             if self.graphEnabled('mysql_myisam_key_buffer_util'):
@@ -395,6 +425,21 @@ class MuninMySQLplugin(MuninPlugin):
                 used = None
             self.setGraphVal('mysql_qcache_memory', 'used', used)
             self.setGraphVal('mysql_qcache_memory', 'free', free)
+        if self.hasGraph('mysql_qcache_hits'):
+            try:
+                hits = self._genStats['Qcache_hits']
+                misses = self._genStats['Com_select'] - hits
+            except KeyError:
+                hits = None
+                misses = None
+            self.setGraphVal('mysql_qcache_hits', 'hits', hits)
+            self.setGraphVal('mysql_qcache_hits', 'misses', misses)
+            
+        if self.hasGraph('mysql_qcache_prunes'):
+            self.setGraphVal('mysql_qcache_prunes', 'insert', 
+                             self._genStats.get('Qcache_inserts'))
+            self.setGraphVal('mysql_qcache_prunes', 'prune',
+                             self._genStats.get('Qcache_lowmem_prunes'))
             
         if self.engineIncluded('myisam'):
             
