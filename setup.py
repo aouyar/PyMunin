@@ -50,8 +50,11 @@ class install(_install):
     def run(self): 
         _install.run(self)
         # Installing the plugins requires write permission to plugins directory
-        # (Default: /usr/share/munin/plugins) which is default owned by root
-        munin_plugin_dir = os.path.join(self.install_data, PYMUNIN_PLUGIN_DIR)
+        # (/usr/share/munin/plugins) which is default owned by root.
+        if os.environ.has_key('MUNIN_PLUGIN_DIR'):
+            munin_plugin_dir = os.environ.get('MUNIN_PLUGIN_DIR')
+        else:
+            munin_plugin_dir = os.path.join(self.install_data, PYMUNIN_PLUGIN_DIR)
         print "Munin Plugin Directory: %s" % munin_plugin_dir
         if os.path.exists(munin_plugin_dir):
             try:
