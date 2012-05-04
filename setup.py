@@ -47,14 +47,21 @@ for modname in modules:
 class install(_install): 
     "Extend base install class to provide a post-install step."
 
-    def run(self): 
+    def run(self):
+        if os.environ.has_key('MUNIN_PLUGIN_DIR'):
+            munin_plugin_dir = os.environ.get('MUNIN_PLUGIN_DIR')
+        elif self.root is None:
+            munin_plugin_dir = os.path.normpath(
+                                    os.path.join(self.prefix,
+                                                 PYMUNIN_PLUGIN_DIR))
+        else:
+            munin_plugin_dir = os.path.normpath(
+                                    os.path.join(self.root,
+                                                 os.path.relpath(self.prefix, '/'),
+                                                 PYMUNIN_PLUGIN_DIR))
         _install.run(self)
         # Installing the plugins requires write permission to plugins directory
         # (/usr/share/munin/plugins) which is default owned by root.
-        if os.environ.has_key('MUNIN_PLUGIN_DIR'):
-            munin_plugin_dir = os.environ.get('MUNIN_PLUGIN_DIR')
-        else:
-            munin_plugin_dir = os.path.join(self.install_data, PYMUNIN_PLUGIN_DIR)
         print "Munin Plugin Directory: %s" % munin_plugin_dir
         if os.path.exists(munin_plugin_dir):
             try:
