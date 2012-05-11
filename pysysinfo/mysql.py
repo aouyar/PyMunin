@@ -140,6 +140,8 @@ class MySQLinfo:
             for row in rows:
                 if row[6] == '':
                     state = 'idle'
+                elif row[6] is None:
+                    state = 'other'
                 else:
                     state = str(row[6]).replace(' ', '_').lower()
                 info_dict[state] = info_dict.get(state, 0) + 1

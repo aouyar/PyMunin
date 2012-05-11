@@ -16,6 +16,7 @@ Multigraph Plugin - Graph Structure
     - mysql_rowreads
     - mysql_tablelocks
     - mysql_threads
+    - mysql_proc_states
     - mysql_commits_rollbacks
     - mysql_qcache_memory
     - mysql_qcache_hits
@@ -195,7 +196,7 @@ class MuninMySQLplugin(MuninPlugin):
         if self.graphEnabled('mysql_threads'):
             graph = MuninGraph('MySQL - Threads', 
                 'MySQL',
-                info='MySQL Server threads status.',
+                info='Number of active and idle threads for MySQL Server.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('running', 'running', draw='AREASTACK', type='GAUGE', 
                 info="Number of threads executing queries.")
@@ -208,6 +209,61 @@ class MuninMySQLplugin(MuninPlugin):
                            info="Total number of threads.")
             self.appendGraph('mysql_threads', graph)
             
+        if self.graphEnabled('mysql_proc_status'):
+            graph = MuninGraph('MySQL - Process Status', 
+                'MySQL',
+                info='Number of Threads discriminated by process status.',
+                args='--base 1000 --lower-limit 0')
+            for (field, label, desc) in (
+                ('locked', 'locked', 
+                 'The query is locked by another query.'),
+                ('sending_data', 'sending', 
+                 'The thread is processing rows for a SELECT statement and also'
+                 ' is sending data to the client.'),
+                ('updating', 'updating',
+                 'The thread is searching for rows to update and is updating them.'),
+                ('sorting_result', 'sorting',
+                 'For a SELECT statement, this is similar to Creating sort'
+                 ' index, but for non-temporary tables.'),
+                ('closing_tables', 'closing',
+                 'The thread is flushing the changed table data to disk and'
+                 ' closing the used tables.'),
+                ('copying_to_tmp_table', 'copying',
+                 'The thread is processing an ALTER TABLE statement. This state'
+                 ' occurs after the table with the new structure has been'
+                 ' created but before rows are copied into it.'), 
+                ('preparing', 'preparing',
+                 'This state occurs during query optimization.'),
+                ('statistics', 'statistics',
+                 'The server is calculating statistics to develop a query'
+                 ' execution plan. If a thread is in this state for a long'
+                 ' time, the server is probably disk-bound performing other work.'),
+                ('reading_from_net', 'net_read',
+                 'The server is reading a packet from the network.'),
+                ('writing_to_net', 'net_write',
+                 'The server is writing a packet to the network.'),
+                ('login', 'login',
+                 'The initial state for a connection thread until the client'
+                 ' has been authenticated successfully.'),
+                ('init', 'init',
+                 'This occurs before the initialization of ALTER TABLE, DELETE,'
+                 ' INSERT, SELECT, or UPDATE statements.'),
+                ('end', 'end',
+                 'This occurs at the end but before the cleanup of ALTER TABLE,'
+                 ' CREATE VIEW, DELETE, INSERT, SELECT, or UPDATE statements.'),
+                ('freeing_items', 'freeing',
+                 'The thread has executed a command. This state is usually'
+                 ' followed by cleaning up.'),
+                ('other', 'other',
+                 'Other valid state.'),
+                ('unknown', 'unknown',
+                 'State not recognized by the monitoring application.'),
+                ('idle', 'idle',
+                 'Idle threads.'),):
+                graph.addField(field, label, draw='AREASTACK', type='GAUGE', 
+                               info=desc)
+            self.appendGraph('mysql_proc_status', graph)
+                
         if self.graphEnabled('mysql_commits_rollbacks'):
             graph = MuninGraph('MySQL - Commits and Rollbacks', 
                 'MySQL',
@@ -440,7 +496,21 @@ class MuninMySQLplugin(MuninPlugin):
                              self._genStats.get('Qcache_inserts'))
             self.setGraphVal('mysql_qcache_prunes', 'prune',
                              self._genStats.get('Qcache_lowmem_prunes'))
-            
+        
+        if self.hasGraph('mysql_proc_status'):
+            self._procStatus = self._dbconn.getProcessStatus()
+            if self._procStatus:
+                stats = {}
+                for field in self.getGraphFieldList('mysql_proc_status'):
+                    stats[field] = 0
+                for (k, v) in self._procStatus.items():
+                    if stats.has_key(k):
+                        stats[k] = v
+                    else:
+                        stats['unknown'] += v
+                for (k,v) in stats.items():
+                    self.setGraphVal('mysql_proc_status', k, v)
+           
         if self.engineIncluded('myisam'):
             
             if self.hasGraph('mysql_myisam_key_buffer_util'):
