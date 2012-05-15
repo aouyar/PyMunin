@@ -17,6 +17,7 @@ Multigraph Plugin - Graph Structure
     - mysql_tablelocks
     - mysql_threads
     - mysql_proc_states
+    - mysql_proc_db
     - mysql_commits_rollbacks
     - mysql_qcache_memory
     - mysql_qcache_hits
@@ -97,6 +98,7 @@ class MuninMySQLplugin(MuninPlugin):
         self._engines = None
         self._genStats = None
         self._genVars = None
+        self._dbList = None
         
         self._dbconn = MySQLinfo(self._host, self._port, self._database, 
                               self._user, self._password)
@@ -212,7 +214,7 @@ class MuninMySQLplugin(MuninPlugin):
         if self.graphEnabled('mysql_proc_status'):
             graph = MuninGraph('MySQL - Process Status', 
                 'MySQL',
-                info='Number of Threads discriminated by process status.',
+                info='Number of threads discriminated by process status.',
                 args='--base 1000 --lower-limit 0')
             for (field, label, desc) in (
                 ('locked', 'locked', 
@@ -263,6 +265,19 @@ class MuninMySQLplugin(MuninPlugin):
                 graph.addField(field, label, draw='AREASTACK', type='GAUGE', 
                                info=desc)
             self.appendGraph('mysql_proc_status', graph)
+        
+        if self.graphEnabled('mysql_proc_db'):
+            if self._dbList is None:
+                self._dbList = self._dbconn.getDatabases()
+                self._dbList.sort()
+            graph = MuninGraph('MySQL - Processes per Database', 
+                'MySQL',
+                info='Number of Threads discriminated by database.',
+                args='--base 1000 --lower-limit 0', autoFixNames=True)
+            for db in self._dbList:
+                graph.addField(db, db, draw='AREASTACK', type='GAUGE', 
+                info="Number of threads attending connections for database %s." % db)
+            self.appendGraph('mysql_proc_db', graph)
                 
         if self.graphEnabled('mysql_commits_rollbacks'):
             graph = MuninGraph('MySQL - Commits and Rollbacks', 
@@ -496,7 +511,6 @@ class MuninMySQLplugin(MuninPlugin):
                              self._genStats.get('Qcache_inserts'))
             self.setGraphVal('mysql_qcache_prunes', 'prune',
                              self._genStats.get('Qcache_lowmem_prunes'))
-        
         if self.hasGraph('mysql_proc_status'):
             self._procStatus = self._dbconn.getProcessStatus()
             if self._procStatus:
@@ -510,6 +524,10 @@ class MuninMySQLplugin(MuninPlugin):
                         stats['unknown'] += v
                 for (k,v) in stats.items():
                     self.setGraphVal('mysql_proc_status', k, v)
+        if self.hasGraph('mysql_proc_db'):
+            self._procDB = self._dbconn.getProcessDatabase()
+            for db in self._dbList:
+                self.setGraphVal('mysql_proc_db', db, self._procDB.get(db, 0))
            
         if self.engineIncluded('myisam'):
             

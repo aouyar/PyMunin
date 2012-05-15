@@ -166,7 +166,7 @@ class MySQLinfo:
     def getDatabases(self):
         """Returns list of databases.
         
-        @return: List of database schemas.
+        @return: List of databases.
         
         """
         cur = self._conn.cursor()
