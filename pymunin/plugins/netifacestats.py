@@ -8,8 +8,8 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
-   - netiface_traffic
-   - netiface_errors
+    - netiface_traffic
+    - netiface_errors
 
 
 Environment Variables

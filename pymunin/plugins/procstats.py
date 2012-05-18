@@ -9,10 +9,10 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
-   - proc_status
-   - proc_priority
-   - thread_status
-   - thread_priority
+    - proc_status
+    - proc_priority
+    - thread_status
+    - thread_priority
 
 
 Environment Variables

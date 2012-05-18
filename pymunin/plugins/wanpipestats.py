@@ -9,10 +9,10 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
-   - wanpipe_traffic
-   - wanpipe_errors
-   - wanpipe_pri_errors_
-   - wanpipe_pri_rxlevel
+    - wanpipe_traffic
+    - wanpipe_errors
+    - wanpipe_pri_errors_
+    - wanpipe_pri_rxlevel
 
 Environment Variables
 

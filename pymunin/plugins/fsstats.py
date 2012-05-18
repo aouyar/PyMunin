@@ -8,8 +8,8 @@ Requirements
 Wild Card Plugin - No
 
 Multigraph Plugin - Graph Structure
-   - fs_calls
-   - fs_channels
+    - fs_calls
+    - fs_channels
    
 
 Environment Variables
@@ -25,7 +25,7 @@ Environment Variables
   Example:
       [fsstats]
         env.fshost 192.168.1.10
-        env.fsport 5038
+        env.fsport 8021
         env.fspass secret
 
 """

@@ -8,8 +8,8 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
-   - ntp_peer_stratum
-   - ntp_peer_stats
+    - ntp_peer_stratum
+    - ntp_peer_stats
 
 
 Environment Variables

@@ -10,15 +10,15 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
-   - sys_loadavg
-   - sys_cpu_util
-   - sys_memory_util
-   - sys_memory_avail
-   - sys_processes
-   - sys_forks
-   - sys_intr_ctxt
-   - sys_vm_paging
-   - sys_vm_swapping
+    - sys_loadavg
+    - sys_cpu_util
+    - sys_memory_util
+    - sys_memory_avail
+    - sys_processes
+    - sys_forks
+    - sys_intr_ctxt
+    - sys_vm_paging
+    - sys_vm_swapping
 
 
 Environment Variables

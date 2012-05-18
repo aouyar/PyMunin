@@ -11,8 +11,8 @@ Wild Card Plugin
 
 
 Multigraph Plugin - Graph Structure
-   - ntp_host_stratum_
-   - ntp_host_stat_
+   - ntp_host_stratum
+   - ntp_host_stat
 
 
 Environment Variables
