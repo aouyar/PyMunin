@@ -19,7 +19,7 @@ Environment Variables
   port:           Web Server Port. (Default: 80, SSL: 443)
   user:           User in case authentication is required for access to 
                   FPM Status page.
-  password:       User in case authentication is required for access to 
+  password:       Password in case authentication is required for access to 
                   FPM Status page.
   monpath:        FPM status page path relative to Document Root.
                   (Default: fpm_status.php)

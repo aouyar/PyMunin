@@ -19,7 +19,7 @@ Environment Variables
   port:           Apache Web Server Port. (Default: 80, SSL: 443)
   user:           User in case authentication is required for access to 
                   server-status page.
-  password:       User in case authentication is required for access 
+  password:       Password in case authentication is required for access 
                   to server-status page.
   statuspath:     Path for Apache Web Server Status Page.
                   (Default: server-status)
