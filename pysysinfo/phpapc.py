@@ -35,6 +35,7 @@ class APCinfo:
         @param password: Password. (Not needed unless authentication is required 
                          to access status page.
         @param monpath:  APC status script path relative to Document Root.
+                         (Default: apcinfo.php)
         @param ssl:      Use SSL if True. (Default: False)
         @param autoInit: If True connect to Web Server on instantiation.
             

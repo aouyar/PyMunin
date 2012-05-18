@@ -26,6 +26,7 @@ Environment Variables
   password:       Password in case authentication is required for access to 
                   APC Status page.
   monpath:        APC status script path relative to Document Root.
+                  (Default: apcinfo.php)
   ssl:            Use SSL if yes. (Default: no)
   include_graphs: Comma separated list of enabled graphs. 
                   (All graphs enabled by default.)
