@@ -34,17 +34,17 @@ Environment Variables
 
   host:           MySQL Server IP. 
                   (Defaults to UNIX socket if not provided.)
-  port:           MySQL Server Port (3306 by default.)
+  port:           MySQL Server Port
+                  (Defaults to 3306 for network connections.)
   database:       MySQL Database
   user:           Database User Name
   password:       Database User Password
-  include_graphs: Comma separated list of enabled graphs. 
-                  (All graphs enabled by default.)
-  exclude_graphs: Comma separated list of disabled graphs.
   include_engine: Comma separated list of storage engines to include graphs.
                   (All enabled by default.)
   exclude_engine: Comma separated list of storage engines to exclude from graphs.
-  
+  include_graphs: Comma separated list of enabled graphs. 
+                  (All graphs enabled by default.)
+  exclude_graphs: Comma separated list of disabled graphs.
 
   Example:
     [mysqlstats]

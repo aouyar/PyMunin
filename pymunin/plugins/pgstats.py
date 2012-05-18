@@ -9,22 +9,22 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
-   - pg_connections
-   - pg_diskspace
-   - pg_blockreads
-   - pg_xact
-   - pg_checkpoints
-   - pg_bgwriter
-   - pg_tup_read
-   - pg_tup_write
-   - pg_blockreads_detail
-   - pg_xact_commit_detail
-   - pg_xact_rollback_detail
-   - pg_tup_return_detail
-   - pg_tup_fetch_detail
-   - pg_tup_delete_detail
-   - pg_tup_update_detail
-   - pg_tup_insert_detail
+    - pg_connections
+    - pg_diskspace
+    - pg_blockreads
+    - pg_xact
+    - pg_checkpoints
+    - pg_bgwriter
+    - pg_tup_read
+    - pg_tup_write
+    - pg_blockreads_detail
+    - pg_xact_commit_detail
+    - pg_xact_rollback_detail
+    - pg_tup_return_detail
+    - pg_tup_fetch_detail
+    - pg_tup_delete_detail
+    - pg_tup_update_detail
+    - pg_tup_insert_detail
    
 
 Environment Variables
