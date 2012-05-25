@@ -31,6 +31,10 @@ The plugins consist of the following components:
 Although the solution is focused on implementing _Multigraph Plugins_ the module
 also supports simple single graph plugins.
 
+For information on other projects you can check 
+my [GitHub Personal Page](http://aouyar.github.com)
+and [GitHub Profile](https://github.com/aouyar).
+
 
 Munin Plugins
 -------------
