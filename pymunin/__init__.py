@@ -282,9 +282,9 @@ class MuninPlugin:
         @return:     Return True if the attribute is enabled.
         
         """
-        filter = self._filters.get(name)
-        if filter:
-            return filter.check(attr) 
+        flt = self._filters.get(name)
+        if flt:
+            return flt.check(attr) 
         else:
             raise AttributeError("Undefined filter: %s" % name)
         
@@ -675,9 +675,9 @@ class MuninGraph:
         self._fieldValDict = {}
         self._autoFixNames = autoFixNames
 
-    def addField(self, name, label, type=None,  draw=None, info=None, 
+    def addField(self, name, label, type=None,  draw=None, info=None, #@ReservedAssignment
                  extinfo=None, colour=None, negative=None, graph=None, 
-                 min=None, max=None, cdef=None, line=None, 
+                 min=None, max=None, cdef=None, line=None, #@ReservedAssignment
                  warning=None, critical=None):
         """Add field to Munin Graph
         
