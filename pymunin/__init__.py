@@ -669,7 +669,7 @@ class MuninGraph:
                              by replacing them with '_'.
         
         """
-        self._graphAttrDict = dict((k,v) for (k,v) in locals().items()
+        self._graphAttrDict = dict((k,v) for (k,v) in locals().iteritems()
                                     if (v is not None 
                                         and k not in ('self', 'autoFixNames')))
         self._fieldNameList = []
@@ -707,7 +707,7 @@ class MuninGraph:
             name = self._fixName(name)
             if negative is not None:
                 negative = self._fixName(negative)
-        self._fieldAttrDict[name] = dict(((k,v) for (k,v) in locals().items()
+        self._fieldAttrDict[name] = dict(((k,v) for (k,v) in locals().iteritems()
                                          if (v is not None
                                              and k not in ('self',))))
         self._fieldNameList.append(name)
