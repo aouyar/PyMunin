@@ -596,8 +596,7 @@ class MuninPlugin:
         for parent_name in self._graphNames:
             graph = self._graphDict[parent_name]
             graph_conf = graph.getConfigDict()
-            if (self._nestedGraphs and self._subgraphDict and self._subgraphNames
-                and self._subgraphNames.has_key(parent_name)):
+            if (self._nestedGraphs and self._subgraphNames.has_key(parent_name)):
                 graph_conf['subgraphs'] = []
                 for graph_name in self._subgraphNames[parent_name]:
                     subgraph = self._subgraphDict[parent_name][graph_name]
@@ -648,8 +647,7 @@ class MuninPlugin:
         vals = {}
         for (parent_name, graph) in self._graphDict.iteritems():
             vals[parent_name] = graph.getValsDict()
-            if (self._nestedGraphs and self._subgraphDict and self._subgraphDict
-                and self._subGraphNames.has_key(parent_name)):
+            if (self._nestedGraphs and self._subgraphNames.has_key(parent_name)):
                 vals['subgraphs'] = {}
                 for (parent_name, subgraph_names) in self._subgraphNames.iteritems():
                     for graph_name in subgraph_names:
