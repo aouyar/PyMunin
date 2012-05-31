@@ -1,6 +1,10 @@
 PyMunin - Python Multigraph Munin Plugins
 =========================================
 
+
+About
+-----
+
 Python Module for developing Munin Multigraph Monitoring Plugins.
 
 More detailed documentation for the project and sample graphs for plugins are 
@@ -74,7 +78,7 @@ Documentation
 -------------
 
 The documentation for the project and sample graphs for plugins will be 
-published in the [PyMunin Project Web Page](http://aouyar.github.com/PyMunin/)
+published in the [PyMunin Project Web Page](http://aouyar.github.com/PyMunin/).
 
 
 Licensing
