@@ -10,6 +10,10 @@ import os.path
 import sys
 import re
 import cPickle as pickle
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
@@ -578,6 +582,31 @@ class MuninPlugin:
                     print
         return True
 
+    def jsonConfig(self):
+        """Implements Munin Plugin Graph Configuration.
+        
+        Prints out configuration for graphs in JSON format.
+
+        Use as is. Not required to be overwritten in child classes. The plugin
+        will work correctly as long as the Munin Graph objects have been 
+        populated.
+
+        """
+        config = []
+        for parent_name in self._graphNames:
+            graph = self._graphDict[parent_name]
+            graph_conf = graph.getConfigDict()
+            if (self._nestedGraphs and self._subgraphDict and self._subgraphNames
+                and self._subgraphNames.has_key(parent_name)):
+                graph_conf['subgraphs'] = []
+                for graph_name in self._subgraphNames[parent_name]:
+                    subgraph = self._subgraphDict[parent_name][graph_name]
+                    subgraph_conf = subgraph.getConfigDict()
+                    graph_conf['subgraphs'].append(subgraph_conf)      
+            config.append(graph_conf)
+        print json.dumps(config)
+        return True
+
     def suggest(self):
         """Implements Munin Plugin Suggest Option.
 
@@ -608,6 +637,26 @@ class MuninPlugin:
                     print graph.getVals()
                     print
         return True
+    
+    def jsonFetch(self):
+        """Implements Munin Plugin Fetch Option in JSON format.
+
+        Prints out measured values in JSON format.
+
+        """
+        self.retrieveVals()
+        vals = {}
+        for (parent_name, graph) in self._graphDict:
+            vals[parent_name] = graph.getValsDict()
+            if (self._nestedGraphs and self._subgraphDict and self._subgraphDict
+                and self._subGraphNames.has_key(parent_name)):
+                vals['subgraphs'] = {}
+                for (parent_name, subgraph_names) in self._subgraphNames.iteritems():
+                    for graph_name in subgraph_names:
+                        subgraph = self._subgraphDict[parent_name][graph_name]
+                        vals['subgraphs'][graph_name] = subgraph.getVals()
+        print json.dumps(vals)
+        return True
 
     def run(self):
         """Implements main entry point for plugin execution."""
@@ -630,6 +679,10 @@ class MuninPlugin:
             ret = True
         elif oper == 'suggest':
             ret = self.suggest()
+        elif oper == 'json_config':
+            ret = self.jsonConfig();
+        elif oper == 'json_fetch':
+            ret = self.jsonFetch();
         else:
             raise AttributeError("Invalid command argument: %s" % oper)
         return ret
@@ -762,6 +815,14 @@ class MuninGraph:
                             val = "no"
                     conf.append("%s.%s %s" % (field_name, key, val))
         return "\n".join(conf)
+    
+    def getConfigDict(self):
+        """Returns dictionary of config entries for Munin Graph.
+        
+        @return: Dictionary of Munin Graph configuration attributes. 
+        
+        """
+        return self._fieldAttrDict
 
     def setVal(self, name, val):
         """Set value for field in graph.
@@ -792,6 +853,14 @@ class MuninGraph:
                 else:
                     vals.append("%s.value %s" % (name, val))
         return "\n".join(vals)
+
+    def getValsDict(self):
+        """Returns dictionary of values for Munin Graph
+        
+        @return: Dictionary of Munin Graph values.
+        
+        """
+        return self._fieldValDict
     
     def _fixName(self, name):
         """Replace invalid characters in field names with underscore.
