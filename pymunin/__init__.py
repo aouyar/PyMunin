@@ -646,7 +646,7 @@ class MuninPlugin:
         """
         self.retrieveVals()
         vals = {}
-        for (parent_name, graph) in self._graphDict:
+        for (parent_name, graph) in self._graphDict.iteritems():
             vals[parent_name] = graph.getValsDict()
             if (self._nestedGraphs and self._subgraphDict and self._subgraphDict
                 and self._subGraphNames.has_key(parent_name)):
