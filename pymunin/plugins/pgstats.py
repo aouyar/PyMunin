@@ -70,7 +70,7 @@ __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = []
 __license__ = "GPL"
-__version__ = "0.9.15"
+__version__ = "0.9.16"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
@@ -354,7 +354,6 @@ class MuninPgPlugin(MuninPlugin):
         for lock_state in ('all', 'wait',):
             if lock_stats is None:
                 lock_stats = self._dbconn.getLockStats()
-                print lock_stats
             graph_name = "pg_local_%s" % lock_state
             if self.hasGraph(graph_name):
                 mode_iter = iter(PgInfo.lockModes)
