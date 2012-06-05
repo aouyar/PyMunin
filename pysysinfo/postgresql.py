@@ -12,7 +12,7 @@ __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = []
 __license__ = "GPL"
-__version__ = "0.9"
+__version__ = "0.9.15"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
@@ -23,6 +23,10 @@ defaultPGport = 5432
 
 class PgInfo:
     """Class to retrieve stats for PostgreSQL Database"""
+    
+    lockModes = ('AccessExclusive', 'Exclusive', 'ShareRowExclusive', 
+                 'Share', 'ShareUpdateExclusive', 'RowExclusive', 
+                 'RowShare', 'AccessShare',)
 
     def __init__(self, host=None, port=None,
                  database=None, user=None, password=None, autoInit=True):
@@ -263,7 +267,25 @@ class PgInfo:
         if inRecovery is not None:
             info_dict['in_recovery'] = inRecovery
         return info_dict
-
+    
+    def getLockStats(self):
+        """Returns the number of different types of locks that are active.
+        
+        @return: : Dictionary of stats.
+        
+        """
+        info_dict = {'all': dict(zip(self.lockModes, (0,) * len(self.lockModes))),
+                     'wait': dict(zip(self.lockModes, (0,) * len(self.lockModes)))}
+        cur = self._conn.cursor()
+        cur.execute("SELECT TRIM(mode, 'Lock'), granted, COUNT(*) FROM pg_locks "
+                    "GROUP BY TRIM(mode, 'Lock'), granted;")
+        rows = cur.fetchall()
+        for row in rows:
+            info_dict['all'][row[0]] += row[2]
+            if not row[1]:
+                info_dict['wait'][row[0]] += row[2]
+        return info_dict       
+        
     def getSlaveStatus(self):
         """Returns status of replication slaves.
         

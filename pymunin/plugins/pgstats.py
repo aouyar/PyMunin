@@ -25,6 +25,8 @@ Multigraph Plugin - Graph Structure
     - pg_tup_delete_detail
     - pg_tup_update_detail
     - pg_tup_insert_detail
+    - pg_lock_all
+    - pg_lock_wait
    
 
 Environment Variables
@@ -68,7 +70,7 @@ __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = []
 __license__ = "GPL"
-__version__ = "0.9"
+__version__ = "0.9.15"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
@@ -209,6 +211,23 @@ class MuninPgPlugin(MuninPlugin):
                            min=0, info="Tuples inserted per second.")
             self.appendGraph('pg_tup_write', graph)
         
+        for lock_state, desc in (('all', 
+                                  'Total number of locks grouped by lock mode.'),
+                                 ('wait',
+                                  'Number of locks in wait state grouped by lock mode.'),):
+            graph_name = "pg_local_%s" % lock_state
+            if self.graphEnabled(graph_name):
+                mode_iter = iter(PgInfo.lockModes)
+                graph = MuninGraph('PostgreSQL - Locks (All)', 'PostgreSQL Sys',
+                    info=desc,
+                    args='--base 1000 --lower-limit 0')
+                for mode in ('AccessExcl', 'Excl', 'ShrRwExcl', 'Shr', 
+                             'ShrUpdExcl', 'RwExcl', 'RwShr', 'AccessShr',):
+                    graph.addField(mode, mode, draw='AREASTACK', type='GAUGE', 
+                                   min=0, 
+                                   info="Number of locks %s." % mode_iter.next())
+                self.appendGraph(graph_name, graph)
+        
         if self._detailGraphs:        
             if self.graphEnabled('pg_blockread_detail'):
                 graph = MuninGraph('PostgreSQL - Block Read Stats Detail', 
@@ -331,6 +350,18 @@ class MuninPgPlugin(MuninPlugin):
             self.setGraphVal('pg_tup_write', 'delete', totals['tup_deleted'])
             self.setGraphVal('pg_tup_write', 'update', totals['tup_updated'])
             self.setGraphVal('pg_tup_write', 'insert', totals['tup_inserted'])
+        lock_stats = None
+        for lock_state in ('all', 'wait',):
+            if lock_stats is None:
+                lock_stats = self._dbconn.getLockStats()
+                print lock_stats
+            graph_name = "pg_local_%s" % lock_state
+            if self.hasGraph(graph_name):
+                mode_iter = iter(PgInfo.lockModes)
+                for mode in ('AccessExcl', 'Excl', 'ShrRwExcl', 'Shr', 
+                             'ShrUpdExcl', 'RwExcl', 'RwShr', 'AccessShr',):
+                    self.setGraphVal(graph_name, mode, 
+                                     lock_stats[lock_state].get(mode_iter.next()))
             
         if self._detailGraphs:
             for (db, dbstats) in databases.iteritems():
