@@ -215,7 +215,7 @@ class MuninPgPlugin(MuninPlugin):
                                   'Total number of locks grouped by lock mode.'),
                                  ('wait',
                                   'Number of locks in wait state grouped by lock mode.'),):
-            graph_name = "pg_local_%s" % lock_state
+            graph_name = "pg_lock_%s" % lock_state
             if self.graphEnabled(graph_name):
                 mode_iter = iter(PgInfo.lockModes)
                 graph = MuninGraph('PostgreSQL - Locks (All)', 'PostgreSQL Sys',
@@ -354,7 +354,7 @@ class MuninPgPlugin(MuninPlugin):
         for lock_state in ('all', 'wait',):
             if lock_stats is None:
                 lock_stats = self._dbconn.getLockStats()
-            graph_name = "pg_local_%s" % lock_state
+            graph_name = "pg_lock_%s" % lock_state
             if self.hasGraph(graph_name):
                 mode_iter = iter(PgInfo.lockModes)
                 for mode in ('AccessExcl', 'Excl', 'ShrRwExcl', 'Shr', 
