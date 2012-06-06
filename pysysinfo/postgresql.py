@@ -222,6 +222,43 @@ class PgInfo:
         totals = self._createTotalsDict(headers, rows)
         return {'databases': dbstats, 'totals': totals}
     
+    def getLockStatsMode(self):
+        """Returns the number of active lock discriminated by lock mode.
+        
+        @return: : Dictionary of stats.
+        
+        """
+        info_dict = {'all': dict(zip(self.lockModes, (0,) * len(self.lockModes))),
+                     'wait': dict(zip(self.lockModes, (0,) * len(self.lockModes)))}
+        cur = self._conn.cursor()
+        cur.execute("SELECT TRIM(mode, 'Lock'), granted, COUNT(*) FROM pg_locks "
+                    "GROUP BY TRIM(mode, 'Lock'), granted;")
+        rows = cur.fetchall()
+        for (mode, granted, cnt) in rows:
+            info_dict['all'][mode] += cnt
+            if not granted:
+                info_dict['wait'][mode] += cnt
+        return info_dict
+    
+    def getLockStatsDB(self):
+        """Returns the number of active lock discriminated by database.
+        
+        @return: : Dictionary of stats.
+        
+        """
+        info_dict = {'all': {},
+                     'wait': {}}
+        cur = self._conn.cursor()
+        cur.execute("SELECT d.datname, l.granted, COUNT(*) FROM pg_database d "
+                    "JOIN pg_locks l ON d.oid=l.database "
+                    "GROUP BY d.datname, l.granted;")
+        rows = cur.fetchall()
+        for (db, granted, cnt) in rows:
+            info_dict['all'][db] = info_dict['all'].get(db, 0) + cnt
+            if not granted:
+                info_dict['wait'][db] = info_dict['wait'].get(db, 0) + cnt
+        return info_dict
+    
     def getBgWriterStats(self):
         """Returns Global Background Writer and Checkpoint Activity stats.
         
@@ -267,25 +304,7 @@ class PgInfo:
         if inRecovery is not None:
             info_dict['in_recovery'] = inRecovery
         return info_dict
-    
-    def getLockStats(self):
-        """Returns the number of different types of locks that are active.
-        
-        @return: : Dictionary of stats.
-        
-        """
-        info_dict = {'all': dict(zip(self.lockModes, (0,) * len(self.lockModes))),
-                     'wait': dict(zip(self.lockModes, (0,) * len(self.lockModes)))}
-        cur = self._conn.cursor()
-        cur.execute("SELECT TRIM(mode, 'Lock'), granted, COUNT(*) FROM pg_locks "
-                    "GROUP BY TRIM(mode, 'Lock'), granted;")
-        rows = cur.fetchall()
-        for row in rows:
-            info_dict['all'][row[0]] += row[2]
-            if not row[1]:
-                info_dict['wait'][row[0]] += row[2]
-        return info_dict       
-        
+               
     def getSlaveStatus(self):
         """Returns status of replication slaves.
         

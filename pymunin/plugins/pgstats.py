@@ -218,14 +218,15 @@ class MuninPgPlugin(MuninPlugin):
             graph_name = "pg_lock_%s" % lock_state
             if self.graphEnabled(graph_name):
                 mode_iter = iter(PgInfo.lockModes)
-                graph = MuninGraph('PostgreSQL - Locks (All)', 'PostgreSQL Sys',
+                graph = MuninGraph("PostgreSQL - Locks (%s)" % lock_state, 
+                    'PostgreSQL Sys',
                     info=desc,
                     args='--base 1000 --lower-limit 0')
                 for mode in ('AccessExcl', 'Excl', 'ShrRwExcl', 'Shr', 
                              'ShrUpdExcl', 'RwExcl', 'RwShr', 'AccessShr',):
                     graph.addField(mode, mode, draw='AREASTACK', type='GAUGE', 
                                    min=0, 
-                                   info="Number of locks %s." % mode_iter.next())
+                                   info="Number of locks of mode: %s" % mode_iter.next())
                 self.appendGraph(graph_name, graph)
         
         if self._detailGraphs:        
@@ -317,6 +318,22 @@ class MuninPgPlugin(MuninPlugin):
                         type='DERIVE', min=0,
                         info="Tuples inserted per second into database %s." % db)
                 self.appendGraph('pg_tup_insert_detail', graph)
+            for lock_state, desc in (('all', 
+                                  'Total number of locks grouped by database.'),
+                                 ('wait',
+                                  'Number of locks in wait state grouped by database.'),):
+                graph_name = "pg_lock_%s_detail" % lock_state
+                if self.graphEnabled(graph_name):
+                    graph = MuninGraph("PostgreSQL - Locks (%s) Detail" % lock_state, 
+                        'PostgreSQL Sys',
+                        info=desc,
+                        args='--base 1000 --lower-limit 0',
+                        autoFixNames = True)
+                    for db in dblist:
+                        graph.addField(db, db, draw='AREASTACK', type='GAUGE', 
+                                       min=0, 
+                                       info="Number of locks for database: %s" % db)
+                    self.appendGraph(graph_name, graph)
             
     def retrieveVals(self):
         """Retrieve values for graphs."""                
@@ -352,33 +369,15 @@ class MuninPgPlugin(MuninPlugin):
             self.setGraphVal('pg_tup_write', 'insert', totals['tup_inserted'])
         lock_stats = None
         for lock_state in ('all', 'wait',):
-            if lock_stats is None:
-                lock_stats = self._dbconn.getLockStats()
             graph_name = "pg_lock_%s" % lock_state
             if self.hasGraph(graph_name):
+                if lock_stats is None:
+                    lock_stats = self._dbconn.getLockStatsMode()
                 mode_iter = iter(PgInfo.lockModes)
                 for mode in ('AccessExcl', 'Excl', 'ShrRwExcl', 'Shr', 
                              'ShrUpdExcl', 'RwExcl', 'RwShr', 'AccessShr',):
                     self.setGraphVal(graph_name, mode, 
                                      lock_stats[lock_state].get(mode_iter.next()))
-            
-        if self._detailGraphs:
-            for (db, dbstats) in databases.iteritems():
-                if self.dbIncluded(db):
-                    if self.hasGraph('pg_blockread_detail'):
-                        self.setGraphVal('pg_blockread_detail', db, 
-                            dbstats['blks_hit'] + dbstats['blks_read'])
-                    for (graph_name, attr_name) in (
-                            ('pg_xact_commit_detail', 'xact_commit'),
-                            ('pg_xact_rollback_detail', 'xact_rollback'),
-                            ('pg_tup_return_detail', 'tup_returned'),
-                            ('pg_tup_fetch_detail', 'tup_fetched'),
-                            ('pg_tup_delete_detail', 'tup_deleted'),
-                            ('pg_tup_update_detail', 'tup_updated'),
-                            ('pg_tup_insert_detail', 'tup_inserted'),
-                        ):
-                        if self.hasGraph(graph_name):
-                            self.setGraphVal(graph_name, db, dbstats[attr_name])
         
         stats = None               
         if self.hasGraph('pg_checkpoints'):
@@ -398,6 +397,31 @@ class MuninPgPlugin(MuninPlugin):
             self.setGraphVal('pg_bgwriter', 'chkpoint', 
                              stats.get('buffers_checkpoint'))
             
+        if self._detailGraphs:
+            for (db, dbstats) in databases.iteritems():
+                if self.dbIncluded(db):
+                    if self.hasGraph('pg_blockread_detail'):
+                        self.setGraphVal('pg_blockread_detail', db, 
+                            dbstats['blks_hit'] + dbstats['blks_read'])
+                    for (graph_name, attr_name) in (
+                            ('pg_xact_commit_detail', 'xact_commit'),
+                            ('pg_xact_rollback_detail', 'xact_rollback'),
+                            ('pg_tup_return_detail', 'tup_returned'),
+                            ('pg_tup_fetch_detail', 'tup_fetched'),
+                            ('pg_tup_delete_detail', 'tup_deleted'),
+                            ('pg_tup_update_detail', 'tup_updated'),
+                            ('pg_tup_insert_detail', 'tup_inserted'),
+                        ):
+                        if self.hasGraph(graph_name):
+                            self.setGraphVal(graph_name, db, dbstats[attr_name])
+                    lock_stats_db = None
+                    for lock_state in ('all', 'wait',):
+                        graph_name = "pg_lock_%s_detail" % lock_state
+                        if self.hasGraph(graph_name):
+                            if lock_stats_db is None:
+                                lock_stats_db = self._dbconn.getLockStatsDB()
+                            self.setGraphVal(graph_name, db, 
+                                             lock_stats_db[lock_state].get(db, 0))
     
     def dbIncluded(self, name):
         """Utility method to check if database is included in graphs.
