@@ -13,7 +13,7 @@ __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = []
 __license__ = "GPL"
-__version__ = "0.9.12"
+__version__ = "0.9.18"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
@@ -111,7 +111,7 @@ class TomcatInfo:
             for connnode in connnodes:
                 namestr = connnode.get('name')
                 if namestr is not None:
-                    mobj = re.match('(\w+)-(\d+)', namestr)
+                    mobj = re.match('(.*)-(\d+)', namestr)
                     if mobj:
                         proto = mobj.group(1)
                         port = int(mobj.group(2))
