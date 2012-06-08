@@ -12,7 +12,7 @@ __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = []
 __license__ = "GPL"
-__version__ = "0.9"
+__version__ = "0.9.15"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
@@ -23,6 +23,10 @@ defaultPGport = 5432
 
 class PgInfo:
     """Class to retrieve stats for PostgreSQL Database"""
+    
+    lockModes = ('AccessExclusive', 'Exclusive', 'ShareRowExclusive', 
+                 'Share', 'ShareUpdateExclusive', 'RowExclusive', 
+                 'RowShare', 'AccessShare',)
 
     def __init__(self, host=None, port=None,
                  database=None, user=None, password=None, autoInit=True):
@@ -218,6 +222,43 @@ class PgInfo:
         totals = self._createTotalsDict(headers, rows)
         return {'databases': dbstats, 'totals': totals}
     
+    def getLockStatsMode(self):
+        """Returns the number of active lock discriminated by lock mode.
+        
+        @return: : Dictionary of stats.
+        
+        """
+        info_dict = {'all': dict(zip(self.lockModes, (0,) * len(self.lockModes))),
+                     'wait': dict(zip(self.lockModes, (0,) * len(self.lockModes)))}
+        cur = self._conn.cursor()
+        cur.execute("SELECT TRIM(mode, 'Lock'), granted, COUNT(*) FROM pg_locks "
+                    "GROUP BY TRIM(mode, 'Lock'), granted;")
+        rows = cur.fetchall()
+        for (mode, granted, cnt) in rows:
+            info_dict['all'][mode] += cnt
+            if not granted:
+                info_dict['wait'][mode] += cnt
+        return info_dict
+    
+    def getLockStatsDB(self):
+        """Returns the number of active lock discriminated by database.
+        
+        @return: : Dictionary of stats.
+        
+        """
+        info_dict = {'all': {},
+                     'wait': {}}
+        cur = self._conn.cursor()
+        cur.execute("SELECT d.datname, l.granted, COUNT(*) FROM pg_database d "
+                    "JOIN pg_locks l ON d.oid=l.database "
+                    "GROUP BY d.datname, l.granted;")
+        rows = cur.fetchall()
+        for (db, granted, cnt) in rows:
+            info_dict['all'][db] = info_dict['all'].get(db, 0) + cnt
+            if not granted:
+                info_dict['wait'][db] = info_dict['wait'].get(db, 0) + cnt
+        return info_dict
+    
     def getBgWriterStats(self):
         """Returns Global Background Writer and Checkpoint Activity stats.
         
@@ -242,9 +283,16 @@ class PgInfo:
             inRecovery = self._simpleQuery("SELECT pg_is_in_recovery();")
         cur = self._conn.cursor()
         if inRecovery:
-            cur.execute("""SELECT
-                pg_last_xlog_receive_location(),
-                pg_last_xlog_replay_location();""")
+            cols = ['pg_last_xlog_receive_location()', 
+                    'pg_last_xlog_replay_location()',]
+            headers = ['xlog_receive_location',
+                       'xlog_replay_location',]
+            if self.checkVersion('9.1'):
+                cols.extend(['pg_last_xact_replay_timestamp()',
+                             'pg_is_xlog_replay_paused()',])
+                headers.extend(['xact_replay_timestamp', 
+                                'xlog_replay_paused',])
+            cur.execute("""SELECT %s;""" % ','.join(cols))
             headers = ('xlog_receive_location', 'xlog_replay_location')
         else:
             cur.execute("""SELECT
@@ -255,4 +303,26 @@ class PgInfo:
         info_dict = dict(zip(headers, row))
         if inRecovery is not None:
             info_dict['in_recovery'] = inRecovery
+        return info_dict
+               
+    def getSlaveStatus(self):
+        """Returns status of replication slaves.
+        
+        @return: Dictionary of status items.
+        
+        """
+        info_dict = {}
+        if self.checkVersion('9.1'):
+            cols = ['procpid', 'usename', 'application_name', 
+                    'client_addr', 'client_port', 'backend_start', 'state', 
+                    'sent_location', 'write_location', 'flush_location', 
+                    'replay_location', 'sync_priority', 'sync_state',]
+            cur = self._conn.cursor()
+            cur.execute("""SELECT %s FROM pg_stat_replication;""" 
+                        % ','.join(cols))
+            rows = cur.fetchall()
+            for row in rows:
+                info_dict[row[0]] = dict(zip(cols[1:], row[1:]))
+        else:
+            return None
         return info_dict

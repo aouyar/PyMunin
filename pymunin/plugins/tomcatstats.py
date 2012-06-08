@@ -3,9 +3,17 @@
 
 Requirements
   - Manager user credentials for accesing the Status Page of Apache Tomcat Server.
-    Configuration example from tomcat-users.xml:
+  
+    Configuration example from tomcat-users.xml for Tomcat 6:
     <user username="munin" password="<set this>" roles="standard,manager"/>
 
+    Configuration example from tomcat-users.xml for Tomcat 7, with minimum level
+    of privileges; access only to Status Page::
+    <user username="munin" password="<set this>" roles="manager-status"/>
+    
+    Configuration example from tomcat-users.xml for Tomcat 7 with privileges to
+    access to Manager GUI and Status Page:
+    <user username="munin" password="<set this>" roles="manager-gui,manager-status"/>
 
 
 Wild Card Plugin - No
