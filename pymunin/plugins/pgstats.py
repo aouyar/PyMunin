@@ -17,6 +17,9 @@ Multigraph Plugin - Graph Structure
     - pg_bgwriter
     - pg_tup_read
     - pg_tup_write
+    - pg_lock_all
+    - pg_lock_wait
+    - pg_repl_conflicts
     - pg_blockreads_detail
     - pg_xact_commit_detail
     - pg_xact_rollback_detail
@@ -25,8 +28,9 @@ Multigraph Plugin - Graph Structure
     - pg_tup_delete_detail
     - pg_tup_update_detail
     - pg_tup_insert_detail
-    - pg_lock_all
-    - pg_lock_wait
+    - pg_lock_all_detail
+    - pg_lock_wait_detail
+    - pg_repl_conflicts_detail
    
 
 Environment Variables
@@ -47,6 +51,7 @@ Environment Variables
   exclude_db:     Comma separated list of databases to exclude from detail graphs.
   detail_graphs:  Enable (on) / disable (off) detail graphs. 
                   (Disabled by default.)
+  repl_graphs:    Enable (on) / disable (off) replication status graphs.
   include_graphs: Comma separated list of enabled graphs. 
                   (All graphs enabled by default.)
   exclude_graphs: Comma separated list of disabled graphs.
@@ -100,6 +105,7 @@ class MuninPgPlugin(MuninPlugin):
         self._user = self.envGet('user')
         self._password = self.envGet('password')
         self._detailGraphs = self.envCheckFlag('detail_graphs', False)
+        self._replGraphs = self.envCheckFlag('repl_graphs', False)
         
         self._dbconn = PgInfo(self._host, self._port, self._database, 
                               self._user, self._password)
@@ -334,26 +340,54 @@ class MuninPgPlugin(MuninPlugin):
                                        min=0, 
                                        info="Number of locks for database: %s" % db)
                     self.appendGraph(graph_name, graph)
+                    
+        if self._replGraphs and self._dbconn.checkVersion('9.1'):        
+            if self.graphEnabled('pg_repl_conflicts'):
+                graph = MuninGraph('PostgreSQL - Replication Conflicts',
+                    'Postgresql Repl.',
+                    info='Number of queries cancelled due to conflict with '
+                         'recovery on standby servers.',
+                    args='--base 1000 --lower-limit 0')
+                for field, desc in (
+                    ('lock', 'Queries that have been canceled due to lock timeouts.'),
+                    ('snapshot', 'Queries that have been canceled due to old snapshots.'),
+                    ('bufferpin', 'Queries that have been canceled due to pinned buffers.'),
+                    ('deadlock', 'Queries that have been canceled due to deadlocks.'),):
+                    graph.addField(field, field, draw='AREASTACK', type='DERIVE', 
+                                   min=0, info=desc)
+                self.appendGraph('pg_repl_conflicts', graph)
+            if self._detailGraphs and self.graphEnabled('pg_repl_conflicts_detail'):
+                graph = MuninGraph('PostgreSQL - Replication Conflicts Detail', 
+                    'Number of queries cancelled due to conflict with recovery '
+                    'on standby servers per database.',
+                    info='Replication ',
+                    args='--base 1000 --lower-limit 0',
+                    autoFixNames = True)
+                for db in dblist:
+                    graph.addField(db, db, draw='AREASTACK', 
+                        type='DERIVE', min=0,
+                        info="Queries on database %s cancelled due to conflict "
+                             "with recovery on standby." % db)
+                self.appendGraph('pg_repl_conflicts_detail', graph)
             
     def retrieveVals(self):
         """Retrieve values for graphs."""                
         stats = self._dbconn.getDatabaseStats()
         databases = stats.get('databases')
         totals = stats.get('totals')
-        if databases and len(databases) > 0:
-            if self.hasGraph('pg_connections'):
-                limit = self._dbconn.getParam('max_connections')
-                self.setGraphVal('pg_connections', 'max_conn', limit)
-                for (db, dbstats) in databases.iteritems():
-                    if self.dbIncluded(db):
-                        self.setGraphVal('pg_connections', db, 
-                                         dbstats['numbackends'])
-                self.setGraphVal('pg_connections', 'total', totals['numbackends'])
-            if self.hasGraph('pg_diskspace'):
-                for (db, dbstats) in databases.iteritems():
-                    if self.dbIncluded(db):
-                        self.setGraphVal('pg_diskspace', db, dbstats['disk_size'])
-                self.setGraphVal('pg_diskspace', 'total', totals['disk_size'])
+        if self.hasGraph('pg_connections'):
+            limit = self._dbconn.getParam('max_connections')
+            self.setGraphVal('pg_connections', 'max_conn', limit)
+            for (db, dbstats) in databases.iteritems():
+                if self.dbIncluded(db):
+                    self.setGraphVal('pg_connections', db, 
+                                     dbstats['numbackends'])
+            self.setGraphVal('pg_connections', 'total', totals['numbackends'])
+        if self.hasGraph('pg_diskspace'):
+            for (db, dbstats) in databases.iteritems():
+                if self.dbIncluded(db):
+                    self.setGraphVal('pg_diskspace', db, dbstats['disk_size'])
+            self.setGraphVal('pg_diskspace', 'total', totals['disk_size'])
         if self.hasGraph('pg_blockreads'):
             self.setGraphVal('pg_blockreads', 'blk_hit', totals['blks_hit'])
             self.setGraphVal('pg_blockreads', 'blk_read', totals['blks_read'])
@@ -422,6 +456,18 @@ class MuninPgPlugin(MuninPlugin):
                                 lock_stats_db = self._dbconn.getLockStatsDB()
                             self.setGraphVal(graph_name, db, 
                                              lock_stats_db[lock_state].get(db, 0))
+            
+        if self._replGraphs:
+            repl_stats = self._dbconn.getSlaveConflictStats()
+            if self.hasGraph('pg_repl_conflicts'):        
+                for field in self.getGraphFieldList('pg_repl_conflicts'):
+                    self.setGraphVal('pg_repl_conflicts', field, 
+                                     repl_stats['totals'].get("confl_%s" % field))
+            if self._detailGraphs and self.hasGraph('pg_repl_conflicts_detail'):
+                for (db, dbstats) in repl_stats['databases'].iteritems():
+                    if self.dbIncluded(db):
+                        self.setGraphVal('pg_repl_conflicts_detail', db,
+                                         sum(dbstats.values()))
     
     def dbIncluded(self, name):
         """Utility method to check if database is included in graphs.

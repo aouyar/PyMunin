@@ -326,3 +326,17 @@ class PgInfo:
         else:
             return None
         return info_dict
+    
+    def getSlaveConflictStats(self):
+        if self.checkVersion('9.1'):
+            headers = ('datname', 'confl_tablespace', 'confl_lock', 'confl_snapshot', 
+                       'confl_bufferpin', 'confl_deadlock')
+            cur = self._conn.cursor()
+            cur.execute("SELECT %s FROM pg_stat_database_conflicts;" 
+                    % ",".join(headers))
+            rows = cur.fetchall()
+            dbstats = self._createStatsDict(headers, rows)
+            totals = self._createTotalsDict(headers, rows)
+            return {'databases': dbstats, 'totals': totals}
+        else:
+            return None
