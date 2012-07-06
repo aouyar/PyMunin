@@ -91,8 +91,8 @@ class PgInfo:
         @param headers: List of columns in query result.
         @param rows:    List of rows in query result.
         @return:        Nested dictionary of values.
-            First key is the database schema name and the second key is the
-            statistics counter name. 
+                        First key is the database name and the second key is the 
+                        statistics counter name. 
             
         """
         dbstats = {}
@@ -179,7 +179,7 @@ class PgInfo:
     def getDatabases(self):
         """Returns list of databases.
         
-        @return: List of database schemas.
+        @return: List of databases.
         
         """
         cur = self._conn.cursor()
