@@ -55,7 +55,7 @@ class MuninVarnishPlugin(MuninPlugin):
     plugin_name = 'varnishstats'
     isMultigraph = True
 
-    def __init__(self, argv=(), env={}, debug=False):
+    def __init__(self, argv=(), env=None, debug=False):
         """Populate Munin Plugin with MuninGraph instances.
         
         @param argv:  List of command line arguments.
@@ -63,7 +63,7 @@ class MuninVarnishPlugin(MuninPlugin):
         @param debug: Print debugging messages if True. (Default: False)
         
         """
-        MuninPlugin.__init__(self, argv, env, debug)
+        MuninPlugin.__init__(self, argv, env or {}, debug)
         
         self._instance = self.envGet('instance')
         varnish_info = VarnishInfo(self._instance)

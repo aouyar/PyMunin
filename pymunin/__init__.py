@@ -37,7 +37,7 @@ class MuninAttrFilter:
     
     """
     
-    def __init__(self, list_include = [], list_exclude = [], 
+    def __init__(self, list_include = None, list_exclude = None,
                  attr_regex = None, default = True):
         """Initialize Munin Attribute Filter.
         
@@ -97,7 +97,7 @@ class MuninPlugin:
     """True for Multi-Graph Plugins, and False for Simple Plugins.
     Must be overriden in child classes to indicate plugin type."""
 
-    def __init__(self, argv=(), env={}, debug=False):
+    def __init__(self, argv=(), env=None, debug=False):
         """Constructor for MuninPlugin Class.
         
         @param argv: List of command line arguments.
@@ -111,7 +111,7 @@ class MuninPlugin:
         self._filters = {}
         self._flags = {}
         self._argv = argv
-        self._env = env
+        self._env = env or {}
         self.arg0 = None
         self._debug = debug
         self._dirtyConfig = False
