@@ -55,7 +55,7 @@ class MuninNTPhostOffsetsPlugin(MuninPlugin):
     plugin_name = 'ntphostoffsets'
     isMultigraph = True
 
-    def __init__(self, argv=(), env={}, debug=False):
+    def __init__(self, argv=(), env=None, debug=False):
         """Populate Munin Plugin with MuninGraph instances.
         
         @param argv:  List of command line arguments.
@@ -63,7 +63,7 @@ class MuninNTPhostOffsetsPlugin(MuninPlugin):
         @param debug: Print debugging messages if True. (Default: False)
         
         """
-        MuninPlugin.__init__(self, argv, env, debug)
+        MuninPlugin.__init__(self, argv, env or {}, debug)
 
         if self.envHasKey('ntphosts'):
             hosts_str = re.sub('[^\d\.,]', '', self.envGet('ntphosts'))
