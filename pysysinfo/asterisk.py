@@ -152,9 +152,9 @@ class AsteriskInfo:
     def _sendAction(self, action, attrs=None, chan_vars=None):
         """Send action to Asterisk Manager Interface.
         
-        @param action: Action name
-        @param attrs:   Tuple of key-value pairs for action attributes.
-        @param chan_vars:   Tuple of key-value pairs for channel variables.
+        @param action:    Action name
+        @param attrs:     Tuple of key-value pairs for action attributes.
+        @param chan_vars: Tuple of key-value pairs for channel variables.
 
         """
         self._conn.write("Action: %s\r\n" % action)
@@ -639,9 +639,9 @@ class AsteriskInfo:
         """
         re_list = []
         info_dict = {}
-        for filter in trunkList:
-            info_dict[filter[0]] = 0
-            re_list.append(re.compile(filter[1], re.IGNORECASE))
+        for filt in trunkList:
+            info_dict[filt[0]] = 0
+            re_list.append(re.compile(filt[1], re.IGNORECASE))
                   
         if self.checkVersion('1.4'):
             cmd = "core show channels"
