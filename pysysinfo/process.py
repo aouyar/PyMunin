@@ -55,7 +55,7 @@ class ProcessInfo:
         out = util.exec_command([psCmd,] + list(args))
         return out.splitlines()
     
-    def parseProcCmd(self, fields=['pid', 'user', 'cmd',], threads=False):
+    def parseProcCmd(self, fields=('pid', 'user', 'cmd',), threads=False):
         """Execute ps command with custom output format with columns from 
         fields and return result as a nested list.
         
@@ -97,7 +97,7 @@ class ProcessInfo:
         else:
             return None
         
-    def getProcList(self, fields=['pid', 'user', 'cmd',], threads=False,
+    def getProcList(self, fields=('pid', 'user', 'cmd',), threads=False,
                     **kwargs):
         """Execute ps command with custom output format with columns columns 
         from fields, select lines using the filters defined by kwargs and return 
@@ -143,7 +143,7 @@ class ProcessInfo:
         else:
             return None
         
-    def getProcDict(self, fields=['user', 'cmd',], threads=False, **kwargs):
+    def getProcDict(self, fields=('user', 'cmd',), threads=False, **kwargs):
         """Execute ps command with custom output format with columns format with 
         columns from fields, and return result as a nested dictionary with 
         the key PID or SPID.
