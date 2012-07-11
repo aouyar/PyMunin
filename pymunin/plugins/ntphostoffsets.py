@@ -63,7 +63,7 @@ class MuninNTPhostOffsetsPlugin(MuninPlugin):
         @param debug: Print debugging messages if True. (Default: False)
         
         """
-        MuninPlugin.__init__(self, argv, env or {}, debug)
+        MuninPlugin.__init__(self, argv, env, debug)
 
         if self.envHasKey('ntphosts'):
             hosts_str = re.sub('[^\d\.,]', '', self.envGet('ntphosts'))

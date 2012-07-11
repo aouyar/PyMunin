@@ -86,7 +86,7 @@ class MuninMySQLplugin(MuninPlugin):
         @param debug: Print debugging messages if True. (Default: False)
         
         """
-        MuninPlugin.__init__(self, argv, env or {}, debug)
+        MuninPlugin.__init__(self, argv, env, debug)
         
         self.envRegisterFilter('engine', '^\w+$')
         

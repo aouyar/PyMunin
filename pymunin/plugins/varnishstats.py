@@ -63,7 +63,7 @@ class MuninVarnishPlugin(MuninPlugin):
         @param debug: Print debugging messages if True. (Default: False)
         
         """
-        MuninPlugin.__init__(self, argv, env or {}, debug)
+        MuninPlugin.__init__(self, argv, env, debug)
         
         self._instance = self.envGet('instance')
         varnish_info = VarnishInfo(self._instance)

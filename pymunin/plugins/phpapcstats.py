@@ -70,7 +70,7 @@ class MuninPHPapcPlugin(MuninPlugin):
         @param debug: Print debugging messages if True. (Default: False)
         
         """
-        MuninPlugin.__init__(self, argv, env or {}, debug)
+        MuninPlugin.__init__(self, argv, env, debug)
         
         self._host = self.envGet('host')
         self._port = self.envGet('port', None, int)

@@ -59,7 +59,7 @@ class MuninProcStatsPlugin(MuninPlugin):
         @param debug: Print debugging messages if True. (Default: False)
         
         """     
-        MuninPlugin.__init__(self, argv, env or {}, debug)
+        MuninPlugin.__init__(self, argv, env, debug)
 
         for (prefix, title, desc) in (('proc', 'Processes', 'Number of processes'),
                                       ('thread', 'Threads', 'Number of threads')):

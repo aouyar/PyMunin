@@ -59,7 +59,7 @@ class MuninNTPhostOffsetPlugin(MuninPlugin):
         @param debug: Print debugging messages if True. (Default: False)
         
         """
-        MuninPlugin.__init__(self, argv, env or {}, debug)
+        MuninPlugin.__init__(self, argv, env, debug)
 
         if self.arg0 is None:
             raise Exception("Remote host name cannot be determined.")

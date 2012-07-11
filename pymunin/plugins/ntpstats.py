@@ -57,7 +57,7 @@ class MuninNTPstatsPlugin(MuninPlugin):
         @param debug: Print debugging messages if True. (Default: False)
         
         """      
-        MuninPlugin.__init__(self, argv, env or {}, debug)
+        MuninPlugin.__init__(self, argv, env, debug)
 
         if self.graphEnabled('ntp_peer_stratum'):
             graph = MuninGraph('NTP Stratum for System Peer', 'Time',

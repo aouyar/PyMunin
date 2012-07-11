@@ -63,7 +63,7 @@ class MuninNetstatsPlugin(MuninPlugin):
         @param debug: Print debugging messages if True. (Default: False)
         
         """     
-        MuninPlugin.__init__(self, argv, env or {}, debug)
+        MuninPlugin.__init__(self, argv, env, debug)
          
         if self.graphEnabled('netstat_conn_status'):
             graph = MuninGraph('Network - Connection Status', 'Network', 
