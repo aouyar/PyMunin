@@ -25,6 +25,9 @@ Environment Variables
   include_container: Comma separated list of containers to include in graphs.
                      (All enabled by default.)
   exclude_container: Comma separated list of containers to exclude from graphs.
+  include_graphs:    Comma separated list of enabled graphs. 
+                     (All graphs enabled by default.)
+  exclude_graphs:    Comma separated list of disabled graphs.
 
   Example:
   
