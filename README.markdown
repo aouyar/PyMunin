@@ -63,10 +63,12 @@ included:
 * PHP FPM (FastCGI Process Manager)
 * PostgreSQL Database
 * Processes and Threads
+* Rackspace Cloud
 * System Resources 
   (Load, CPU, Memory, Processes, Interrupts, Paging, Swapping, etc.)
 * Sangoma Wanpipe Telephony Interfaces
 * Varnish Cache Web Application Accelerator
+
 
 Classes for retrieving stats are available, but no plugins have been developed
 yet for the following:
