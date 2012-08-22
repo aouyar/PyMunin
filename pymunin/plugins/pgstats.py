@@ -46,9 +46,9 @@ Environment Variables
                   Must be specified for network connections.)
   password:       Database User Password
                   (Attempt login without password by default.)
-  include_db:     Comma separated list of databases to include in detail graphs.
+  include_db:     Comma separated list of databases to include in graphs.
                   (All enabled by default.)
-  exclude_db:     Comma separated list of databases to exclude from detail graphs.
+  exclude_db:     Comma separated list of databases to exclude from graphs.
   detail_graphs:  Enable (on) / disable (off) detail graphs. 
                   (Disabled by default.)
   repl_graphs:    Enable (on) / disable (off) replication status graphs.

@@ -62,7 +62,7 @@ class MySQLinfo:
             self._conn.close()
             
     def _connect(self):
-        """Establish connection to PostgreSQL Database."""
+        """Establish connection to MySQL Database."""
         if self._connParams:
             self._conn = MySQLdb.connect(**self._connParams)
         else:
