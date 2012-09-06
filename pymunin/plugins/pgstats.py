@@ -55,6 +55,15 @@ Environment Variables
   include_graphs: Comma separated list of enabled graphs. 
                   (All graphs enabled by default.)
   exclude_graphs: Comma separated list of disabled graphs.
+  
+Environment Variables for Multiple Instances of Plugin (Omitted by default.)
+  instance_name:         Name of instance.
+  instance_label:        Graph title label for instance.
+                         (Default is the same as instance name.)
+  instance_label_format: One of the following values:
+                         - suffix (Default)
+                         - prefix
+                         - none 
 
   Example:
     [pgstats]
@@ -87,6 +96,7 @@ class MuninPgPlugin(MuninPlugin):
     """
     plugin_name = 'pgstats'
     isMultigraph = True
+    isMultiInstance = True
 
     def __init__(self, argv=(), env=None, debug=False):
         """Populate Munin Plugin with MuninGraph instances.

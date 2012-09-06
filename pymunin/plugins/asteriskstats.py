@@ -24,7 +24,6 @@ Multigraph Plugin - Graph Structure
 
 
 Environment Variables
-
   amihost:        IP of Asterisk Server. (Default: 127.0.0.1)
   amiport:        Asterisk Manager Interface Port. (Default: 5038)
   amiuser:        Asterisk Manager Interface User.
@@ -47,6 +46,15 @@ Environment Variables
   exclude_graphs: Comma separated list of disabled graphs.
 
   Note: Channel, codec and trunk expressions are case insensitive.
+  
+Environment Variables for Multiple Instances of Plugin (Omitted by default.)
+  instance_name:         Name of instance.
+  instance_label:        Graph title label for instance.
+                         (Default is the same as instance name.)
+  instance_label_format: One of the following values:
+                         - suffix (Default)
+                         - prefix
+                         - none
 
   Example:
       [asteriskstats]
@@ -83,6 +91,7 @@ class MuninAsteriskPlugin(MuninPlugin):
     """
     plugin_name = 'asteriskstats'
     isMultigraph = True
+    isMultiInstance = True
 
     def __init__(self, argv=(), env=None, debug=False):
         """Populate Munin Plugin with MuninGraph instances.

@@ -33,6 +33,15 @@ Environment Variables
                   (All graphs enabled by default.)
   exclude_graphs: Comma separated list of disabled graphs.
 
+Environment Variables for Multiple Instances of Plugin (Omitted by default.)
+  instance_name:         Name of instance.
+  instance_label:        Graph title label for instance.
+                         (Default is the same as instance name.)
+  instance_label_format: One of the following values:
+                         - suffix (Default)
+                         - prefix
+                         - none 
+
   Example:
     [nginxstats]
         env.include_graphs nginx_activeconn
@@ -67,6 +76,7 @@ class MuninNginxPlugin(MuninPlugin):
     """
     plugin_name = 'nginxstats'
     isMultigraph = True
+    isMultiInstance = True
 
     def __init__(self, argv=(), env=None, debug=False):
         """Populate Munin Plugin with MuninGraph instances.
