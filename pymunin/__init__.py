@@ -133,8 +133,16 @@ class MuninPlugin:
             self._nestedGraphs = self.envCheckFlag('nested_graphs', True)
             if self.isMultiInstance:
                 self._instanceName = self.envGet('instance_name')
-                self._instanceLabel = self.envGet('instance_label',
-                                                  self._instanceName)
+                if self._instanceName is not None:
+                    label_type = self.envGet('instance_label_format', 
+                                             'suffix').lower()
+                    if label_type in ('suffix', 'prefix'):
+                        self._instanceLabel = self.envGet('instance_label',
+                                                          self._instanceName)
+                        self._instanceLabelType = label_type
+                    else:
+                        self._instanceLabel = None
+                        self._instanceLabelType = None
                 
     def _parseEnv(self, env=None):
         """Private method for parsing through environment variables.
@@ -237,7 +245,20 @@ class MuninPlugin:
         field_list = conf_dict['fields']
         
         # Order and format Graph Attributes
-        for key in ('title', 'category', 'vlabel', 'info', 'args', 'period', 
+        title = graph_dict.get('title')
+        if title is not None:
+            if self.isMultiInstance and self._instanceLabel is not None:
+                if self._instanceLabelType == 'suffix':
+                    confs.append("graph_%s %s - %s" % ('title', 
+                                                       title, 
+                                                       self._instanceLabel,))
+                elif self._instanceLabelType == 'prefix':
+                    confs.append("graph_%s %s - %s" % ('title', 
+                                                       self._instanceLabel,
+                                                       title,))
+            else:
+                confs.append("graph_%s %s" % ('title', title))
+        for key in ('category', 'vlabel', 'info', 'args', 'period', 
                     'scale', 'total', 'order', 'printf', 'width', 'height'):
             val = graph_dict.get(key)
             if val is not None:
@@ -246,7 +267,7 @@ class MuninPlugin:
                         val = "yes"
                     else:
                         val = "no"
-                confs.append("graph_%s %s" % (key,val))
+                confs.append("graph_%s %s" % (key, val))
 
         # Order and Format Field Attributes
         for (field_name, field_attrs) in field_list:
