@@ -91,10 +91,14 @@ class MuninPlugin:
     """The name of the plugin executable.
     Must be overriden in child classes to indicate plugin name.
     If it ends with an underscore the name will be parsed to separate plugin
-    argument embedded in the name."""
+    wildcard argument embedded in the name."""
 
     isMultigraph = False
     """True for Multi-Graph Plugins, and False for Simple Plugins.
+    Must be overriden in child classes to indicate plugin type."""
+    
+    isMultiInstance = False
+    """True for Multi-Graph Plugins with Multi-Instance support, False otherwise.
     Must be overriden in child classes to indicate plugin type."""
 
     def __init__(self, argv=(), env=None, debug=False):
@@ -115,6 +119,8 @@ class MuninPlugin:
         self.arg0 = None
         self._debug = debug
         self._dirtyConfig = False
+        self._instanceName = None
+        self._instanceLabel = None
         if (self.plugin_name is not None and argv is not None and len(argv) > 0 
             and re.search('_$', self.plugin_name)):
             mobj = re.match("%s(\S+)$" % self.plugin_name, 
@@ -122,8 +128,13 @@ class MuninPlugin:
             if mobj:
                 self.arg0 = mobj.group(1)
         self._parseEnv()
-        self.envRegisterFilter('graphs', '^[\w\-]+$')
-        self._nestedGraphs = self.envCheckFlag('nested_graphs', True)
+        if self.isMultigraph:
+            self.envRegisterFilter('graphs', '^[\w\-]+$')
+            self._nestedGraphs = self.envCheckFlag('nested_graphs', True)
+            if self.isMultiInstance:
+                self._instanceName = self.envGet('instance_name')
+                self._instanceLabel = self.envGet('instance_label',
+                                                  self._instanceName)
                 
     def _parseEnv(self, env=None):
         """Private method for parsing through environment variables.
@@ -154,6 +165,7 @@ class MuninPlugin:
         @param fail_noexist: If true throw exception if there is no graph with
                              name graph_name.
         @return:             Graph Object or None
+        
         """
         graph = self._graphDict.get(graph_name)
         if fail_noexist and graph is None:
@@ -190,6 +202,27 @@ class MuninPlugin:
             raise AttributeError("Invalid parent graph name %s "
                                  "for subgraph %s."
                                  % (parent_name, graph_name))
+    
+    def _getMultigraphID(self, graph_name, subgraph_name=None):
+        """Private method for generating Multigraph ID from graph name and 
+        subgraph name. 
+        
+        @param  graph_name:     Graph Name.
+        @param  subgraph_name:  Subgraph Name.
+        @return:                Multigraph ID.
+        
+        """
+        if self.isMultiInstance and self._instanceName is not None:
+            if subgraph_name is None:
+                return "%s_%s" % (graph_name, self._instanceName)
+            else:
+                return "%s_%s.%s_%s" % (graph_name, self._instanceName, 
+                                        subgraph_name, self._instanceName)
+        else:
+            if subgraph_name is None:
+                return graph_name
+            else:
+                return "%s.%s" % (graph_name, subgraph_name)
             
     def envHasKey(self, name):
         """Return True if environment variable with name exists.  
@@ -329,7 +362,7 @@ class MuninPlugin:
         @return:           Returns True if graph is enabled, False otherwise.
             
         """
-        return self.envCheckFilter('graphs', graph_name)
+        return not self.isMultigraph or self.envCheckFilter('graphs', graph_name)
         
     def saveState(self,  stateObj):
         """Utility methos to save plugin state stored in stateObj to persistent 
@@ -566,14 +599,15 @@ class MuninPlugin:
         for parent_name in self._graphNames:
             graph = self._graphDict[parent_name]
             if self.isMultigraph:
-                print "multigraph %s" % parent_name
+                print "multigraph %s" % self._getMultigraphID(parent_name)
             print graph.getConfig()
             print
         if self._nestedGraphs and self._subgraphDict and self._subgraphNames:
             for (parent_name, subgraph_names) in self._subgraphNames.iteritems():
                 for graph_name in subgraph_names:
                     graph = self._subgraphDict[parent_name][graph_name]
-                    print "multigraph %s.%s" % (parent_name, graph_name)
+                    print "multigraph %s" % self.getMultigraphID(parent_name, 
+                                                                 graph_name)
                     print graph.getConfig()
                     print
         return True
@@ -597,14 +631,15 @@ class MuninPlugin:
         for parent_name in self._graphNames:
             graph = self._graphDict[parent_name]
             if self.isMultigraph:
-                print "multigraph %s" % parent_name
+                print "multigraph %s" % self._getMultigraphID(parent_name)
             print graph.getVals()
             print
         if self._nestedGraphs and self._subgraphDict and self._subgraphNames:
             for (parent_name, subgraph_names) in self._subgraphNames.iteritems():
                 for graph_name in subgraph_names:
                     graph = self._subgraphDict[parent_name][graph_name]
-                    print "multigraph %s.%s" % (parent_name,  graph_name)
+                    print "multigraph %s" % self.getMultigraphID(parent_name, 
+                                                                 graph_name)
                     print graph.getVals()
                     print
         return True
