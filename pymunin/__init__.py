@@ -224,6 +224,64 @@ class MuninPlugin:
             else:
                 return "%s.%s" % (graph_name, subgraph_name)
             
+    def _formatConfig(self, conf_dict):
+        """Formats configuration directory from Munin Graph and returns 
+        multi-line value entries for the plugin config cycle.
+        
+        @param conf_dict: Configuration directory. 
+        @return:          Multi-line text.
+        
+        """
+        confs = []
+        graph_dict = conf_dict['graph']
+        field_list = conf_dict['fields']
+        
+        # Order and format Graph Attributes
+        for key in ('title', 'category', 'vlabel', 'info', 'args', 'period', 
+                    'scale', 'total', 'order', 'printf', 'width', 'height'):
+            val = graph_dict.get(key)
+            if val is not None:
+                if isinstance(val, bool):
+                    if val:
+                        val = "yes"
+                    else:
+                        val = "no"
+                confs.append("graph_%s %s" % (key,val))
+
+        # Order and Format Field Attributes
+        for (field_name, field_attrs) in field_list:
+            for key in ('label', 'type', 'draw', 'info', 'extinfo', 'colour',
+                        'negative', 'graph', 'min', 'max', 'cdef', 
+                        'line', 'warning', 'critical'):
+                val = field_attrs.get(key)
+                if val is not None:
+                    if isinstance(val, bool):
+                        if val:
+                            val = "yes"
+                        else:
+                            val = "no"
+                    confs.append("%s.%s %s" % (field_name, key, val))
+        return "\n".join(confs)
+    
+    def _formatVals(self, val_list):
+        """Formats value list from Munin Graph and returns multi-line value
+        entries for the plugin fetch cycle.
+        
+        @param val_list: List of name-value pairs. 
+        @return:         Multi-line text.
+        
+        """
+        vals = []
+        for (name, val) in val_list:
+            if val is not None:
+                if isinstance(val, float):
+                    vals.append("%s.value %f" % (name, val))
+                else:
+                    vals.append("%s.value %s" % (name, val))
+            else:
+                vals.append("%s.value U" % (name,))
+        return "\n".join(vals)
+            
     def envHasKey(self, name):
         """Return True if environment variable with name exists.  
         
@@ -600,7 +658,7 @@ class MuninPlugin:
             graph = self._graphDict[parent_name]
             if self.isMultigraph:
                 print "multigraph %s" % self._getMultigraphID(parent_name)
-            print graph.getConfig()
+            print self._formatConfig(graph.getConfig())
             print
         if self._nestedGraphs and self._subgraphDict and self._subgraphNames:
             for (parent_name, subgraph_names) in self._subgraphNames.iteritems():
@@ -608,7 +666,7 @@ class MuninPlugin:
                     graph = self._subgraphDict[parent_name][graph_name]
                     print "multigraph %s" % self.getMultigraphID(parent_name, 
                                                                  graph_name)
-                    print graph.getConfig()
+                    print self._formatConfig(graph.getConfig())
                     print
         return True
 
@@ -632,7 +690,7 @@ class MuninPlugin:
             graph = self._graphDict[parent_name]
             if self.isMultigraph:
                 print "multigraph %s" % self._getMultigraphID(parent_name)
-            print graph.getVals()
+            print self._formatVals(graph.getVals())
             print
         if self._nestedGraphs and self._subgraphDict and self._subgraphNames:
             for (parent_name, subgraph_names) in self._subgraphNames.iteritems():
@@ -640,7 +698,7 @@ class MuninPlugin:
                     graph = self._subgraphDict[parent_name][graph_name]
                     print "multigraph %s" % self.getMultigraphID(parent_name, 
                                                                  graph_name)
-                    print graph.getVals()
+                    print self._formatVals(graph.getVals())
                     print
         return True
 
@@ -767,40 +825,14 @@ class MuninGraph:
         return self._fieldNameList
     
     def getConfig(self):
-        """Returns config entries for Munin Graph.
+        """Returns dictionary of config entries for Munin Graph.
         
-        @return: Multi-line text output with Munin Graph configuration. 
+        @return: Dictionary of config entries. 
         
         """
-        conf = []
-        
-        # Process Graph Attributes
-        for key in ('title', 'category', 'vlabel', 'info', 'args', 'period', 
-                    'scale', 'total', 'order', 'printf', 'width', 'height'):
-            val = self._graphAttrDict.get(key)
-            if val is not None:
-                if isinstance(val, bool):
-                    if val:
-                        val = "yes"
-                    else:
-                        val = "no"
-                conf.append("graph_%s %s" % (key,val))
-
-        # Process Field Attributes
-        for field_name in self._fieldNameList:
-            field_attrs = self._fieldAttrDict.get(field_name)
-            for key in ('label', 'type', 'draw', 'info', 'extinfo', 'colour',
-                        'negative', 'graph', 'min', 'max', 'cdef', 
-                        'line', 'warning', 'critical'):
-                val = field_attrs.get(key)
-                if val is not None:
-                    if isinstance(val, bool):
-                        if val:
-                            val = "yes"
-                        else:
-                            val = "no"
-                    conf.append("%s.%s %s" % (field_name, key, val))
-        return "\n".join(conf)
+        return {'graph': self._graphAttrDict,
+                'fields': [(field_name, self._fieldAttrDict.get(field_name))
+                           for field_name in self._fieldNameList]}
 
     def setVal(self, name, val):
         """Set value for field in graph.
@@ -811,26 +843,16 @@ class MuninGraph:
         """
         if self._autoFixNames:
             name = self._fixName(name)
-        if val is not None:
-            self._fieldValDict[name] = val
-        else:
-            self._fieldValDict[name] = 'U'
+        self._fieldValDict[name] = val
 
     def getVals(self):
-        """Returns value entries for Munin Graph
+        """Returns value list for Munin Graph
         
-        @return: Multi-line text output with Munin Graph values.
+        @return: List of name-value pairs.
         
         """
-        vals = []
-        for name in self._fieldNameList:
-            val = self._fieldValDict.get(name)
-            if val is not None:
-                if isinstance(val, float):
-                    vals.append("%s.value %f" % (name, val))
-                else:
-                    vals.append("%s.value %s" % (name, val))
-        return "\n".join(vals)
+        return [(name, self._fieldValDict.get(name)) 
+                for name in self._fieldNameList]
     
     def _fixName(self, name):
         """Replace invalid characters in field names with underscore.
