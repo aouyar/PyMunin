@@ -95,11 +95,11 @@ class MuninNginxPlugin(MuninPlugin):
         self._statuspath = self.envGet('statuspath')
         self._ssl = self.envCheckFlag('ssl', False)
         self._numSamples = self.envGet('samples', defaultNumSamples, int)
-        category = 'Nginx'
+        self._category = 'Nginx'
         
         if self.graphEnabled('nginx_activeconn'):
             graph = MuninGraph('Nginx - Active Connections', 
-                category,
+                self._category,
                 info='Active connections to Nginx Web Server.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('proc', 'proc', draw='AREASTACK', type='GAUGE',
@@ -115,7 +115,7 @@ class MuninNginxPlugin(MuninPlugin):
             
         if self.graphEnabled('nginx_connections'):
             graph = MuninGraph('Nginx - Connections per Second', 
-                category,
+                self._category,
                 info='Connections per second to Nginx Web Server.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('handled', 'handled', draw='AREASTACK', type='DERIVE', 
@@ -127,7 +127,7 @@ class MuninNginxPlugin(MuninPlugin):
             
         if self.graphEnabled('nginx_requests'):
             graph = MuninGraph('Nginx - Requests per Second', 
-                category,
+                self._category,
                 info='Requests per second to Nginx Web Server.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('requests', 'requests', draw='LINE2', type='DERIVE', 
@@ -136,7 +136,7 @@ class MuninNginxPlugin(MuninPlugin):
             
         if self.graphEnabled('nginx_requestsperconn'):
             graph = MuninGraph('Nginx - Requests per Connection', 
-                category,
+                self._category,
                 info='Requests per handled connections for Nginx Web Server.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('requests', 'requests', draw='LINE2', type='GAUGE', 

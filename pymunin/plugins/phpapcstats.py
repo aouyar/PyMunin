@@ -88,10 +88,10 @@ class MuninPHPapcPlugin(MuninPlugin):
         self._monpath = self.envGet('monpath')
         self._password = self.envGet('password')
         self._ssl = self.envCheckFlag('ssl', False)
-        category = 'PHP'
+        self._category = 'PHP'
         
         if self.graphEnabled('php_apc_memory'):
-            graph = MuninGraph('PHP APC Cache - Memory Utilization (bytes)', category,
+            graph = MuninGraph('PHP APC Cache - Memory Utilization (bytes)', self._category,
                 info='Memory Utilization of PHP APC Cache in bytes.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('filecache', 'File Cache', draw='AREASTACK', 
@@ -104,7 +104,7 @@ class MuninPHPapcPlugin(MuninPlugin):
             self.appendGraph('php_apc_memory', graph)
         
         if self.graphEnabled('php_apc_items'):
-            graph = MuninGraph('PHP APC Cache - Cached Items', category,
+            graph = MuninGraph('PHP APC Cache - Cached Items', self._category,
                 info='Number of items (files, user data) in PHP APC Cache.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('filecache', 'File Cache', draw='AREASTACK', 
@@ -114,7 +114,7 @@ class MuninPHPapcPlugin(MuninPlugin):
             self.appendGraph('php_apc_items', graph)
         
         if self.graphEnabled('php_apc_reqs_filecache'):
-            graph = MuninGraph('PHP APC - File Cache Requests per second', category,
+            graph = MuninGraph('PHP APC - File Cache Requests per second', self._category,
                 info='PHP APC File Cache Requests (Hits and Misses) per second.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('hits', 'hits', draw='AREASTACK', 
@@ -126,7 +126,7 @@ class MuninPHPapcPlugin(MuninPlugin):
             self.appendGraph('php_apc_reqs_filecache', graph)
         
         if self.graphEnabled('php_apc_reqs_usercache'):
-            graph = MuninGraph('PHP APC - User Cache Requests per second', category,
+            graph = MuninGraph('PHP APC - User Cache Requests per second', self._category,
                 info='PHP APC User Cache Requests (Hits and Misses) per second.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('hits', 'hits', draw='AREASTACK', 
@@ -138,7 +138,7 @@ class MuninPHPapcPlugin(MuninPlugin):
             self.appendGraph('php_apc_reqs_usercache', graph)
             
         if self.graphEnabled('php_apc_expunge'):
-            graph = MuninGraph('PHP APC - Cache Expunge Runs per second', category,
+            graph = MuninGraph('PHP APC - Cache Expunge Runs per second', self._category,
                 info='PHP APC File and User Cache Expunge Runs per second.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('filecache', 'File Cache', draw='LINE2', 

@@ -74,7 +74,7 @@ class MuninNTPhostOffsetsPlugin(MuninPlugin):
         
         """
         MuninPlugin.__init__(self, argv, env, debug)
-        category = 'Time'
+        self._category = 'Time'
 
         if self.envHasKey('ntphosts'):
             hosts_str = re.sub('[^\d\.,]', '', self.envGet('ntphosts'))
@@ -84,7 +84,7 @@ class MuninNTPhostOffsetsPlugin(MuninPlugin):
                                  "'ntphosts' environment variable.")
 
         if self.graphEnabled('ntp_host_stratums'):
-            graph = MuninGraph('NTP Stratums of Multiple Hosts', category,
+            graph = MuninGraph('NTP Stratums of Multiple Hosts', self._category,
                 info='NTP Stratum of Multiple Remote Hosts.',
                 args='--base 1000 --lower-limit 0')
             for host in self._remoteHosts:
@@ -93,7 +93,7 @@ class MuninNTPhostOffsetsPlugin(MuninPlugin):
             self.appendGraph('ntp_host_stratums', graph)
 
         if self.graphEnabled('ntp_host_offsets'):
-            graph = MuninGraph('NTP Offsets of Multiple Hosts', category,
+            graph = MuninGraph('NTP Offsets of Multiple Hosts', self._category,
                 info='NTP Delays of Multiple Hosts relative to current node.',
                 args ='--base 1000 --lower-limit 0',
                 vlabel='seconds'
@@ -104,7 +104,7 @@ class MuninNTPhostOffsetsPlugin(MuninPlugin):
             self.appendGraph('ntp_host_offsets', graph)
     
         if self.graphEnabled('ntp_host_delays'):
-            graph = MuninGraph('NTP Delays of Multiple Hosts', category,
+            graph = MuninGraph('NTP Delays of Multiple Hosts', self._category,
                 info='NTP Delays of Multiple Hosts relative to current node.',
                 args='--base 1000 --lower-limit 0',
                 vlabel='seconds'

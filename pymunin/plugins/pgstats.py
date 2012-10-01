@@ -116,8 +116,8 @@ class MuninPgPlugin(MuninPlugin):
         self._password = self.envGet('password')
         self._detailGraphs = self.envCheckFlag('detail_graphs', False)
         self._replGraphs = self.envCheckFlag('repl_graphs', False)
-        category_sys = 'PostgreSQL Sys'
-        category_db = 'PostgreSQL DB'
+        self._category_sys = 'PostgreSQL Sys'
+        self._category_db = 'PostgreSQL DB'
         
         self._dbconn = PgInfo(self._host, self._port, self._database, 
                               self._user, self._password)
@@ -127,7 +127,7 @@ class MuninPgPlugin(MuninPlugin):
         
         if self.graphEnabled('pg_connections'):
             graph = MuninGraph('PostgreSQL - Active Connections', 
-                category_sys,
+                self._category_sys,
                 info='Active connections for PostgreSQL Database Server.',
                 args='--base 1000 --lower-limit 0',
                 autoFixNames = True)
@@ -144,7 +144,7 @@ class MuninPgPlugin(MuninPlugin):
         
         if self.graphEnabled('pg_diskspace'):
             graph = MuninGraph('PostgreSQL - Database Disk Usage', 
-                category_sys,
+                self._category_sys,
                 info='Disk usage of databases on PostgreSQL Server in bytes.',
                 args='--base 1024 --lower-limit 0',
                 autoFixNames = True)
@@ -156,7 +156,7 @@ class MuninPgPlugin(MuninPlugin):
             self.appendGraph('pg_diskspace', graph)
         
         if self.graphEnabled('pg_blockreads'):
-            graph = MuninGraph('PostgreSQL - Block Read Stats', category_sys,
+            graph = MuninGraph('PostgreSQL - Block Read Stats', self._category_sys,
                 info='Block read stats for PostgreSQL Server.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('blk_hit', 'cache hits', draw='AREASTACK', 
@@ -169,7 +169,7 @@ class MuninPgPlugin(MuninPlugin):
             self.appendGraph('pg_blockreads', graph)
         
         if self.graphEnabled('pg_xact'):
-            graph = MuninGraph('PostgreSQL - Transactions', category_sys,
+            graph = MuninGraph('PostgreSQL - Transactions', self._category_sys,
                 info='Transaction commit / rollback Stats for PostgreSQL Server.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('commits', 'commits', draw='LINE2', type='DERIVE', 
@@ -181,7 +181,7 @@ class MuninPgPlugin(MuninPlugin):
         if self._dbconn.checkVersion('8.3'):
             if self.graphEnabled('pg_checkpoints'):
                 graph = MuninGraph('PostgreSQL - Checkpoints per minute', 
-                    category_sys,
+                    self._category_sys,
                     info='Number of Checkpoints per Minute for PostgreSQL Server.',
                     args='--base 1000 --lower-limit 0', period='minute')
                 graph.addField('req', 'req', draw='LINE2', type='DERIVE', 
@@ -191,7 +191,7 @@ class MuninPgPlugin(MuninPlugin):
                 self.appendGraph('pg_checkpoints', graph)
             if self.graphEnabled('pg_bgwriter'):
                 graph = MuninGraph('PostgreSQL - BgWriter Stats (blocks / second)', 
-                    category_sys,
+                    self._category_sys,
                     info='PostgreSQL Server - Bgwriter - Blocks written per second.',
                     args='--base 1000 --lower-limit 0', period='minute')
                 graph.addField('backend', 'backend', draw='LINE2', 
@@ -205,7 +205,7 @@ class MuninPgPlugin(MuninPlugin):
                 self.appendGraph('pg_bgwriter', graph)
         
         if self.graphEnabled('pg_tup_read'):
-            graph = MuninGraph('PostgreSQL - Tuple Reads', category_sys,
+            graph = MuninGraph('PostgreSQL - Tuple Reads', self._category_sys,
                 info='Tuple return and fetch Stats for PostgreSQL Server.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('fetch', 'fetch', draw='AREASTACK', 
@@ -218,7 +218,7 @@ class MuninPgPlugin(MuninPlugin):
             self.appendGraph('pg_tup_read', graph)
             
         if self.graphEnabled('pg_tup_write'):
-            graph = MuninGraph('PostgreSQL - Tuple Writes', category_sys,
+            graph = MuninGraph('PostgreSQL - Tuple Writes', self._category_sys,
                 info='Tuple insert, update and delete Stats for PostgreSQL Server.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('delete', 'delete', draw='AREASTACK', type='DERIVE', 
@@ -237,7 +237,7 @@ class MuninPgPlugin(MuninPlugin):
             if self.graphEnabled(graph_name):
                 mode_iter = iter(PgInfo.lockModes)
                 graph = MuninGraph("PostgreSQL - Locks (%s)" % lock_state, 
-                    category_sys,
+                    self._category_sys,
                     info=desc,
                     args='--base 1000 --lower-limit 0')
                 for mode in ('AccessExcl', 'Excl', 'ShrRwExcl', 'Shr', 
@@ -250,7 +250,7 @@ class MuninPgPlugin(MuninPlugin):
         if self._detailGraphs:        
             if self.graphEnabled('pg_blockread_detail'):
                 graph = MuninGraph('PostgreSQL - Block Read Stats Detail', 
-                    category_db,
+                    self._category_db,
                     info='Block read stats for each database in PostgreSQL Server.',
                     args='--base 1000 --lower-limit 0',
                     autoFixNames = True)
@@ -261,7 +261,7 @@ class MuninPgPlugin(MuninPlugin):
                 self.appendGraph('pg_blockread_detail', graph)
             if self.graphEnabled('pg_xact_commit_detail'):
                 graph = MuninGraph('PostgreSQL - Transaction Commits Detail', 
-                    category_db,
+                    self._category_db,
                     info='Transaction commits for each database in PostgreSQL Server.',
                     args='--base 1000 --lower-limit 0',
                     autoFixNames = True)
@@ -272,7 +272,7 @@ class MuninPgPlugin(MuninPlugin):
                 self.appendGraph('pg_xact_commit_detail', graph)
             if self.graphEnabled('pg_xact_rollback_detail'):
                 graph = MuninGraph('PostgreSQL - Transaction Rollbacks Detail', 
-                    category_db,
+                    self._category_db,
                     info='Transaction rollbacks for each database in PostgreSQL Server.',
                     args='--base 1000 --lower-limit 0',
                     autoFixNames = True)
@@ -283,7 +283,7 @@ class MuninPgPlugin(MuninPlugin):
                 self.appendGraph('pg_xact_rollback_detail', graph)
             if self.graphEnabled('pg_tup_return_detail'):
                 graph = MuninGraph('PostgreSQL - Tuple Scan Detail', 
-                    category_db,
+                    self._category_db,
                     info='Tuple scans for each database in PostgreSQL Server.',
                     args='--base 1000 --lower-limit 0',
                     autoFixNames = True)
@@ -294,7 +294,7 @@ class MuninPgPlugin(MuninPlugin):
                 self.appendGraph('pg_tup_return_detail', graph)
             if self.graphEnabled('pg_tup_fetch_detail'):
                 graph = MuninGraph('PostgreSQL - Tuple Fetch Detail', 
-                    category_db,
+                    self._category_db,
                     info='Tuple fetches for each database in PostgreSQL Server.',
                     args='--base 1000 --lower-limit 0',
                     autoFixNames = True)
@@ -305,7 +305,7 @@ class MuninPgPlugin(MuninPlugin):
                 self.appendGraph('pg_tup_fetch_detail', graph)
             if self.graphEnabled('pg_tup_delete_detail'):
                 graph = MuninGraph('PostgreSQL - Tuple Delete Detail', 
-                    category_db,
+                    self._category_db,
                     info='Tuple deletes for each database in PostgreSQL Server.',
                     args='--base 1000 --lower-limit 0',
                     autoFixNames = True)
@@ -316,7 +316,7 @@ class MuninPgPlugin(MuninPlugin):
                 self.appendGraph('pg_tup_delete_detail', graph)
             if self.graphEnabled('pg_tup_update_detail'):
                 graph = MuninGraph('PostgreSQL - Tuple Updates Detail', 
-                    category_db,
+                    self._category_db,
                     info='Tuple updates for each database in PostgreSQL Server.',
                     args='--base 1000 --lower-limit 0',
                     autoFixNames = True)
@@ -327,7 +327,7 @@ class MuninPgPlugin(MuninPlugin):
                 self.appendGraph('pg_tup_update_detail', graph)
             if self.graphEnabled('pg_tup_insert_detail'):
                 graph = MuninGraph('PostgreSQL - Tuple Inserts Detail', 
-                    category_db,
+                    self._category_db,
                     info='Tuple insertes for each database in PostgreSQL Server.',
                     args='--base 1000 --lower-limit 0',
                     autoFixNames = True)
@@ -343,7 +343,7 @@ class MuninPgPlugin(MuninPlugin):
                 graph_name = "pg_lock_%s_detail" % lock_state
                 if self.graphEnabled(graph_name):
                     graph = MuninGraph("PostgreSQL - Locks (%s) Detail" % lock_state, 
-                        category_sys,
+                        self._category_sys,
                         info=desc,
                         args='--base 1000 --lower-limit 0',
                         autoFixNames = True)

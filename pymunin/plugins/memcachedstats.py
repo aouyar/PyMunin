@@ -84,7 +84,7 @@ class MuninMemcachedPlugin(MuninPlugin):
         
         self._host = self.envGet('host')
         self._port = self.envGet('port', None, int)
-        category = 'Memcached'
+        self._category = 'Memcached'
         
         self._stats = None
         self._prev_stats = self.restoreState()
@@ -99,7 +99,7 @@ class MuninMemcachedPlugin(MuninPlugin):
         
         if (self.graphEnabled('memcached_connections')  
             and stats.has_key('curr_connections')):
-            graph = MuninGraph('Memcached - Active Connections', category,
+            graph = MuninGraph('Memcached - Active Connections', self._category,
                 info='Active connections for Memcached Server.',
                 vlabel='connections', args='--base 1000 --lower-limit 0')
             graph.addField('conn', 'conn', draw='LINE2', type='GAUGE')
@@ -107,7 +107,7 @@ class MuninMemcachedPlugin(MuninPlugin):
         
         if (self.graphEnabled('memcached_items')
             and stats.has_key('curr_items')):
-            graph = MuninGraph('Memcached - Items', category,
+            graph = MuninGraph('Memcached - Items', self._category,
                 info='Current number of items stored on Memcached Server.',
                 vlabel='items', args='--base 1000 --lower-limit 0')
             graph.addField('items', 'items', draw='LINE2', type='GAUGE')
@@ -115,7 +115,7 @@ class MuninMemcachedPlugin(MuninPlugin):
         
         if (self.graphEnabled('memcached_memory')
             and stats.has_key('bytes')):
-            graph = MuninGraph('Memcached - Memory Usage', category,
+            graph = MuninGraph('Memcached - Memory Usage', self._category,
                 info='Memory used to store items on Memcached Server in bytes.',
                 vlabel='bytes',
                 args='--base 1024 --lower-limit 0')
@@ -125,7 +125,7 @@ class MuninMemcachedPlugin(MuninPlugin):
         if (self.graphEnabled('memcached_connrate')
             and stats.has_key('total_connections')):
             graph = MuninGraph('Memcached - Throughput - Connections', 
-                category,
+                self._category,
                 info='Connections per second.',
                 vlabel='conn / sec',
                 args='--base 1000 --lower-limit 0')
@@ -134,7 +134,7 @@ class MuninMemcachedPlugin(MuninPlugin):
         
         if (self.graphEnabled('memcached_traffic')
             and stats.has_key('bytes_read') and stats.has_key('bytes_written')):
-            graph = MuninGraph('Memcached - Throughput - Network', category,
+            graph = MuninGraph('Memcached - Throughput - Network', self._category,
                 info='Bytes sent (+) / received (-)  by Memcached per second.',
                 vlabel='bytes in (-) / out (+) per second',
                 args='--base 1024 --lower-limit 0')
@@ -148,7 +148,7 @@ class MuninMemcachedPlugin(MuninPlugin):
             and stats.has_key('cmd_set')
             and stats.has_key('cmd_get')):
             graph = MuninGraph('Memcached - Throughput - Request Rate', 
-                category,
+                self._category,
                 info='Requests per second.',
                 vlabel='reqs / sec', args='--base 1000 --lower-limit 0')
             for (fname,fstat,fstr) in (('set', 'cmd_set', 'Set'),
@@ -166,7 +166,7 @@ class MuninMemcachedPlugin(MuninPlugin):
         if (self.graphEnabled('memcached_statget')
             and stats.has_key('cmd_get')):
             graph = MuninGraph('Memcached - Stats - Get', 
-                category,
+                self._category,
                 info='Get requests per second.',
                 vlabel='reqs / sec', args='--base 1000 --lower-limit 0')
             graph.addField('hit', 'hit', draw='AREASTACK', type='DERIVE', min=0, 
@@ -181,7 +181,7 @@ class MuninMemcachedPlugin(MuninPlugin):
         if (self.graphEnabled('memcached_statset')
             and stats.has_key('cmd_set')):
             graph = MuninGraph('Memcached - Stats - Set', 
-                category,
+                self._category,
                 info='Set requests per second.', 
                 vlabel='reqs / sec', args='--base 1000 --lower-limit 0')
             graph.addField('hit', 'hit', draw='AREASTACK', type='DERIVE', min=0, 
@@ -196,7 +196,7 @@ class MuninMemcachedPlugin(MuninPlugin):
         if (self.graphEnabled('memcached_statdel')
             and stats.has_key('delete_hits')):
             graph = MuninGraph('Memcached - Stats - Delete', 
-                category,
+                self._category,
                 info='Delete requests per second.',
                 vlabel='reqs / sec', args='--base 1000 --lower-limit 0')
             graph.addField('hit', 'hit', draw='AREASTACK', type='DERIVE', min=0, 
@@ -211,7 +211,7 @@ class MuninMemcachedPlugin(MuninPlugin):
         if (self.graphEnabled('memcached_statcas')
             and stats.has_key('cas_hits')):
             graph = MuninGraph('Memcached - Stats - CAS', 
-                category,
+                self._category,
                 info='CAS requests per second.',
                 vlabel='reqs / sec', args='--base 1000 --lower-limit 0')
             graph.addField('hit', 'hit', draw='AREASTACK', type='DERIVE', min=0, 
@@ -230,7 +230,7 @@ class MuninMemcachedPlugin(MuninPlugin):
             and stats.has_key('incr_hits')
             and stats.has_key('decr_hits')):
             graph = MuninGraph('Memcached - Stats - Incr / Decr', 
-                category,
+                self._category,
                 info='Increment / decrement requests per second.',
                 vlabel='reqs / sec', args='--base 1000 --lower-limit 0')
             graph.addField('incr_hit', 'incr_hit', draw='AREASTACK', 
@@ -253,7 +253,7 @@ class MuninMemcachedPlugin(MuninPlugin):
         if (self.graphEnabled('memcached_statevict')
             and stats.has_key('evictions')):
             graph = MuninGraph('Memcached - Stats - Evictions', 
-                category,
+                self._category,
                 info='Cache evictions and reclaims per second.',
                 vlabel='per second', args='--base 1000 --lower-limit 0')
             graph.addField('evict', 'evict', draw='LINE2', type='DERIVE', min=0, 
@@ -267,7 +267,7 @@ class MuninMemcachedPlugin(MuninPlugin):
         if (self.graphEnabled('memcached_statauth')
             and stats.has_key('auth_cmds')):
             graph = MuninGraph('Memcached - Stats - Autentication', 
-                category,
+                self._category,
                 info='Autentication requests per second.',
                 vlabel='reqs / sec', args='--base 1000 --lower-limit 0')
             graph.addField('reqs', 'reqs', draw='LINE2', type='DERIVE', min=0, 
@@ -279,7 +279,7 @@ class MuninMemcachedPlugin(MuninPlugin):
         if (self.graphEnabled('memcached_hitpct')
             and stats.has_key('cmd_set')
             and stats.has_key('cmd_get')):
-            graph = MuninGraph('Memcached - Hit Percent', category,
+            graph = MuninGraph('Memcached - Hit Percent', self._category,
                 info='Hit percent for memcached requests.',
                 vlabel='%', args='--base 1000 --lower-limit 0')
             graph.addField('set', 'set', draw='LINE2', type='GAUGE', 

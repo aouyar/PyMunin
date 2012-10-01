@@ -76,7 +76,7 @@ class MuninVarnishPlugin(MuninPlugin):
         MuninPlugin.__init__(self, argv, env, debug)
         
         self._instance = self.envGet('instance')
-        category = 'Varnish'
+        self._category = 'Varnish'
         varnish_info = VarnishInfo(self._instance)
         self._stats = varnish_info.getStats()
         self._desc = varnish_info.getDescDict()
@@ -84,7 +84,7 @@ class MuninVarnishPlugin(MuninPlugin):
         graph_name = 'varnish_client_conn'
         if self.graphEnabled(graph_name):
             graph = MuninGraph('Varnish - Client Connections / sec', 
-                category,
+                self._category,
                 info='Client connections per second for Varnish Cache.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('client_conn', 'conn', draw='LINE2', type='DERIVE', 
@@ -96,7 +96,7 @@ class MuninVarnishPlugin(MuninPlugin):
         graph_name = 'varnish_client_requests'
         if self.graphEnabled(graph_name):
             graph = MuninGraph('Varnish - Client Requests / sec', 
-                category,
+                self._category,
                 info='Requests per second to Varnish Cache.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('client_req', 'reqs', draw='LINE2', type='DERIVE', 
@@ -106,7 +106,7 @@ class MuninVarnishPlugin(MuninPlugin):
         graph_name = 'varnish_backend_conn'
         if self.graphEnabled(graph_name):
             graph = MuninGraph('Varnish - Backend Connections / sec', 
-                category,
+                self._category,
                 info='Connections per second from Varnish Cache to backends.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('backend_conn', 'conn', draw='LINE2', type='DERIVE', 
@@ -116,7 +116,7 @@ class MuninVarnishPlugin(MuninPlugin):
         graph_name = 'varnish_backend_requests'
         if self.graphEnabled(graph_name):
             graph = MuninGraph('Varnish - Backend Requests / sec', 
-                category,
+                self._category,
                 info='Requests per second from Varnish Cache to backends.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('backend_req', 'reqs', draw='LINE2', type='DERIVE', 
@@ -126,7 +126,7 @@ class MuninVarnishPlugin(MuninPlugin):
         graph_name = 'varnish_traffic'
         if self.graphEnabled(graph_name):
             graph = MuninGraph('Varnish - Traffic (bytes/sec)', 
-                category,
+                self._category,
                 info='HTTP Header and Body traffic. '
                      '(TCP/IP overhead not included.)',
                 args='--base 1000 --lower-limit 0')
@@ -139,7 +139,7 @@ class MuninVarnishPlugin(MuninPlugin):
         graph_name = 'varnish_workers'
         if self.graphEnabled(graph_name):
             graph = MuninGraph('Varnish - Worker Threads', 
-                category,
+                self._category,
                 info='Number of worker threads.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('cache_hit', 'hit', draw='AREASTACK', type='DERIVE', 
@@ -153,7 +153,7 @@ class MuninVarnishPlugin(MuninPlugin):
         graph_name = 'varnish_hits'
         if self.graphEnabled(graph_name):
             graph = MuninGraph('Varnish - Cache Hits vs. Misses', 
-                category,
+                self._category,
                 info='Number of Cache Hits and Misses por second.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('n_wrk', 'req', draw='AREASTACK', type='DERIVE', 

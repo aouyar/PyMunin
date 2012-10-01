@@ -105,7 +105,7 @@ class MuninMySQLplugin(MuninPlugin):
         self._database = self.envGet('database')
         self._user = self.envGet('user')
         self._password = self.envGet('password')
-        category = 'MySQL'
+        self._category = 'MySQL'
         
         self._engines = None
         self._genStats = None
@@ -116,7 +116,7 @@ class MuninMySQLplugin(MuninPlugin):
         
         if self.graphEnabled('mysql_connections'):
             graph = MuninGraph('MySQL - Connections per second', 
-                category,
+                self._category,
                 info='MySQL Server new and aborted connections per second.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('conn', 'conn', draw='LINE2', 
@@ -133,7 +133,7 @@ class MuninMySQLplugin(MuninPlugin):
         
         if self.graphEnabled('mysql_traffic'):
             graph = MuninGraph('MySQL - Network Traffic (bytes/sec)', 
-                category,
+                self._category,
                 info='MySQL Server Network Traffic in bytes per second.',
                 args='--base 1000 --lower-limit 0',
                 vlabel='bytes in (-) / out (+) per second')
@@ -146,7 +146,7 @@ class MuninMySQLplugin(MuninPlugin):
             
         if self.graphEnabled('mysql_slowqueries'):
             graph = MuninGraph('MySQL - Slow Queries per second', 
-                category,
+                self._category,
                 info='The number of queries that have taken more than '
                      'long_query_time seconds.',
                 args='--base 1000 --lower-limit 0')
@@ -156,7 +156,7 @@ class MuninMySQLplugin(MuninPlugin):
             
         if self.graphEnabled('mysql_rowmodifications'):
             graph = MuninGraph('MySQL - Row Insert, Delete, Updates per second', 
-                category,
+                self._category,
                 info='MySQL Server Inserted, Deleted, Updated Rows per second.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('insert', 'insert', draw='AREASTACK', 
@@ -172,7 +172,7 @@ class MuninMySQLplugin(MuninPlugin):
             
         if self.graphEnabled('mysql_rowreads'):
             graph = MuninGraph('MySQL - Row Reads per second', 
-                category,
+                self._category,
                 info='MySQL Server Row Reads per second.',
                 args='--base 1000 --lower-limit 0')
             for (field, desc) in (('first', 
@@ -193,7 +193,7 @@ class MuninMySQLplugin(MuninPlugin):
             
         if self.graphEnabled('mysql_tablelocks'):
             graph = MuninGraph('MySQL - Table Locks per second', 
-                category,
+                self._category,
                 info='MySQL Server Table Locks per second.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('waited', 'waited', draw='AREASTACK', 
@@ -208,7 +208,7 @@ class MuninMySQLplugin(MuninPlugin):
         
         if self.graphEnabled('mysql_threads'):
             graph = MuninGraph('MySQL - Threads', 
-                category,
+                self._category,
                 info='Number of active and idle threads for MySQL Server.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('running', 'running', draw='AREASTACK', type='GAUGE', 
@@ -224,7 +224,7 @@ class MuninMySQLplugin(MuninPlugin):
             
         if self.graphEnabled('mysql_proc_status'):
             graph = MuninGraph('MySQL - Process Status', 
-                category,
+                self._category,
                 info='Number of threads discriminated by process status.',
                 args='--base 1000 --lower-limit 0')
             for (field, label, desc) in (
@@ -282,7 +282,7 @@ class MuninMySQLplugin(MuninPlugin):
                 self._dbList = self._dbconn.getDatabases()
                 self._dbList.sort()
             graph = MuninGraph('MySQL - Processes per Database', 
-                category,
+                self._category,
                 info='Number of Threads discriminated by database.',
                 args='--base 1000 --lower-limit 0', autoFixNames=True)
             for db in self._dbList:
@@ -292,7 +292,7 @@ class MuninMySQLplugin(MuninPlugin):
                 
         if self.graphEnabled('mysql_commits_rollbacks'):
             graph = MuninGraph('MySQL - Commits and Rollbacks', 
-                category,
+                self._category,
                 info='MySQL Server Commits and Rollbacks per second.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('commit', 'commit', draw='LINE2', 
@@ -305,7 +305,7 @@ class MuninMySQLplugin(MuninPlugin):
             
         if self.graphEnabled('mysql_qcache_memory'):
             graph = MuninGraph('MySQL - Query Cache - Memory Use (bytes)', 
-                category,
+                self._category,
                 info='Memory utilization for MySQL Server Query Cache.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('used', 'used', draw='AREASTACK', type='GAUGE', 
@@ -316,7 +316,7 @@ class MuninMySQLplugin(MuninPlugin):
             
         if self.graphEnabled('mysql_qcache_hits'):
             graph = MuninGraph('MySQL - Query Cache - Hits', 
-                category,
+                self._category,
                 info='MySQL Server Query Cache Hits vs. Select Queries.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('hits', 'hits', draw='AREASTACK', 
@@ -329,7 +329,7 @@ class MuninMySQLplugin(MuninPlugin):
             
         if self.graphEnabled('mysql_qcache_prunes'):
             graph = MuninGraph('MySQL - Query Cache - Inserts/Prunes per second', 
-                category,
+                self._category,
                 info='MySQL Server Query Cache Inserts and Low Memory Prune'
                      ' operations per second.',
                 args='--base 1000 --lower-limit 0')
@@ -346,7 +346,7 @@ class MuninMySQLplugin(MuninPlugin):
             
             if self.graphEnabled('mysql_myisam_key_buffer_util'):
                 graph = MuninGraph('MyISAM - Key Buffer Utilization (bytes)', 
-                    category,
+                    self._category,
                     info='MySQL Server MyISAM Key Buffer Utilization'
                          ' in bytes.',
                     args='--base 1000 --lower-limit 0')
@@ -363,7 +363,7 @@ class MuninMySQLplugin(MuninPlugin):
             
             if self.graphEnabled('mysql_myisam_key_read_reqs'):
                 graph = MuninGraph('MyISAM - Key Block Read Requests per second', 
-                    category,
+                    self._category,
                     info='MySQL Server MyISAM Key block read requests satisfied '
                          ' from block cache (hits) vs. disk (misses).',
                     args='--base 1000 --lower-limit 0')
@@ -382,7 +382,7 @@ class MuninMySQLplugin(MuninPlugin):
             
             if self.graphEnabled('mysql_innodb_buffer_pool_util'):
                 graph = MuninGraph('InnoDB - Buffer Pool Utilization (bytes)', 
-                    category,
+                    self._category,
                     info='MySQL Server InnoDB Buffer Pool Utilization in bytes.',
                     args='--base 1000 --lower-limit 0')
                 graph.addField('dirty', 'dirty', draw='AREASTACK', type='GAUGE', 
@@ -400,7 +400,7 @@ class MuninMySQLplugin(MuninPlugin):
                 
             if self.graphEnabled('mysql_innodb_buffer_pool_activity'):
                 graph = MuninGraph('InnoDB - Buffer Pool Activity (Pages per second)', 
-                    category,
+                    self._category,
                     info='MySQL Server Pages read into, written from and created'
                          ' in InnoDB buffer pool.',
                     args='--base 1000 --lower-limit 0')
@@ -417,7 +417,7 @@ class MuninMySQLplugin(MuninPlugin):
                 
             if self.graphEnabled('mysql_innodb_buffer_pool_read_reqs'):
                 graph = MuninGraph('InnoDB - Buffer Pool Read Requests per second', 
-                    category,
+                    self._category,
                     info='MySQL Server read requests satisfied from InnoDB buffer'
                          ' pool (hits) vs. disk (misses).',
                     args='--base 1000 --lower-limit 0')
@@ -434,7 +434,7 @@ class MuninMySQLplugin(MuninPlugin):
                     
             if self.graphEnabled('mysql_innodb_row_ops'):
                 graph = MuninGraph('InnoDB - Row Operations per Second', 
-                    category,
+                    self._category,
                     info='MySQL Server InnoDB Inserted, updated, deleted, read'
                          ' rows per second.',
                     args='--base 1000 --lower-limit 0')

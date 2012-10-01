@@ -100,13 +100,13 @@ class MuninTomcatPlugin(MuninPlugin):
         self._user = self.envGet('user')
         self._password = self.envGet('password')
         self._ssl = self.envCheckFlag('ssl', False)
-        category = 'Tomcat'
+        self._category = 'Tomcat'
         
         self._tomcatInfo = TomcatInfo(self._host, self._port,
                                       self._user, self._password, self._ssl)
         
         if self.graphEnabled('tomcat_memory'):
-            graph = MuninGraph('Apache Tomcat - Memory Usage', category,
+            graph = MuninGraph('Apache Tomcat - Memory Usage', self._category,
                 info='Memory Usage Stats for Apache Tomcat Server (bytes).',
                 args='--base 1024 --lower-limit 0')
             graph.addField('used', 'used', draw='AREASTACK', type='GAUGE',
@@ -127,7 +127,7 @@ class MuninTomcatPlugin(MuninPlugin):
                     title = "Apache Tomcat - %s-%s - Threads" % (proto, port)
                     info = ("Thread stats for Apache Tomcat Connector %s-%s." 
                             % (proto, port))
-                    graph = MuninGraph(title, category, info=info, 
+                    graph = MuninGraph(title, self._category, info=info, 
                                        args='--base 1000 --lower-limit 0')
                     graph.addField('busy', 'busy', draw='AREASTACK', type='GAUGE',
                                    info="Number of busy threads.")
@@ -143,7 +143,7 @@ class MuninTomcatPlugin(MuninPlugin):
                              % (proto, port))
                     info = ("Requests per second for Apache Tomcat Connector %s-%s." 
                             % (proto, port))
-                    graph = MuninGraph(title, category, info=info,
+                    graph = MuninGraph(title, self._category, info=info,
                                        args='--base 1000 --lower-limit 0')
                     graph.addField('reqs', 'reqs', draw='LINE2', type='DERIVE', 
                                    min=0, info="Requests per second.")
@@ -154,7 +154,7 @@ class MuninTomcatPlugin(MuninPlugin):
                              % (proto, port))
                     info = ("Errors per second for Apache Tomcat Connector %s-%s." 
                             % (proto, port))
-                    graph = MuninGraph(title, category, info=info,
+                    graph = MuninGraph(title, self._category, info=info,
                                        args='--base 1000 --lower-limit 0')
                     graph.addField('errors', 'errors', draw='LINE2', 
                                    type='DERIVE', min=0, 
@@ -167,7 +167,7 @@ class MuninTomcatPlugin(MuninPlugin):
                     info = ("Traffic in bytes per second for "
                             "Apache Tomcat Connector %s-%s." 
                             % (proto, port))
-                    graph = MuninGraph(title, category, info=info,
+                    graph = MuninGraph(title, self._category, info=info,
                                        args='--base 1024 --lower-limit 0',
                                        vlabel='bytes in (-) / out (+) per second')
                     graph.addField('rx', 'bytes', draw='LINE2', type='DERIVE', 
@@ -182,7 +182,7 @@ class MuninTomcatPlugin(MuninPlugin):
 #                             % (proto, port))
 #                    info = ("Processing time for Apache Tomcat Connector %s-%s." 
 #                            % (proto, port))
-#                    graph = MuninGraph(title, category, info=info,
+#                    graph = MuninGraph(title, self._category, info=info,
 #                                       args='--base 1000 --lower-limit 0')
 #                    graph.addField('cpu', 'cpu', draw='LINE2', type='DERIVE', 
 #                                   min=0, cdef='cpu,10,/')

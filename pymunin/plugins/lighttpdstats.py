@@ -84,11 +84,11 @@ class MuninLighttpdPlugin(MuninPlugin):
         self._password = self.envGet('password')
         self._statuspath = self.envGet('statuspath')
         self._ssl = self.envCheckFlag('ssl', False)
-        category = 'Lighttpd'
+        self._category = 'Lighttpd'
         
         if self.graphEnabled('lighttpd_access'):
             graph = MuninGraph('Lighttpd Web Server - Throughput (Requests / sec)', 
-                category,
+                self._category,
                 info='Throughput in Requests per second for Lighttpd Web Server.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('reqs', 'reqs', draw='LINE2', type='DERIVE', min=0,
@@ -97,14 +97,14 @@ class MuninLighttpdPlugin(MuninPlugin):
         
         if self.graphEnabled('lighttpd_bytes'):
             graph = MuninGraph('Lighttpd Web Server - Througput (bytes/sec)', 
-                category,
+                self._category,
                 info='Throughput in bytes per second for Lighttpd Web Server.',
                 args='--base 1024 --lower-limit 0')
             graph.addField('bytes', 'bytes', draw='LINE2', type='DERIVE', min=0)
             self.appendGraph('lighttpd_bytes', graph)
                 
         if self.graphEnabled('lighttpd_servers'):
-            graph = MuninGraph('Lighttpd Web Server - Servers', category,
+            graph = MuninGraph('Lighttpd Web Server - Servers', self._category,
                 info='Server utilization stats for Lighttpd Web server.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('busy', 'busy', draw='AREASTACK', type='GAUGE',

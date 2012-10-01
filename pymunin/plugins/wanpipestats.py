@@ -67,7 +67,7 @@ class MuninWanpipePlugin(MuninPlugin):
         MuninPlugin.__init__(self, argv, env, debug)
         
         self.envRegisterFilter('ifaces', '^[\w\d]+$')
-        category = 'Wanpipe'
+        self._category = 'Wanpipe'
 
         self._wanpipeInfo = WanpipeInfo()
         self._ifaceStats = self._wanpipeInfo.getIfaceStats()
@@ -81,7 +81,7 @@ class MuninWanpipePlugin(MuninPlugin):
             if self._reqIfaceList is None or iface in self._reqIfaceList:
                 if self.graphEnabled('wanpipe_traffic'):
                     graph = MuninGraph('Wanpipe - Traffic - %s' % iface, 
-                        category,
+                        self._category,
                         info='Traffic Stats for Wanpipe Interface %s '
                              'in packets/sec.' % iface,
                         args='--base 1000 --lower-limit 0',
@@ -94,7 +94,7 @@ class MuninWanpipePlugin(MuninPlugin):
                     self.appendGraph('wanpipe_traffic_%s' % iface, graph)
 
                 if self.graphEnabled('wanpipe_errors'):
-                    graph = MuninGraph('Wanpipe - Errors - %s' % iface, category,
+                    graph = MuninGraph('Wanpipe - Errors - %s' % iface, self._category,
                         info='Error Stats for Wanpipe Interface %s'
                              ' in errors/sec.' % iface,
                         args='--base 1000 --lower-limit 0',
@@ -123,7 +123,7 @@ class MuninWanpipePlugin(MuninPlugin):
 
                 if self.graphEnabled('wanpipe_pri_errors'):
                     graph = MuninGraph('Wanpipe - ISDN PRI Stats - %s' % iface, 
-                        category,
+                        self._category,
                         info='ISDN PRI Error Stats for Wanpipe Interface %s'
                              ' in errors/sec.' % iface,
                         args='--base 1000 --lower-limit 0',
@@ -141,7 +141,7 @@ class MuninWanpipePlugin(MuninPlugin):
                     self.appendGraph('wanpipe_pri_errors_%s' % iface, graph)
 
         if self.graphEnabled('wanpipe_pri_rxlevel'):
-            graph = MuninGraph('Wanpipe - ISDN PRI Signal Level', category,
+            graph = MuninGraph('Wanpipe - ISDN PRI Signal Level', self._category,
                         info='ISDN PRI received signal level in DB.',
                         args='--base 1000 --lower-limit 0',
                         vlabel='db')
