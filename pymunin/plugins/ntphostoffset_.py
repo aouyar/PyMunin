@@ -70,6 +70,7 @@ class MuninNTPhostOffsetPlugin(MuninPlugin):
         
         """
         MuninPlugin.__init__(self, argv, env, debug)
+        category = 'Time'
 
         if self.arg0 is None:
             raise Exception("Remote host name cannot be determined.")
@@ -79,7 +80,7 @@ class MuninNTPhostOffsetPlugin(MuninPlugin):
         if self.graphEnabled('ntp_host_stratum'):
             graphName = 'ntp_host_stratum_%s' % self._remoteHost
             graph = MuninGraph('NTP Stratum of Host %s' % self._remoteHost, 
-                'Time',
+                category,
                 info='NTP Stratum of Host %s.' % self._remoteHost,
                 args='--base 1000 --lower-limit 0')
             graph.addField('stratum', 'stratum', type='GAUGE', draw='LINE2')
@@ -87,7 +88,7 @@ class MuninNTPhostOffsetPlugin(MuninPlugin):
 
         if self.graphEnabled('ntp_host_stat'):
             graphName = 'ntp_host_stat_%s' % self._remoteHost
-            graph = MuninGraph('NTP Offset of Host %s' % self._remoteHost, 'Time',
+            graph = MuninGraph('NTP Offset of Host %s' % self._remoteHost, category,
                 info=('NTP Offset of Host %s relative to current node.' 
                       % self._remoteHost),
                 args='--base 1000 --lower-limit 0',

@@ -73,6 +73,7 @@ class MuninDiskUsagePlugin(MuninPlugin):
         
         self.envRegisterFilter('fspaths', '^[\w\-\/]+$')
         self.envRegisterFilter('fstypes', '^\w+$')
+        category = 'Disk Usage'
         
         self._statsSpace = None
         self._statsInode = None
@@ -86,7 +87,7 @@ class MuninDiskUsagePlugin(MuninPlugin):
         name = 'diskspace'
         if self.graphEnabled(name):
             self._statsSpace = self._info.getSpaceUse()
-            graph = MuninGraph('Disk Space Usage (%)', 'Disk Usage',
+            graph = MuninGraph('Disk Space Usage (%)', category,
                 info='Disk space usage of filesystems.',
                 args='--base 1000 --lower-limit 0', printf='%6.1lf',
                 autoFixNames=True)
@@ -102,7 +103,7 @@ class MuninDiskUsagePlugin(MuninPlugin):
         name = 'diskinode'
         if self.graphEnabled(name):
             self._statsInode = self._info.getInodeUse()
-            graph = MuninGraph('Inode Usage (%)', 'Disk Usage',
+            graph = MuninGraph('Inode Usage (%)', category,
                 info='Inode usage of filesystems.',
                 args='--base 1000 --lower-limit 0', printf='%6.1lf',
                 autoFixNames=True)

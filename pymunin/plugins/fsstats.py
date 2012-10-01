@@ -75,9 +75,10 @@ class MuninFreeswitchPlugin(MuninPlugin):
         self._fshost = self.envGet('fshost')
         self._fsport = self.envGet('fsport', None, int)
         self._fspass = self.envGet('fspass')
+        category = 'FreeSwitch'
 
         if self.graphEnabled('fs_calls'):
-            graph = MuninGraph('FreeSWITCH - Active Calls', 'FreeSwitch',
+            graph = MuninGraph('FreeSWITCH - Active Calls', category,
                 info = 'FreeSWITCH - Number of Active Calls.',
                 args = '--base 1000 --lower-limit 0')
             graph.addField('calls', 'calls', type='GAUGE',

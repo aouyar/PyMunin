@@ -60,14 +60,16 @@ class MuninProcStatsPlugin(MuninPlugin):
         
         """     
         MuninPlugin.__init__(self, argv, env, debug)
+        
+        category = 'Processes'
 
-        for (prefix, title, desc) in (('proc', 'Processes', 'Number of processes'),
+        for (prefix, title, desc) in (('proc', category, 'Number of processes'),
                                       ('thread', 'Threads', 'Number of threads')):
             graph_name = '%s_status' % prefix
             graph_title = '%s - Status' % title
             graph_desc = '%s discriminated by status.' % desc 
             if self.graphEnabled(graph_name):
-                graph = MuninGraph(graph_title, 'Processes', info=graph_desc,
+                graph = MuninGraph(graph_title, category, info=graph_desc,
                     args='--base 1000 --lower-limit 0')
                 for (fname, fdesc) in (
                     ('unint_sleep', 'Uninterruptable sleep. (Usually I/O)'),
@@ -86,7 +88,7 @@ class MuninProcStatsPlugin(MuninPlugin):
             graph_title = '%s - Priority' % title
             graph_desc = '%s discriminated by priority.' % desc 
             if self.graphEnabled(graph_name):
-                graph = MuninGraph(graph_title, 'Processes', info=graph_desc,
+                graph = MuninGraph(graph_title, category, info=graph_desc,
                     args='--base 1000 --lower-limit 0')
                 for (fname, fdesc) in (
                     ('high', 'High priority.'),

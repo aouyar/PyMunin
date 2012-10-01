@@ -88,6 +88,7 @@ class MuninRackspacePlugin(MuninPlugin):
         self._api_key = self.envGet('api_key')
         self._region = self.envGet('region')
         self._servicenet = self.envCheckFlag('servicenet', False)
+        category = 'Rackspace'
         
         self._fileInfo = CloudFilesInfo(username=self._username,
                                         api_key=self._api_key,
@@ -98,7 +99,7 @@ class MuninRackspacePlugin(MuninPlugin):
         
         if self.graphEnabled('rackspace_cloudfiles_container_size'):
             graph = MuninGraph('Rackspace Cloud Files - Container Size (bytes)', 
-                               'Rackspace',
+                               category,
                 info='The total size of files for each Rackspace Cloud Files container.',
                 args='--base 1024 --lower-limit 0', autoFixNames=True)
             for contname in self._fileContList:
@@ -108,7 +109,7 @@ class MuninRackspacePlugin(MuninPlugin):
         
         if self.graphEnabled('rackspace_cloudfiles_container_count'):
             graph = MuninGraph('Rackspace Cloud Files - Container Object Count', 
-                               'Rackspace',
+                               category,
                 info='The total number of files for each Rackspace Cloud Files container.',
                 args='--base 1024 --lower-limit 0', autoFixNames=True)
             for contname in self._fileContList:

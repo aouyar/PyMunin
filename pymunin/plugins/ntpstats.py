@@ -58,16 +58,17 @@ class MuninNTPstatsPlugin(MuninPlugin):
         
         """      
         MuninPlugin.__init__(self, argv, env, debug)
+        category = 'Time'
 
         if self.graphEnabled('ntp_peer_stratum'):
-            graph = MuninGraph('NTP Stratum for System Peer', 'Time',
+            graph = MuninGraph('NTP Stratum for System Peer', category,
                 info='Stratum of the NTP Server the system is in sync with.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('stratum', 'stratum', type='GAUGE', draw='LINE2')
             self.appendGraph('ntp_peer_stratum', graph)
 
         if self.graphEnabled('ntp_peer_stats'):
-            graph = MuninGraph('NTP Timing Stats for System Peer', 'Time',
+            graph = MuninGraph('NTP Timing Stats for System Peer', category,
                 info='Timing Stats for the NTP Server the system is in sync with.',
                 args='--base 1000 --lower-limit 0',
                 vlabel='seconds'

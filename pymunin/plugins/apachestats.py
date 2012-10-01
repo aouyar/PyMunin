@@ -83,11 +83,12 @@ class MuninApachePlugin(MuninPlugin):
         self._user = self.envGet('user')
         self._password = self.envGet('password')
         self._statuspath = self.envGet('statuspath')
-        self._ssl = self.envCheckFlag('ssl', False) 
+        self._ssl = self.envCheckFlag('ssl', False)
+        category = 'Apache'
         
         if self.graphEnabled('apache_access'):
             graph = MuninGraph('Apache Web Server - Throughput (Requests / sec)', 
-                'Apache',
+                category,
                 info='Throughput in Requests per second for Apache Web Server.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('reqs', 'reqs', draw='LINE2', type='DERIVE', min=0,
@@ -96,14 +97,14 @@ class MuninApachePlugin(MuninPlugin):
         
         if self.graphEnabled('apache_bytes'):
             graph = MuninGraph('Apache Web Server - Througput (bytes/sec)', 
-                'Apache',
+                category,
                 info='Throughput in bytes per second for Apache Web Server.',
                 args='--base 1024 --lower-limit 0')
             graph.addField('bytes', 'bytes', draw='LINE2', type='DERIVE', min=0)
             self.appendGraph('apache_bytes', graph)
                 
         if self.graphEnabled('apache_workers'):
-            graph = MuninGraph('Apache Web Server - Workers', 'Apache',
+            graph = MuninGraph('Apache Web Server - Workers', category,
                 info='Worker utilization stats for Apache Web server.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('busy', 'busy', draw='AREASTACK', type='GAUGE',

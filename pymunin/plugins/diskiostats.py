@@ -73,6 +73,7 @@ class MuninDiskIOplugin(MuninPlugin):
         
         """
         MuninPlugin.__init__(self, argv, env, debug)
+        category = 'Disk I/O'
 
         self._info = DiskIOinfo()
         
@@ -146,7 +147,7 @@ class MuninDiskIOplugin(MuninPlugin):
         """
         name = 'diskio_%s_requests' % namestr
         if self.graphEnabled(name):
-            graph = MuninGraph('Disk I/O - %s - Requests' % titlestr, 'Disk I/O',
+            graph = MuninGraph('Disk I/O - %s - Requests' % titlestr, category,
                 info='Disk I/O - %s Throughput, Read / write requests per second.' 
                      % titlestr,
                 args='--base 1000 --lower-limit 0',
@@ -176,7 +177,7 @@ class MuninDiskIOplugin(MuninPlugin):
         """
         name = 'diskio_%s_bytes' % namestr
         if self.graphEnabled(name):
-            graph = MuninGraph('Disk I/O - %s - Throughput' % titlestr, 'Disk I/O',
+            graph = MuninGraph('Disk I/O - %s - Throughput' % titlestr, category,
                 info='Disk I/O - %s Throughput, bytes read / written per second.'
                      % titlestr,
                 args='--base 1000 --lower-limit 0', printf='%6.1lf',
@@ -207,7 +208,7 @@ class MuninDiskIOplugin(MuninPlugin):
         name = 'diskio_%s_active' % namestr
         if self.graphEnabled(name):
             graph = MuninGraph('Disk I/O - %s - Queue Length' % titlestr, 
-                'Disk I/O',
+                category,
                 info='Disk I/O - Number  of I/O Operations in Progress for every %s.'
                      % titlestr,
                 args='--base 1000 --lower-limit 0', printf='%6.1lf',

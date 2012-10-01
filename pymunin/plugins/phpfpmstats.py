@@ -83,17 +83,18 @@ class MuninPHPfpmPlugin(MuninPlugin):
         self._user = self.envGet('user')
         self._monpath = self.envGet('monpath')
         self._password = self.envGet('password')
-        self._ssl = self.envCheckFlag('ssl', False) 
+        self._ssl = self.envCheckFlag('ssl', False)
+        category = 'PHP'
         
         if self.graphEnabled('php_fpm_connections'):
-            graph = MuninGraph('PHP FPM - Connections per second', 'PHP',
+            graph = MuninGraph('PHP FPM - Connections per second', category,
                 info='PHP Fast Process Manager (FPM) - Connections per second.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('conn', 'conn', draw='LINE2', type='DERIVE', min=0)
             self.appendGraph('php_fpm_connections', graph)
         
         if self.graphEnabled('php_fpm_processes'):
-            graph = MuninGraph('PHP FPM - Processes', 'PHP',
+            graph = MuninGraph('PHP FPM - Processes', category,
                 info='PHP Fast Process Manager (FPM) - Active / Idle Processes.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('active', 'active', draw='AREASTACK', type='GAUGE')

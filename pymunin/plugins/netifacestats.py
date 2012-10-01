@@ -64,6 +64,7 @@ class MuninNetIfacePlugin(MuninPlugin):
         MuninPlugin.__init__(self, argv, env, debug)
 
         self.envRegisterFilter('ifaces', '^[\w\d:]+$')
+        category = 'Network'
         
         self._ifaceInfo = NetIfaceInfo()
         self._ifaceStats = self._ifaceInfo.getIfStats()
@@ -77,7 +78,7 @@ class MuninNetIfacePlugin(MuninPlugin):
         for iface in self._ifaceList:
             if self.graphEnabled('netiface_traffic'):
                 graph = MuninGraph('Network Interface - Traffic - %s' % iface, 
-                    'Network',
+                    category,
                     info='Traffic Stats for Network Interface %s in bps.' % iface,
                     args='--base 1000 --lower-limit 0',
                     vlabel='bps in (-) / out (+) per second')
@@ -89,7 +90,7 @@ class MuninNetIfacePlugin(MuninPlugin):
 
             if self.graphEnabled('netiface_errors'):
                 graph = MuninGraph('Network Interface - Errors - %s' % iface, 
-                    'Network',
+                    category,
                     info='Error Stats for Network Interface %s in errors/sec.' % iface,
                     args='--base 1000 --lower-limit 0',
                     vlabel='errors in (-) / out (+) per second')

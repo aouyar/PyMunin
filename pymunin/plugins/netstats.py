@@ -64,9 +64,10 @@ class MuninNetstatsPlugin(MuninPlugin):
         
         """     
         MuninPlugin.__init__(self, argv, env, debug)
+        category = 'Network'
          
         if self.graphEnabled('netstat_conn_status'):
-            graph = MuninGraph('Network - Connection Status', 'Network', 
+            graph = MuninGraph('Network - Connection Status', category, 
                                info='TCP connection status stats.',
                                args='--base 1000 --lower-limit 0')
             for (fname, fdesc) in (
@@ -107,7 +108,7 @@ class MuninNetstatsPlugin(MuninPlugin):
                     self._port_list.extend(ports)      
             self._srv_list.sort()
             if len(self._srv_list) > 0:
-                graph = MuninGraph('Network - Server Connections', 'Network', 
+                graph = MuninGraph('Network - Server Connections', category, 
                                    info='Number of TCP connections to server ports.',
                                    args='--base 1000 --lower-limit 0')
                 for srv in self._srv_list:

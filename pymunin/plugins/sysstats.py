@@ -67,6 +67,7 @@ class MuninSysStatsPlugin(MuninPlugin):
         """     
         MuninPlugin.__init__(self, argv, env, debug)
         
+        category = 'System'
         self._sysinfo = SystemInfo()
         self._loadstats = None
         self._cpustats = None
@@ -75,7 +76,7 @@ class MuninSysStatsPlugin(MuninPlugin):
         self._vmstats = None
 
         if self.graphEnabled('sys_loadavg'):
-            graph = MuninGraph('Load Average', 'System',
+            graph = MuninGraph('Load Average', category,
                 info='Load Average (15 min, 5 min, 1 min).',
                 args='--base 1000 --lower-limit 0')
             graph.addField('load15min', '15 min', type='GAUGE', draw='AREA')
@@ -85,7 +86,7 @@ class MuninSysStatsPlugin(MuninPlugin):
         
         if self.graphEnabled('sys_cpu_util'):
             self._cpustats = self._sysinfo.getCPUuse()
-            graph = MuninGraph('CPU Utilization (%)', 'System',
+            graph = MuninGraph('CPU Utilization (%)', category,
                 info='System CPU Utilization.',
                 args='--base 1000 --lower-limit 0')
             for field in ['system', 'user', 'nice', 'idle', 'iowait', 
@@ -104,7 +105,7 @@ class MuninSysStatsPlugin(MuninPlugin):
                     self._memstats['MemUsed'] -= self._memstats[field]
             self._memstats['SwapUsed'] = (self._memstats['SwapTotal'] 
                                           - self._memstats['SwapFree'])
-            graph = MuninGraph('Memory Utilization (bytes)', 'System',
+            graph = MuninGraph('Memory Utilization (bytes)', category,
                 info='System Memory Utilization in bytes.',
                 args='--base 1000 --lower-limit 0')
             for field in ['MemUsed', 'SwapCached', 'Buffers', 'Cached', 
@@ -124,7 +125,7 @@ class MuninSysStatsPlugin(MuninPlugin):
                 if self._memstats.has_key(field):
                     self._memstats['MemKernel'] -= self._memstats[field]
             graph = MuninGraph('Memory Utilization - Active/Inactive (bytes)', 
-                'System',
+                category,
                 info='System Memory Utilization (Active/Inactive) in bytes.',
                 args='--base 1000 --lower-limit 0')
             for field in ['MemKernel', 'MemHugePages', 'Active', 'Inactive', 
@@ -139,7 +140,7 @@ class MuninSysStatsPlugin(MuninPlugin):
             if (self._memstats.has_key('Hugepagesize') 
                 and self._memstats['HugePages_Total'] > 0):
                 graph = MuninGraph('Memory Utilization - Huge Pages (bytes)', 
-                    'System',
+                    category,
                     info='System Memory Huge Pages Utilization in bytes.',
                     args='--base 1000 --lower-limit 0')
                 for field in ['Rsvd', 'Surp', 'Free']:
@@ -150,7 +151,7 @@ class MuninSysStatsPlugin(MuninPlugin):
                 self.appendGraph('sys_mem_huge', graph)
         
         if self.graphEnabled('sys_processes'):
-            graph = MuninGraph('Processes', 'System',
+            graph = MuninGraph('Processes', category,
                 info='Number of processes in running and blocked state.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('running', 'running', type='GAUGE', draw='AREASTACK')
@@ -158,7 +159,7 @@ class MuninSysStatsPlugin(MuninPlugin):
             self.appendGraph('sys_processes', graph)
             
         if self.graphEnabled('sys_forks'):
-            graph = MuninGraph('Process Forks per Second', 'System',
+            graph = MuninGraph('Process Forks per Second', category,
                 info='Process Forks per Second.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('forks', 'forks', type='DERIVE', min=0, draw='LINE2')
@@ -168,7 +169,7 @@ class MuninSysStatsPlugin(MuninPlugin):
             if self._procstats is None:
                 self._procstats = self._sysinfo.getProcessStats()
             graph = MuninGraph('Interrupts and Context Switches per Second', 
-                'System',
+                category,
                 info='Interrupts and Context Switches per Second',
                 args='--base 1000 --lower-limit 0')
             labels = ['irq', 'softirq', 'ctxt']
@@ -184,7 +185,7 @@ class MuninSysStatsPlugin(MuninPlugin):
             self.appendGraph('sys_intr_ctxt', graph)
         
         if self.graphEnabled('sys_vm_paging'):
-            graph = MuninGraph('VM - Paging', 'System',
+            graph = MuninGraph('VM - Paging', category,
                 info='Virtual Memory Paging: Pages In (-) / Out (+) per Second.',
                 args='--base 1000 --lower-limit 0',
                 vlabel='pages in (-) / out (+) per second')
@@ -195,7 +196,7 @@ class MuninSysStatsPlugin(MuninPlugin):
             self.appendGraph('sys_vm_paging', graph)
         
         if self.graphEnabled('sys_vm_swapping'):
-            graph = MuninGraph('VM - Swapping', 'System',
+            graph = MuninGraph('VM - Swapping', category,
                 info='Virtual Memory Swapping: Pages In (-) / Out (+) per Second.',
                 args='--base 1000 --lower-limit 0',
                 vlabel='pages in (-) / out (+) per second')
