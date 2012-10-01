@@ -73,7 +73,7 @@ class MuninDiskIOplugin(MuninPlugin):
         
         """
         MuninPlugin.__init__(self, argv, env, debug)
-        category = 'Disk I/O'
+        category = 'Disk IO'
 
         self._info = DiskIOinfo()
         
