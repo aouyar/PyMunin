@@ -121,6 +121,7 @@ class MuninPlugin:
         self._dirtyConfig = False
         self._instanceName = None
         self._instanceLabel = None
+        self._nestedGraphs = False
         if (self.plugin_name is not None and argv is not None and len(argv) > 0 
             and re.search('_$', self.plugin_name)):
             mobj = re.match("%s(\S+)$" % self.plugin_name, 
@@ -681,7 +682,8 @@ class MuninPlugin:
                 print "multigraph %s" % self._getMultigraphID(parent_name)
             print self._formatConfig(graph.getConfig())
             print
-        if self._nestedGraphs and self._subgraphDict and self._subgraphNames:
+        if (self.isMultigraph and self._nestedGraphs 
+            and self._subgraphDict and self._subgraphNames):
             for (parent_name, subgraph_names) in self._subgraphNames.iteritems():
                 for graph_name in subgraph_names:
                     graph = self._subgraphDict[parent_name][graph_name]
@@ -713,7 +715,8 @@ class MuninPlugin:
                 print "multigraph %s" % self._getMultigraphID(parent_name)
             print self._formatVals(graph.getVals())
             print
-        if self._nestedGraphs and self._subgraphDict and self._subgraphNames:
+        if (self.isMultigraph and self._nestedGraphs 
+            and self._subgraphDict and self._subgraphNames):
             for (parent_name, subgraph_names) in self._subgraphNames.iteritems():
                 for graph_name in subgraph_names:
                     graph = self._subgraphDict[parent_name][graph_name]
