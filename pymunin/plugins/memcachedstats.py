@@ -27,6 +27,9 @@ Environment Variables
 
   host:           Memcached Server IP. (127.0.0.1 by default.)
   port:           Memcached Server Port (11211 by default.)
+  socket_file:    Memcached named socket file.
+                  (The host and port arguments are ignored and UNIX socket is 
+                  used for connecting to the server.)
   include_graphs: Comma separated list of enabled graphs.
                   (All graphs enabled by default.)
   exclude_graphs: Comma separated list of disabled graphs.
@@ -84,12 +87,14 @@ class MuninMemcachedPlugin(MuninPlugin):
         
         self._host = self.envGet('host')
         self._port = self.envGet('port', None, int)
+        self._socket_file = self.envGet('socket_file', None)
         self._category = 'Memcached'
         
         self._stats = None
         self._prev_stats = self.restoreState()
         if self._prev_stats is None:
-            serverInfo = MemcachedInfo(self._host,  self._port)
+            serverInfo = MemcachedInfo(self._host,  self._port, 
+                                       self._socket_file)
             self._stats = serverInfo.getStats()
             stats = self._stats
         else:
@@ -297,7 +302,7 @@ class MuninMemcachedPlugin(MuninPlugin):
     def retrieveVals(self):
         """Retrieve values for graphs."""
         if self._stats is None:
-            serverInfo = MemcachedInfo(self._host,  self._port)
+            serverInfo = MemcachedInfo(self._host,  self._port, self._socket_file)
             stats = serverInfo.getStats()
         else:
             stats = self._stats
@@ -436,7 +441,7 @@ class MuninMemcachedPlugin(MuninPlugin):
         @return: True if plugin can be  auto-configured, False otherwise.
                  
         """
-        serverInfo = MemcachedInfo(self._host,  self._port)
+        serverInfo = MemcachedInfo(self._host,  self._port, self._socket_file)
         return (serverInfo is not None)
 
 
