@@ -34,6 +34,7 @@ class MemcachedInfo:
         @param host:        Memcached Host for TCP connections.
         @param port:        Memcached Port for TCP connections.
         @param socket_file: Memcached Socket File Path for UNIX Socket connections.
+        @param timeout:     Memcached Socket Timeout in seconds.
         @param autoInit:    If True connect to Memcached on init.
 
         """
