@@ -178,7 +178,7 @@ class MuninPlugin:
         """
         graph = self._graphDict.get(graph_name)
         if fail_noexist and graph is None:
-            raise AttributeError("Invalid graph name %s", graph_name)
+            raise AttributeError("Invalid graph name: %s" % graph_name)
         else:
             return graph
             
@@ -200,8 +200,8 @@ class MuninPlugin:
                 subgraph = subgraphs.get(graph_name)
                 if fail_noexist and subgraph is None:
                     raise AttributeError("Invalid subgraph name %s"
-                                         "for graph %s.", 
-                                         (graph_name, parent_name))
+                                         "for graph %s."
+                                         % (graph_name, parent_name))
                 else:
                     return subgraph
             else:
@@ -531,8 +531,7 @@ class MuninPlugin:
         if graph.hasField(field_name):
             graph.setVal(field_name, val)
         else:
-            raise AttributeError("Invalid field name %s "
-                                 "for graph %s." 
+            raise AttributeError("Invalid field name %s for graph %s." 
                                  % (field_name, graph_name))
     
     def setSubgraphVal(self,  parent_name,  graph_name, field_name, val):
@@ -551,8 +550,7 @@ class MuninPlugin:
         if subgraph.hasField(field_name):
             subgraph.setVal(field_name, val)
         else:
-            raise AttributeError("Invalid field name %s "
-                                 "for subgraph %s "
+            raise AttributeError("Invalid field name %s for subgraph %s "
                                  "of parent graph %s." 
                                  % (field_name, graph_name, parent_name))
     
