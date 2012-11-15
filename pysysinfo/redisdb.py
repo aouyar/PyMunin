@@ -2,7 +2,8 @@
 
 """
 
-import redis as redis
+import time
+import redis
 import util
 
 __author__ = "Ali Onur Uyar"
@@ -44,6 +45,16 @@ class RedisInfo:
                                           'socket_timeout', 'unix_socket_path')
                                 if params[k] is not None)
         self._conn = redis.Redis(**self._connParams)
+        
+    def ping(self):
+        """Ping Redis Server and return Round-Trip-Time in seconds.
+        
+        @return: Round-trip-time in seconds as float.
+        
+        """
+        start = time.time()
+        self._conn.ping()
+        return (time.time() - start)
         
     def getStats(self):
         """Query Redis and return stats.
