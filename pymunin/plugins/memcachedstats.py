@@ -71,7 +71,7 @@ class MuninMemcachedPlugin(MuninPlugin):
     """Multigraph Munin Plugin for monitoring Memcached Server.
 
     """
-    plugin_name = 'memcached'
+    plugin_name = 'memcachedstats'
     isMultigraph = True
     isMultiInstance = True
 
