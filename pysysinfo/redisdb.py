@@ -62,4 +62,8 @@ class RedisInfo:
         @return: Dictionary of stats.
         
         """
-        return self._conn.info()
+        try:
+            return self._conn.info('all')
+        except TypeError:
+            return self._conn.info()
+        
