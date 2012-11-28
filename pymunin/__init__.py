@@ -582,20 +582,37 @@ class MuninPlugin:
         """
         return self._graphNames
     
+    def getGraphCount(self):
+        """Returns number of graphs registered to plugin.
+        
+        @return - Number of graphs.
+        
+        """
+        return len(self._graphNames)
+    
     def getSubgraphList(self, parent_name):
         """Returns list of names of subgraphs for Root Graph with name parent_name.
         
         @param parent_name: Name of Root Graph.
-        @return -           List of subgraph names.
+        @return:            List of subgraph names.
         
         """
         if not self.isMultigraph:
             raise AttributeError("Simple Munin Plugins cannot have subgraphs.")
         if self._graphDict.has_key(parent_name):
-            return self._subgraphNames.get(parent_name) or []
+            return self._subgraphNames[parent_name] or []
         else:
             raise AttributeError("Invalid parent graph name %s."
                                  % (parent_name,))
+            
+    def getSubgraphCount(self, parent_name):
+        """Returns number of subgraphs for Root Graph with name parent_name.
+        
+        @param parent_name: Name of Root Graph.
+        @return:            Number of subgraphs.
+        
+        """
+        return len(self.getSubgraphList(parent_name))
 
     def graphHasField(self, graph_name, field_name):
         """Return true if graph with name graph_name has field with 
@@ -632,8 +649,19 @@ class MuninPlugin:
         graph = self._getGraph(graph_name, True)
         return graph.getFieldList()
     
+    def getGraphFieldCount(self, graph_name):
+        """Returns number of fields for graph with name graph_name.
+        
+        @param graph_name: Graph Name
+        @return:           Number of fields for graph.
+        
+        """
+        graph = self._getGraph(graph_name, True)
+        return graph.getFieldCount()
+    
     def getSubgraphFieldList(self, parent_name, graph_name):
-        """Returns list of names of fields for graph with name graph_name.
+        """Returns list of names of fields for subgraph with name graph_name
+        and parent graph with name parent_name.
         
         @param parent_name: Root Graph Name
         @param graph_name:  Subgraph Name
@@ -642,6 +670,18 @@ class MuninPlugin:
         """
         graph = self._getSubGraph(parent_name, graph_name, True)
         return graph.getFieldList()
+    
+    def getSubgraphFieldCount(self, parent_name, graph_name):
+        """Returns number of fields for subgraph with name graph_name and parent 
+        graph with name parent_name.
+        
+        @param parent_name: Root Graph Name
+        @param graph_name:  Subgraph Name
+        @return:            Number of fields for subgraph.
+        
+        """
+        graph = self._getSubGraph(parent_name, graph_name, True)
+        return graph.getFieldCount()
         
     def retrieveVals(self):
         """Initialize measured values for Graphs.
@@ -845,6 +885,14 @@ class MuninGraph:
         
         """
         return self._fieldNameList
+    
+    def getFieldCount(self):
+        """Returns the number of fields for Munin Graph.
+        
+        @return: Number of fields.
+        
+        """
+        return len(self._fieldNameList)
     
     def getConfig(self):
         """Returns dictionary of config entries for Munin Graph.
