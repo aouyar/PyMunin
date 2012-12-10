@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 """ntpstats - Munin Plugin to monitor stats of active synchronization peer.
 
+
 Requirements
+
   - Requires ntpd running on local host and ntpq utility.
 
 Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
     - ntp_peer_stratum
     - ntp_peer_stats
 

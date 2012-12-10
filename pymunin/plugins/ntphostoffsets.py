@@ -3,6 +3,7 @@
                  using NTP.
 
 Requirements
+
   - Requires ntpd running on remote hosts and access to NTP on remote host.
   - Requires ntpdate utility on local host.
 
@@ -10,6 +11,7 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
    - ntp_host_stratums
    - ntp_host_offsets
    - ntp_host_delays

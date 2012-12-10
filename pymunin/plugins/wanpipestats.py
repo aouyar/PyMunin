@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 """wanpipestats - Munin Plugin to monitor Wanpipe Interfaces.
 
+
 Requirements
+
   - Wanpipe utility wanpipemon.
   - Plugin must be executed with root user privileges.
 
@@ -9,6 +11,7 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
     - wanpipe_traffic
     - wanpipe_errors
     - wanpipe_pri_errors_

@@ -3,12 +3,14 @@
 
 
 Requirements
+
   - ps command
 
 Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
     - proc_status
     - proc_priority
     - thread_status

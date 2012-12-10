@@ -1,16 +1,20 @@
 #!/usr/bin/env python
 """rackspacestats - Munin Plugin to monitor stats for Rackspace Cloud..
 
+
 Requirements
+
   - Valid username and api_key for accessing Rackspace Cloud.
 
 Wild Card Plugin - No
 
 Multigraph Plugin - Graph Structure
+
     - rackspace_cloudfiles_count
     - rackspace_cloudfiles_size
 
 Environment Variables
+
   username:   Rackspace Cloud username.
   api_key:    Rackspace Cloud api_key.
   region:     Rackspace Auth Server Region.
@@ -29,6 +33,7 @@ Environment Variables
   exclude_graphs:    Comma separated list of disabled graphs.
 
 Environment Variables for Multiple Instances of Plugin (Omitted by default.)
+
   instance_name:         Name of instance.
   instance_label:        Graph title label for instance.
                          (Default is the same as instance name.)

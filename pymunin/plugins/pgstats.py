@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 """pgstats - Munin Plugin to monitor stats for PostgreSQL Database Server.
 
+
 Requirements
+
   - Access permissions for PostgreSQL Database.
 
 
@@ -9,6 +11,7 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
     - pg_connections
     - pg_diskspace
     - pg_blockreads
@@ -57,6 +60,7 @@ Environment Variables
   exclude_graphs: Comma separated list of disabled graphs.
   
 Environment Variables for Multiple Instances of Plugin (Omitted by default.)
+
   instance_name:         Name of instance.
   instance_label:        Graph title label for instance.
                          (Default is the same as instance name.)

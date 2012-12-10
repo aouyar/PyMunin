@@ -3,12 +3,14 @@
 
 
 Requirements
+
   - netstat command
 
 Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
     - netstat_conn_status
     - netstat_conn_server
 

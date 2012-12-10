@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """memcachedstats - Munin Plugin to monitor stats for Memcached Server.
 
+
 Requirements
 
 
@@ -8,6 +9,7 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
     - memcached_connections
     - memcached_items
     - memcached_memory
@@ -35,6 +37,7 @@ Environment Variables
   exclude_graphs: Comma separated list of disabled graphs.
 
 Environment Variables for Multiple Instances of Plugin (Omitted by default.)
+
   instance_name:         Name of instance.
   instance_label:        Graph title label for instance.
                          (Default is the same as instance name.)

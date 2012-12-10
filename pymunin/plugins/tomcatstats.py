@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 """tomcatstats - Munin Plugin to monitor Apache Tomcat Application Server.
 
+
 Requirements
+
   - Manager user credentials for accesing the Status Page of Apache Tomcat Server.
   
     Configuration example from tomcat-users.xml for Tomcat 6:
@@ -20,6 +22,7 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
    - tomcat_memory
    - tomcat_threads
    - tomcat_access
@@ -28,6 +31,7 @@ Multigraph Plugin - Graph Structure
 
    
 Environment Variables
+
   host:          Apache Tomcat Host. (Default: 127.0.0.1)
   port:          Apache Tomcat Port. (Default: 8080, SSL: 8443)
   user:          Apache Tomcat Manager User.
@@ -41,6 +45,7 @@ Environment Variables
   exclude_graphs: Comma separated list of disabled graphs.
 
 Environment Variables for Multiple Instances of Plugin (Omitted by default.)
+
   instance_name:         Name of instance.
   instance_label:        Graph title label for instance.
                          (Default is the same as instance name.)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """netifacestats - Munin Plugin to monitor Network Interfaces.
 
+
 Requirements
 
 
@@ -8,6 +9,7 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
     - netiface_traffic
     - netiface_errors
 

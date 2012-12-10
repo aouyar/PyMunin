@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 """apachestats - Munin Plugin to monitor stats for Apache Web Server.
 
+
 Requirements
+
   - Access to Apache Web Server server-status page.
 
 
@@ -9,12 +11,14 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
    - apache_access
    - apache_bytes
    - apache_workers
 
    
 Environment Variables
+
   host:           Apache Web Server Host. (Default: 127.0.0.1)
   port:           Apache Web Server Port. (Default: 80, SSL: 443)
   user:           User in case authentication is required for access to 
@@ -29,6 +33,7 @@ Environment Variables
   exclude_graphs: Comma separated list of disabled graphs.
   
 Environment Variables for Multiple Instances of Plugin (Omitted by default.)
+
   instance_name:         Name of instance.
   instance_label:        Graph title label for instance.
                          (Default is the same as instance name.)

@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 """phpfpmstats - Munin Plugin for monitoring PHP FPM (Fast Process Manager).
 
+
 Requirements
+
   - The PHP FPM status page must be configured and it must have access 
     permissions from localhost.
 
@@ -10,6 +12,7 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
    - php_fpm_connections
    - php_fpm_processes
    
@@ -29,6 +32,7 @@ Environment Variables
   exclude_graphs: Comma separated list of disabled graphs.
 
 Environment Variables for Multiple Instances of Plugin (Omitted by default.)
+
   instance_name:         Name of instance.
   instance_label:        Graph title label for instance.
                          (Default is the same as instance name.)

@@ -3,16 +3,19 @@
 Interface.
 
 Requirements
+
   - Access to FreeSWITCH Event Socket Interface
 
 Wild Card Plugin - No
 
 Multigraph Plugin - Graph Structure
+
     - fs_calls
     - fs_channels
    
 
 Environment Variables
+
   fshost:        FreeSWITCH Server (Default: 127.0.0.1)
   fsport:        FreeSWITCH Event Socket Port (Default: 8021)
   fspass:        FreeSWITCH Event Socket Password
@@ -21,6 +24,7 @@ Environment Variables
   exclude_graphs: Comma separated list of disabled graphs.
 
 Environment Variables for Multiple Instances of Plugin (Omitted by default.)
+
   instance_name:         Name of instance.
   instance_label:        Graph title label for instance.
                          (Default is the same as instance name.)

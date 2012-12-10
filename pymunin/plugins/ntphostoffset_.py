@@ -1,16 +1,20 @@
 #!/usr/bin/env python
 """ntphostoffset_ - Munin Plugin to monitor time offset of remote host using NTP.
 
+
 Requirements
+
   - Requires ntpd running on remote host and access to NTP on remote host.
   - Requires ntpdate utility on local host.
 
 Wild Card Plugin
+
   Symlink indicates IP of remote host to be monitored:
   Ex: ntphostoffset_192.168.1.1 -> /usr/shar/munin/plugins/ntphostoffset_
 
 
 Multigraph Plugin - Graph Structure
+
    - ntp_host_stratum
    - ntp_host_stat
 

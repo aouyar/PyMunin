@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 """varnishstats - Munin Plugin to monitor stats for Varnish Cache.
 
+
 Requirements
+
   - Access to varnishstat executable for retrieving stats.
 
 
@@ -9,6 +11,7 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
     - varnish_client_conn
     - varnish_client_requests
     - varnish_backend_conn
@@ -19,6 +22,7 @@ Multigraph Plugin - Graph Structure
 
    
 Environment Variables
+
   instance:       Name  of the Varnish Cache instance.
                   (Defaults to hostname.) 
   include_graphs: Comma separated list of enabled graphs. 
@@ -26,6 +30,7 @@ Environment Variables
   exclude_graphs: Comma separated list of disabled graphs.
 
 Environment Variables for Multiple Instances of Plugin (Omitted by default.)
+
   instance_name:         Name of instance.
   instance_label:        Graph title label for instance.
                          (Default is the same as instance name.)

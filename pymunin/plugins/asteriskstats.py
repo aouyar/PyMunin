@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 """asteriskstats - Munin Plugin to monitor Asterisk through Manager Interface.
 
+
 Requirements
+
   - Access to Asterisk Manager Interface
 
 Wild Card Plugin - No
 
 Multigraph Plugin - Graph Structure
+
    - asterisk_calls
    - asterisk_channels
    - asterisk_peers_sip
@@ -24,6 +27,7 @@ Multigraph Plugin - Graph Structure
 
 
 Environment Variables
+
   amihost:        IP of Asterisk Server. (Default: 127.0.0.1)
   amiport:        Asterisk Manager Interface Port. (Default: 5038)
   amiuser:        Asterisk Manager Interface User.
@@ -48,6 +52,7 @@ Environment Variables
   Note: Channel, codec and trunk expressions are case insensitive.
   
 Environment Variables for Multiple Instances of Plugin (Omitted by default.)
+
   instance_name:         Name of instance.
   instance_label:        Graph title label for instance.
                          (Default is the same as instance name.)

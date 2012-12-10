@@ -4,12 +4,14 @@ CPU, memory, processes, forks, interrupts, context switches, paging,
 swapping, etc.
 
 Requirements
+
   - NA.
 
 Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
     - sys_loadavg
     - sys_cpu_util
     - sys_memory_util

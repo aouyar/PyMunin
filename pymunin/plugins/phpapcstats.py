@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 """phpapcstats - Munin Plugin for monitoring PHP APC Cache.
 
+
 Requirements
+
   - The PHP script apcinfo.php must be placed in the document root and have 
     access permissions from localhost.
 
@@ -10,6 +12,7 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
    - php_apc_memory
    - php_apc_items
    - php_apc_reqs_filecache
@@ -33,6 +36,7 @@ Environment Variables
   exclude_graphs: Comma separated list of disabled graphs.
 
 Environment Variables for Multiple Instances of Plugin (Omitted by default.)
+
   instance_name:         Name of instance.
   instance_label:        Graph title label for instance.
                          (Default is the same as instance name.)

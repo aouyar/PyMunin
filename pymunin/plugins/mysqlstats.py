@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 """mysqlstats - Munin Plugin to monitor stats for MySQL Database Server.
 
+
 Requirements
+
   - Access permissions for MySQL Database.
 
 
@@ -9,6 +11,7 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
     - mysql_connections
     - mysql_traffic
     - mysql_slowqueries
@@ -47,6 +50,7 @@ Environment Variables
   exclude_graphs: Comma separated list of disabled graphs.
 
 Environment Variables for Multiple Instances of Plugin (Omitted by default.)
+
   instance_name:         Name of instance.
   instance_label:        Graph title label for instance.
                          (Default is the same as instance name.)

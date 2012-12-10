@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 """nginxstats - Munin Plugin to monitor stats for Nginx Web Server.
 
+
 Requirements
+
   - Access to Nginx Web Server server-status page.
 
 
@@ -9,6 +11,7 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
    - nginx_activeconn
    - nginx_connections
    - nginx_requests
@@ -34,6 +37,7 @@ Environment Variables
   exclude_graphs: Comma separated list of disabled graphs.
 
 Environment Variables for Multiple Instances of Plugin (Omitted by default.)
+
   instance_name:         Name of instance.
   instance_label:        Graph title label for instance.
                          (Default is the same as instance name.)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """diskiostats - Munin Plugin to monitor Disk I/O.
 
+
 Requirements - NA
 
 
@@ -8,6 +9,7 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
     - diskio_disk_requests
     - diskio_disk_bytes
     - diskio_disk_active
@@ -26,6 +28,7 @@ Multigraph Plugin - Graph Structure
 
    
 Environment Variables
+
   include_graphs:  Comma separated list of enabled graphs. 
                    (All graphs enabled by default.)
   exclude_graphs:  Comma separated list of disabled graphs.
