@@ -11,6 +11,7 @@ Multigraph Plugin - Graph Structure
     - redis_ping
     - redis_conn_client
     - redis_memory
+    - redis_memory_fragmentation
     
 
 Environment Variables
@@ -87,49 +88,68 @@ class RedisPlugin(MuninPlugin):
         self._serverInfo = RedisInfo(self._host, self._port, self._db, 
                                      self._password, self._socket_timeout,
                                      self._unix_socket_path)
+        self._stats = self._serverInfo.getStats()
+        self._stats['rtt'] = self._serverInfo.ping()
        
-        if self.graphEnabled('redis_ping'):
+        graph_name = 'redis_ping'
+        if self.graphEnabled(graph_name):
             graph = MuninGraph('Redis - Ping Latency (secs)', self._category,
                 info='Round Trip Time in seconds for Redis Ping.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('rtt', 'rtt', draw='LINE2', type='GAUGE')
-            self.appendGraph('redis_ping', graph)
-            
-        if self.graphEnabled('redis_conn_client'):
+            self.appendGraph(graph_name, graph)
+        
+        graph_name = 'redis_conn_client'
+        if self.graphEnabled(graph_name):
             graph = MuninGraph('Redis - Client Connections', self._category,
                 info='Number of connections to Redis Server.',
                 args='--base 1000 --lower-limit 0')
-            graph.addField('clients', 'clients', draw='AREA', type='GAUGE',
-                           info='Total number of clients connected to server.')
-            graph.addField('blocked', 'blocked', draw='LINE2', type='GAUGE',
-                           info='Number of clients pending on a blocking call.')
-            self.appendGraph('redis_conn_client', graph)
+            if self._stats.has_key('connected_clients'):
+                graph.addField('connected_clients', 'clients', draw='AREA', 
+                               type='GAUGE',
+                               info='Total number of clients connected to server.')
+            if self._stats.has_key('blocked_clients'):
+                graph.addField('blocked_clients', 'blocked', draw='LINE2', 
+                               type='GAUGE',
+                               info='Number of clients pending on a blocking call.')
+            if graph.getFieldCount() > 0:
+                self.appendGraph(graph_name, graph)
         
-        if self.graphEnabled('redis_memory'):
+        graph_name = 'redis_memory'        
+        if self.graphEnabled(graph_name):
             graph = MuninGraph('Redis - Memory Usage (bytes)', self._category,
                 info='Memory (RAM) usage of Redis Server.',
                 args='--base 1000 --lower-limit 0')
-            graph.addField('mem', 'mem', draw='AREA', type='GAUGE',
-                           info='Total number of bytes allocated by Redis Allocator.')
-            graph.addField('rss', 'rss', draw='LINE2', type='GAUGE',
-                           info='Number of bytes that Redis allocated as seen '
-                                'by the operating system.')
-            self.appendGraph('redis_memory', graph)
+            if self._stats.has_key('used_memory'):
+                graph.addField('used_memory', 'mem', draw='AREA', type='GAUGE',
+                               info='Total number of bytes allocated by Redis Allocator.')
+            if self._stats.has_key('used_memory_rss'):
+                graph.addField('used_memory_rss', 'rss', draw='LINE2', type='GAUGE',
+                               info='Number of bytes of RAM (RSS) allocated to '
+                                    'Redis by the OS.')
+            if graph.getFieldCount() > 0:
+                self.appendGraph(graph_name, graph)
+        
+        graph_name = 'redis_memory_fragmentation'        
+        if self.graphEnabled(graph_name):
+            graph = MuninGraph('Redis - Memory Fragmentation Ratio', self._category,
+                info='Ratio between RSS and virtual memory use for Redis Server. '
+                     'Values much higher than 1 imply fragmentation. Values less '
+                     'than 1 imply that memory has been swapped out by OS.',
+                args='--base 1000 --lower-limit 0')
+            if self._stats.has_key('mem_fragmentation_ratio'):
+                graph.addField('mem_fragmentation_ratio', 'ratio', draw='LINE2', 
+                               type='GAUGE',
+                               info='Ratio between RSS and virtual memory use.')
+            if graph.getFieldCount() > 0:
+                self.appendGraph(graph_name, graph)        
+        
             
     def retrieveVals(self):
         """Retrieve values for graphs."""
-        stats = self._serverInfo.getStats()
-        if self.hasGraph('redis_ping'):
-            rtt = self._serverInfo.ping()
-            self.setGraphVal('redis_ping', 'rtt', rtt)
-        if self.hasGraph('redis_conn_client'):
-            self.setGraphVal('redis_conn_client', 'clients', 
-                             stats.get('connected_clients'))
-            self.setGraphVal('redis_conn_client', 'blocked', 
-                             stats.get('blocked_clients'))
-        if self.hasGraph('redis_memory'):
-            self.setGraphVal('redis_memory', 'mem', stats.get('used_memory'))
-            self.setGraphVal('redis_memory', 'rss', stats.get('used_memory_rss'))
+        for graph_name in self.getGraphList():
+            for field_name in self.getGraphFieldList(graph_name):
+                self.setGraphVal(graph_name, field_name, self._stats.get(field_name))
                         
     def autoconf(self):
         """Implements Munin Plugin Auto-Configuration Option.
