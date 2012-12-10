@@ -10,8 +10,11 @@ Wild Card Plugin - No
 Multigraph Plugin - Graph Structure
     - redis_ping
     - redis_conn_client
+    - redis_conn_rate
+    - redis_cmd_rate
     - redis_memory
     - redis_memory_fragmentation
+    - redis_cpu_util
     
 
 Environment Variables
@@ -90,60 +93,65 @@ class RedisPlugin(MuninPlugin):
                                      self._unix_socket_path)
         self._stats = self._serverInfo.getStats()
         self._stats['rtt'] = self._serverInfo.ping()
-       
-        graph_name = 'redis_ping'
-        if self.graphEnabled(graph_name):
-            graph = MuninGraph('Redis - Ping Latency (secs)', self._category,
-                info='Round Trip Time in seconds for Redis Ping.',
-                args='--base 1000 --lower-limit 0')
-            graph.addField('rtt', 'rtt', draw='LINE2', type='GAUGE')
-            self.appendGraph(graph_name, graph)
         
-        graph_name = 'redis_conn_client'
-        if self.graphEnabled(graph_name):
-            graph = MuninGraph('Redis - Client Connections', self._category,
-                info='Number of connections to Redis Server.',
-                args='--base 1000 --lower-limit 0')
-            if self._stats.has_key('connected_clients'):
-                graph.addField('connected_clients', 'clients', draw='AREA', 
-                               type='GAUGE',
-                               info='Total number of clients connected to server.')
-            if self._stats.has_key('blocked_clients'):
-                graph.addField('blocked_clients', 'blocked', draw='LINE2', 
-                               type='GAUGE',
-                               info='Number of clients pending on a blocking call.')
-            if graph.getFieldCount() > 0:
-                self.appendGraph(graph_name, graph)
-        
-        graph_name = 'redis_memory'        
-        if self.graphEnabled(graph_name):
-            graph = MuninGraph('Redis - Memory Usage (bytes)', self._category,
-                info='Memory (RAM) usage of Redis Server.',
-                args='--base 1000 --lower-limit 0')
-            if self._stats.has_key('used_memory'):
-                graph.addField('used_memory', 'mem', draw='AREA', type='GAUGE',
-                               info='Total number of bytes allocated by Redis Allocator.')
-            if self._stats.has_key('used_memory_rss'):
-                graph.addField('used_memory_rss', 'rss', draw='LINE2', type='GAUGE',
-                               info='Number of bytes of RAM (RSS) allocated to '
-                                    'Redis by the OS.')
-            if graph.getFieldCount() > 0:
-                self.appendGraph(graph_name, graph)
-        
-        graph_name = 'redis_memory_fragmentation'        
-        if self.graphEnabled(graph_name):
-            graph = MuninGraph('Redis - Memory Fragmentation Ratio', self._category,
-                info='Ratio between RSS and virtual memory use for Redis Server. '
-                     'Values much higher than 1 imply fragmentation. Values less '
-                     'than 1 imply that memory has been swapped out by OS.',
-                args='--base 1000 --lower-limit 0')
-            if self._stats.has_key('mem_fragmentation_ratio'):
-                graph.addField('mem_fragmentation_ratio', 'ratio', draw='LINE2', 
-                               type='GAUGE',
-                               info='Ratio between RSS and virtual memory use.')
-            if graph.getFieldCount() > 0:
-                self.appendGraph(graph_name, graph)        
-        
+        for graph_name, graph_title, graph_info, graph_fields in (
+            ('redis_ping', 'Ping Latency (secs)',
+             'Round Trip Time in seconds for Redis Ping.',
+             (('rtt', 'rtt', 'LINE2', 'GAUGE', 'Round trip time.'),)
+            ),
+            ('redis_conn_client', 'Active Client Connections',
+             'Number of connections to Redis Server.',
+             (('connected_clients', 'clients', 'AREA', 'GAUGE',
+               'Number of clients connected to server.'),
+              ('blocked_clients', 'blocked', 'LINE2', 'GAUGE',
+               'Number of clients pending on a blocking call.'),)
+            ),
+            ('redis_conn_rate', 'Client Connections per Second',
+             'Connections accepted / rejected per second by the Redis Server.',
+             (('rejected_connections', 'reject', 'AREASTACK', 'DERIVE',
+               'Number of connections rejected by the server.'),
+              ('total_connections_received', 'accept', 'AREASTACK', 'DERIVE',
+               'Number of connections accepted by the server.'),)
+            ),
+            ('redis_cmd_rate', 'Commands Processed per Second',
+             'Number of commands processed per second by the Redis Server.',
+             (('total_commands_processed', 'cmds', 'LINE2', 'DERIVE',
+               'Number of commands processed by the Redis Server.'),)
+            ),
+            ('redis_memory', 'Memory Usage (bytes)', 'Memory usage of Redis Server.',
+             (('used_memory_rss', 'rss', 'AREA', 'GAUGE',
+               'Number of RAM (RSS) in bytes allocated to Redis by the OS.'),
+              ('used_memory', 'mem', 'LINE2', 'GAUGE',
+               'Total number memory in bytes allocated by Redis Allocator.'),)
+            ),
+            ('redis_memory_fragmentation', 'Memory Fragmentation Ratio',
+             'Ratio between RSS and virtual memory use for Redis Server. '
+             'Values much higher than 1 imply fragmentation. Values less '
+             'than 1 imply that memory has been swapped out by OS.',
+             (('mem_fragmentation_ratio', 'ratio', 'LINE2', 'GAUGE',
+               'Ratio between RSS and virtual memory use.'),)
+            ),
+            ('redis_cpu_util', 'CPU Utilization',
+             'Processor time utilized by Redis Server.',
+             (('used_cpu_sys_children', 'child_sys', 'AREASTACK', 'DERIVE',
+               'System CPU Time consumed by the background processes.'),
+              ('used_cpu_user_children', 'child_user', 'AREASTACK', 'DERIVE',
+               'User CPU Time consumed by the background processes.'),
+              ('used_cpu_sys', 'srv_sys', 'AREASTACK', 'DERIVE',
+               'System CPU Time consumed by the server.'),
+              ('used_cpu_user', 'srv_user', 'AREASTACK', 'DERIVE',
+               'User CPU Time consumed by the server.'),)
+            ),
+            ):
+            if self.graphEnabled(graph_name):
+                graph = MuninGraph("Redis - %s" % graph_title, self._category, 
+                                   info=graph_info, 
+                                   args='--base 1000 --lower-limit 0')
+                for fname, flabel, fdraw, ftype, finfo in graph_fields:
+                    graph.addField(fname, flabel, draw=fdraw, type=ftype, min=0,
+                                   info=finfo)
+                if graph.getFieldCount() > 0:
+                    self.appendGraph(graph_name, graph)
             
     def retrieveVals(self):
         """Retrieve values for graphs."""
