@@ -64,6 +64,7 @@ included:
 * PostgreSQL Database
 * Processes and Threads
 * Rackspace Cloud
+* Redis Server
 * System Resources 
   (Load, CPU, Memory, Processes, Interrupts, Paging, Swapping, etc.)
 * Sangoma Wanpipe Telephony Interfaces
