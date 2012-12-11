@@ -16,6 +16,10 @@ Multigraph Plugin - Graph Structure
     - redis_memory
     - redis_memory_fragmentation
     - redis_cpu_util
+    - redis_hits_misses
+    - redis_keys_expired
+    - redis_keys_evicted
+    - redis_subscriptions
     
 
 Environment Variables
@@ -107,14 +111,14 @@ class RedisPlugin(MuninPlugin):
               ('blocked_clients', 'blocked', 'LINE2', 'GAUGE',
                'Number of clients pending on a blocking call.'),)
             ),
-            ('redis_conn_rate', 'Client Connections per Second',
+            ('redis_conn_rate', 'Client Connections per Sec',
              'Connections accepted / rejected per second by the Redis Server.',
              (('rejected_connections', 'reject', 'AREASTACK', 'DERIVE',
                'Number of connections rejected by the server.'),
               ('total_connections_received', 'accept', 'AREASTACK', 'DERIVE',
                'Number of connections accepted by the server.'),)
             ),
-            ('redis_cmd_rate', 'Commands Processed per Second',
+            ('redis_cmd_rate', 'Commands Processed per Sec',
              'Number of commands processed per second by the Redis Server.',
              (('total_commands_processed', 'cmds', 'LINE2', 'DERIVE',
                'Number of commands processed by the Redis Server.'),)
@@ -142,6 +146,30 @@ class RedisPlugin(MuninPlugin):
                'System CPU Time consumed by the server.'),
               ('used_cpu_user', 'srv_user', 'AREASTACK', 'DERIVE',
                'User CPU Time consumed by the server.'),)
+            ),
+            ('redis_hits_misses', 'Hits/Misses per Sec',
+             'Hits vs. misses in main dictionary lookup by Redis Server.',
+             (('keyspace_hits', 'hit', 'AREASTACK', 'DERIVE',
+               'Number of hits in main dictionary lookup.'),
+              ('keyspace_misses', 'miss', 'AREASTACK', 'DERIVE',
+               'Number of misses in main dictionary lookup.'),)
+            ),
+            ('redis_keys_expired', 'Expired Keys per Sec',
+             'Number of keys expired by the Redis Server.',
+             (('expired_keys', 'keys', 'LINE2', 'DERIVE',
+               'Number of keys expired.'),)
+            ),
+            ('redis_keys_evicted', 'Evicted Keys per Sec',
+             'Number of keys evicted by the Redis Server due to memory limits.',
+             (('evicted_keys', 'keys', 'LINE2', 'DERIVE',
+               'Number of keys evicted.'),)
+            ),
+            ('redis_subscriptions', 'Subscriptions',
+             'Channels or patterns with subscribed clients.',
+             (('pubsub_patterns', 'patterns', 'AREASTACK', 'GAUGE',
+               'Global number of pub/sub patterns with client subscriptions.'),
+              ('pubsub_channels', 'channels', 'AREASTACK', 'GAUGE',
+               'Global number of pub/sub channels with client subscriptions.'),)
             ),
             ):
             if self.graphEnabled(graph_name):
