@@ -9,6 +9,7 @@ Wild Card Plugin - No
 
 
 Multigraph Plugin - Graph Structure
+
     - redis_ping
     - redis_conn_client
     - redis_conn_rate
@@ -26,7 +27,7 @@ Multigraph Plugin - Graph Structure
     - redis_aof_bufflen
     - redis_aof_rewrite_bufflen
     - redis_aof_rewritetime
-    
+
 
 Environment Variables
 
@@ -105,6 +106,15 @@ class RedisPlugin(MuninPlugin):
         self._stats = self._serverInfo.getStats()
         self._stats['rtt'] = self._serverInfo.ping()
         
+        cmd_list = []
+        db_list = []
+        for k in self._stats.keys():
+            if k.startswith('cmdstat_'):
+                cmd_list.append(k[len('cmdstat_'):])
+            elif k.startswith('db'):
+                db_list.append(k)
+        print cmd_list
+        print db_list
         graphs = [
             ('redis_ping', 'Ping Latency (secs)',
              'Round Trip Time in seconds for Redis Ping.',
@@ -131,7 +141,8 @@ class RedisPlugin(MuninPlugin):
             ),
             ('redis_memory', 'Memory Usage (bytes)', 'Memory usage of Redis Server.',
              (('used_memory_rss', 'rss', 'AREASTACK', 'GAUGE',
-               'Memory space (bytes) allocated to Redis by the OS for storing data.'),
+               'Resident Memory space (bytes) allocated to Redis by the OS for '
+               'storing data.'),
               ('used_memory_lua', 'lua', 'AREASTACK', 'GAUGE',
                'Memory space (bytes) used by the Lua Engine.'),
               ('used_memory', 'mem', 'LINE2', 'GAUGE',
