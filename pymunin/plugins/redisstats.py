@@ -20,12 +20,18 @@ Multigraph Plugin - Graph Structure
     - redis_keys_expired
     - redis_keys_evicted
     - redis_subscriptions
+    - redis_rdb_changes
+    - redis_rdb_dumptime
+    - redis_aof_filesize
+    - redis_aof_bufflen
+    - redis_aof_rewrite_bufflen
+    - redis_aof_rewritetime
     
 
 Environment Variables
 
-  host:             Redis Server Host.  (127.0.0.1 by default.)
-  port:             Redis Server Port.  (6379  by default.)
+  host:             Redis Server Host. (127.0.0.1 by default.)
+  port:             Redis Server Port. (6379  by default.)
   db:               Redis DB ID. (0 by default.)
   password:         Redis Password (Optional)
   socket_timeout:   Redis Socket Timeout (Default: OS Default.)
@@ -99,7 +105,7 @@ class RedisPlugin(MuninPlugin):
         self._stats = self._serverInfo.getStats()
         self._stats['rtt'] = self._serverInfo.ping()
         
-        for graph_name, graph_title, graph_info, graph_fields in (
+        graphs = [
             ('redis_ping', 'Ping Latency (secs)',
              'Round Trip Time in seconds for Redis Ping.',
              (('rtt', 'rtt', 'LINE2', 'GAUGE', 'Round trip time.'),)
@@ -124,10 +130,12 @@ class RedisPlugin(MuninPlugin):
                'Number of commands processed by the Redis Server.'),)
             ),
             ('redis_memory', 'Memory Usage (bytes)', 'Memory usage of Redis Server.',
-             (('used_memory_rss', 'rss', 'AREA', 'GAUGE',
-               'Number of RAM (RSS) in bytes allocated to Redis by the OS.'),
+             (('used_memory_rss', 'rss', 'AREASTACK', 'GAUGE',
+               'Memory space (bytes) allocated to Redis by the OS for storing data.'),
+              ('used_memory_lua', 'lua', 'AREASTACK', 'GAUGE',
+               'Memory space (bytes) used by the Lua Engine.'),
               ('used_memory', 'mem', 'LINE2', 'GAUGE',
-               'Total number memory in bytes allocated by Redis Allocator.'),)
+               'Memory space (bytes) allocated by Redis Allocator for storing data.'),)
             ),
             ('redis_memory_fragmentation', 'Memory Fragmentation Ratio',
              'Ratio between RSS and virtual memory use for Redis Server. '
@@ -138,14 +146,14 @@ class RedisPlugin(MuninPlugin):
             ),
             ('redis_cpu_util', 'CPU Utilization',
              'Processor time utilized by Redis Server.',
-             (('used_cpu_sys_children', 'child_sys', 'AREASTACK', 'DERIVE',
-               'System CPU Time consumed by the background processes.'),
-              ('used_cpu_user_children', 'child_user', 'AREASTACK', 'DERIVE',
-               'User CPU Time consumed by the background processes.'),
-              ('used_cpu_sys', 'srv_sys', 'AREASTACK', 'DERIVE',
+             (('used_cpu_sys', 'srv_sys', 'AREASTACK', 'DERIVE',
                'System CPU Time consumed by the server.'),
               ('used_cpu_user', 'srv_user', 'AREASTACK', 'DERIVE',
-               'User CPU Time consumed by the server.'),)
+               'User CPU Time consumed by the server.'),
+              ('used_cpu_sys_children', 'child_sys', 'AREASTACK', 'DERIVE',
+               'System CPU Time consumed by the background processes.'),
+              ('used_cpu_user_children', 'child_user', 'AREASTACK', 'DERIVE',
+               'User CPU Time consumed by the background processes.'),)
             ),
             ('redis_hits_misses', 'Hits/Misses per Sec',
              'Hits vs. misses in main dictionary lookup by Redis Server.',
@@ -171,14 +179,51 @@ class RedisPlugin(MuninPlugin):
               ('pubsub_channels', 'channels', 'AREASTACK', 'GAUGE',
                'Global number of pub/sub channels with client subscriptions.'),)
             ),
-            ):
+            ('redis_rdb_changes', 'RDB Pending Changes', 
+             'Number of pending changes since last RDB Dump of Redis Server.',
+             (('rdb_changes_since_last_save', 'changes', 'LINE2', 'GAUGE',
+               'Number of changes since last RDB Dump.'),)
+            ),
+            ('redis_rdb_dumptime', 'RDB Dump Duration (sec)', 
+             'Duration of the last RDB Dump of Redis Server in seconds.',
+             (('rdb_last_bgsave_time_sec', 'duration', 'LINE2', 'GAUGE',
+               'Duration of the last RDB Dump in seconds.'),)
+            ),
+        ]
+        
+        if self._stats.get('aof_enabled', 0) > 0:
+            graphs.extend((
+                ('redis_aof_filesize', 'AOF File Size (bytes)', 
+                 'Redis Server AOF File Size in bytes.',
+                 (('aof_current_size', 'size', 'LINE2', 'GAUGE',
+                   'AOF File Size in bytes.'),)
+                ),
+                ('redis_aof_bufflen', 'AOF Buffer Length (bytes)', 
+                 'Redis Server AOF Buffer Length in bytes.',
+                 (('aof_buffer_length', 'len', 'LINE2', 'GAUGE',
+                   'AOF Buffer Length in bytes.'),)
+                ),
+                ('redis_aof_rewrite_bufflen', 'AOF Rewrite Buffer Length (bytes)', 
+                 'Redis Server AOF Rewrite Buffer Length in bytes.',
+                 (('aof_rewrite_buffer_length', 'len', 'LINE2', 'GAUGE',
+                   'AOF Rewrite Buffer Length in bytes.'),)
+                ),
+                ('redis_aof_rewritetime', 'AOF Rewrite Duration (sec)', 
+                 'Duration of the last AOF Rewrite of Redis Server in seconds.',
+                 (('aof_last_rewrite_time_sec', 'duration', 'AREA', 'GAUGE',
+                   'Duration of the last AOF Rewrite in seconds.'),)
+                ),             
+            ))
+        
+        for graph_name, graph_title, graph_info, graph_fields in graphs:
             if self.graphEnabled(graph_name):
                 graph = MuninGraph("Redis - %s" % graph_title, self._category, 
                                    info=graph_info, 
                                    args='--base 1000 --lower-limit 0')
                 for fname, flabel, fdraw, ftype, finfo in graph_fields:
-                    graph.addField(fname, flabel, draw=fdraw, type=ftype, min=0,
-                                   info=finfo)
+                    if self._stats.has_key(fname):
+                        graph.addField(fname, flabel, draw=fdraw, type=ftype, 
+                                       min=0, info=finfo)
                 if graph.getFieldCount() > 0:
                     self.appendGraph(graph_name, graph)
             
