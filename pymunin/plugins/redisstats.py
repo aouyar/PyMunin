@@ -27,6 +27,9 @@ Multigraph Plugin - Graph Structure
     - redis_aof_bufflen
     - redis_aof_rewrite_bufflen
     - redis_aof_rewritetime
+    - redis_db_totals
+    - redis_db_keys
+    - redis_db_expires
 
 
 Environment Variables
@@ -113,8 +116,8 @@ class RedisPlugin(MuninPlugin):
                 cmd_list.append(k[len('cmdstat_'):])
             elif k.startswith('db'):
                 db_list.append(k)
-        print cmd_list
-        print db_list
+        db_list.sort()
+        cmd_list.sort()
         graphs = [
             ('redis_ping', 'Ping Latency (secs)',
              'Round Trip Time in seconds for Redis Ping.',
@@ -237,12 +240,65 @@ class RedisPlugin(MuninPlugin):
                                        min=0, info=finfo)
                 if graph.getFieldCount() > 0:
                     self.appendGraph(graph_name, graph)
+        
+        self._stats['db_total_keys'] = 0
+        self._stats['db_total_expires'] = 0
+        if self.graphEnabled('redis_db_totals'):
+            for db in db_list:
+                fname_keys = "%s_keys" % db
+                fname_expires = "%s_expires" % db
+                num_keys = self._stats[db].get('keys', 0)
+                num_expires = self._stats[db].get('expires', 0)
+                self._stats[fname_keys] = num_keys
+                self._stats[fname_expires] = num_expires
+                self._stats['db_total_keys'] += num_keys
+                self._stats['db_total_expires'] += num_expires
+            self._stats['db_total_persists'] = (self._stats['db_total_keys']
+                                                - self._stats['db_total_expires'])
+        
+        graph_name = 'redis_db_totals'
+        if self.graphEnabled(graph_name) and len(db_list) > 0:
+            graph = MuninGraph("Redis - Number of Keys", self._category,
+                               info="Number of keys stored by Redis Server",
+                               args='--base 1000 --lower-limit 0')
+            graph.addField('db_total_expires', 'expire', 'GAUGE', 'AREASTACK', 
+                           min=0, info="Total number of keys with expiration.")
+            graph.addField('db_total_persists', 'persist', 'GAUGE', 'AREASTACK', 
+                           min=0, info="Total number of keys without expiration.")
+            graph.addField('db_total_keys', 'total', 'GAUGE', 'LINE2', 
+                           min=0, info="Total number of keys.", colour='000000')
+            self.appendGraph(graph_name, graph)
+                
+        graph_name = 'redis_db_keys'
+        if self.graphEnabled(graph_name) and len(db_list) > 0:
+            graph = MuninGraph("Redis - Number of Keys per DB", self._category,
+                               info="Number of keys stored in each DB by Redis Server",
+                               args='--base 1000 --lower-limit 0')
+            for db in db_list:
+                fname = "%s_keys" % db
+                graph.addField(fname, db, 'GAUGE', 'AREASTACK', min=0, 
+                               info="Number of keys stored in %s." % db)
+            self.appendGraph(graph_name, graph)
+        
+        graph_name = 'redis_db_expires'
+        if self.graphEnabled(graph_name) and len(db_list) > 0:
+            graph = MuninGraph("Redis - Number of Keys with Expiration per DB", 
+                               self._category,
+                               info="Number of keys stored in each DB by Redis Server",
+                               args='--base 1000 --lower-limit 0')
+            for db in db_list:
+                fname = "%s_expires" % db
+                graph.addField(fname, db, 'GAUGE', 'AREASTACK', min=0, 
+                               info="Number of keys with expiration stored in %s." % db)
+            self.appendGraph(graph_name, graph)
+        
             
     def retrieveVals(self):
         """Retrieve values for graphs."""
         for graph_name in self.getGraphList():
             for field_name in self.getGraphFieldList(graph_name):
                 self.setGraphVal(graph_name, field_name, self._stats.get(field_name))
+        
                         
     def autoconf(self):
         """Implements Munin Plugin Auto-Configuration Option.
