@@ -140,7 +140,7 @@ class MuninVarnishPlugin(MuninPlugin):
                 self._category,
                 info='HTTP Header and Body traffic. '
                      '(TCP/IP overhead not included.)',
-                args='--base 1000 --lower-limit 0')
+                args='--base 1024 --lower-limit 0')
             graph.addField('s_hdrbytes', 'header', draw='AREASTACK', type='DERIVE',
                            min=0, info=self._desc.get('s_hdrbytes'))
             graph.addField('s_bodybytes', 'body', draw='AREASTACK', type='DERIVE',
@@ -167,9 +167,9 @@ class MuninVarnishPlugin(MuninPlugin):
                 self._category,
                 info='Number of requests being proccessed.',
                 args='--base 1000 --lower-limit 0')
-            graph.addField('n_wrk_queued', 'worker-queued', draw='AREASTACK', type='DERIVE',
+            graph.addField('n_wrk_queued', 'queued req', draw='AREASTACK', type='DERIVE',
                            min=0, info=self._desc.get('n_wrk_queued'))
-            graph.addField('n_wrk_drop', 'worker-droped', draw='AREASTACK', type='DERIVE',
+            graph.addField('n_wrk_drop', 'droped req', draw='AREASTACK', type='DERIVE',
                            min=0, info=self._desc.get('n_wrk_drop'))
             self.appendGraph(graph_name, graph)
 
