@@ -179,11 +179,15 @@ class MuninVarnishPlugin(MuninPlugin):
                 self._category,
                 info='Number of Cache Hits and Misses per second.',
                 args='--base 1000 --lower-limit 0')
-            graph.addField('cache_hit', 'hit', draw='AREASTACK', type='DERIVE',
+            graph.addField('client_req', 'hit', type='DERIVE', graph = False, min=0)
+            graph.addField('cache_hit', 'hit', draw='AREA', type='DERIVE',
+                           cdef='cache_hit,client_req,/,100,*',
                            min=0, info=self._desc.get('cache_hit'))
-            graph.addField('cache_hitpass', 'pass', draw='AREASTACK', type='DERIVE',
+            graph.addField('cache_hitpass', 'pass', draw='STACK', type='DERIVE',
+                           cdef='cache_hitpass,client_req,/,100,*',
                            min=0, info=self._desc.get('cache_hitpass'))
-            graph.addField('cache_miss', 'miss', draw='AREASTACK', type='DERIVE',
+            graph.addField('cache_miss', 'miss', draw='STACK', type='DERIVE',
+                           cdef='cache_miss,client_req,/,100,*',
                            min=0, info=self._desc.get('cache_miss'))
             self.appendGraph(graph_name, graph)
 
