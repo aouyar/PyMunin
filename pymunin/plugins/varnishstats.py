@@ -140,10 +140,12 @@ class MuninVarnishPlugin(MuninPlugin):
                 self._category,
                 info='HTTP Header and Body traffic. '
                      '(TCP/IP overhead not included.)',
-                args='--base 1024 --lower-limit 0')
-            graph.addField('s_hdrbytes', 'header', draw='AREASTACK', type='DERIVE',
+                args='-l 0 --lower-limit 0')
+            graph.addField('s_hdrbytes', 'Header traffic', draw='STACK', type='DERIVE',
+                           cdef='s_hdrbytes,8,*',
                            min=0, info=self._desc.get('s_hdrbytes'))
-            graph.addField('s_bodybytes', 'body', draw='AREASTACK', type='DERIVE',
+            graph.addField('s_bodybytes', 'body', draw='AREA', type='DERIVE',
+                           cdef='s_bodybytes,8,*',
                            min=0, info=self._desc.get('s_bodybytes'))
             self.appendGraph(graph_name, graph)
 
@@ -153,23 +155,15 @@ class MuninVarnishPlugin(MuninPlugin):
                 self._category,
                 info='Number of worker threads.',
                 args='--base 1000 --lower-limit 0')
-            graph.addField('n_wrk', 'threads', draw='AREASTACK', type='DERIVE',
+            graph.addField('n_wrk', 'threads', type='GAUGE',
                            min=0, info=self._desc.get('n_wrk'))
-            graph.addField('n_wrk_create', 'thrd-created', draw='AREASTACK', type='DERIVE',
+            graph.addField('n_wrk_create', 'wrk-created', type='DERIVE',
                            min=0, info=self._desc.get('n_wrk_create'))
-            graph.addField('n_wrk_failed', 'thrd-failed', draw='AREASTACK', type='DERIVE',
+            graph.addField('n_wrk_failed', 'wrk-failed', type='DERIVE',
                            min=0, info=self._desc.get('n_wrk_failed'))
-            self.appendGraph(graph_name, graph)
-
-        graph_name = 'varnish_work_requests'
-        if self.graphEnabled(graph_name):
-            graph = MuninGraph('Varnish - Work Requests',
-                self._category,
-                info='Number of requests being proccessed.',
-                args='--base 1000 --lower-limit 0')
-            graph.addField('n_wrk_queued', 'queued req', draw='AREASTACK', type='DERIVE',
-                           min=0, info=self._desc.get('n_wrk_queued'))
-            graph.addField('n_wrk_drop', 'droped req', draw='AREASTACK', type='DERIVE',
+            graph.addField('n_wrk_max', 'n_wrk_max', type='DERIVE',
+                           min=0, info=self._desc.get('n_wrk_max'))
+            graph.addField('n_wrk_drop', 'n_wrk_drop', type='DERIVE',
                            min=0, info=self._desc.get('n_wrk_drop'))
             self.appendGraph(graph_name, graph)
 
