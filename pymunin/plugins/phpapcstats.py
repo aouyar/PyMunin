@@ -97,24 +97,27 @@ class MuninPHPapcPlugin(MuninPlugin):
         if self.graphEnabled('php_apc_memory'):
             graph = MuninGraph('PHP APC Cache - Memory Utilization (bytes)', self._category,
                 info='Memory Utilization of PHP APC Cache in bytes.', total='Total',
-                args='--base 1000 --lower-limit 0')
-            graph.addField('filecache', 'File Cache', draw='AREASTACK', 
-                           type='GAUGE')
-            graph.addField('usercache', 'User Cache', draw='AREASTACK', 
-                           type='GAUGE')
-            #graph.addField('other', 'Other', draw='AREASTACK', type='GAUGE')
-            graph.addField('fragmented', 'Fragmentated', draw='AREASTACK', type='GAUGE')
+                vlabel='Bytes',
+                args='--base 1024 --lower-limit 0')
+            graph.addField('used', 'Used', draw='AREASTACK', type='GAUGE')
             graph.addField('free', 'Free', draw='AREASTACK', type='GAUGE')
+            graph.addField('fragmented', 'Fragmentated', draw='AREASTACK', type='GAUGE')
             self.appendGraph('php_apc_memory', graph)
+
+        if self.graphEnabled('php_apc_mem_fragmentation'):
+            graph = MuninGraph('PHP APC - Shared memory fragmentation', self._category,
+                info='PHP APC Shared memory fragmentation',
+                args='--base 1000 --upper-limit 100')
+            graph.addField('fragment_percentage', 'Fragmentation', draw='LINE2', warning='50',
+                           type='DERIVE', min=0)
+            self.appendGraph('php_apc_mem_fragmentation', graph)
         
         if self.graphEnabled('php_apc_items'):
             graph = MuninGraph('PHP APC Cache - Cached Items', self._category,
                 info='Number of items (files, user data) in PHP APC Cache.',
                 args='--base 1000 --lower-limit 0')
-            graph.addField('filecache', 'File Cache', draw='AREASTACK', 
-                           type='GAUGE')
-            graph.addField('usercache', 'User Cache', draw='AREASTACK', 
-                           type='GAUGE')
+            graph.addField('filecache', 'File Items', draw='LINE2', type='GAUGE')
+            graph.addField('usercache', 'User Items', draw='LINE2', type='GAUGE')
             self.appendGraph('php_apc_items', graph)
         
         if self.graphEnabled('php_apc_reqs_filecache'):
@@ -141,14 +144,6 @@ class MuninPHPapcPlugin(MuninPlugin):
                            type='DERIVE', min=0)
             self.appendGraph('php_apc_reqs_usercache', graph)
 
-        if self.graphEnabled('php_apc_mem_fragmentation'):
-            graph = MuninGraph('PHP APC - Shared memory fragmentation', self._category,
-                info='PHP APC Shared memory fragmentation',
-                args='--base 1000 --upper-limit 100')
-            graph.addField('fragment_percentage', 'Fragmentation', draw='LINE2', warning='50',
-                           type='DERIVE', min=0)
-            self.appendGraph('php_apc_mem_fragmentation', graph)
-            
         if self.graphEnabled('php_apc_expunge'):
             graph = MuninGraph('PHP APC - Cache Expunge Runs per second', self._category,
                 info='PHP APC File and User Cache Expunge Runs per second.',
@@ -166,17 +161,18 @@ class MuninPHPapcPlugin(MuninPlugin):
         stats = apcinfo.getAllStats()
         
         if self.hasGraph('php_apc_memory') and stats:
-            filecache = stats['cache_sys']['mem_size']
-            usercache = stats['cache_user']['mem_size']
-            #total = stats['memory']['seg_size'] * stats['memory']['num_seg']
-            free = stats['memory']['avail_mem']
+            #filecache = stats['cache_sys']['mem_size']
+            #usercache = stats['cache_user']['mem_size']
+
+            total = stats['memory']['seg_size'] * stats['memory']['num_seg']
             fragmented = stats['memory']['fragmented']
-            #other = total - free - filecache - usercache 
-            self.setGraphVal('php_apc_memory', 'filecache', filecache)
-            self.setGraphVal('php_apc_memory', 'usercache', usercache)
-            #self.setGraphVal('php_apc_memory', 'other', other)
-            self.setGraphVal('php_apc_memory', 'fragmented', fragmented)
+            free = stats['memory']['avail_mem'] - fragmented
+            used = total - stats['memory']['avail_mem']
+
+            self.setGraphVal('php_apc_memory', 'used', used)
             self.setGraphVal('php_apc_memory', 'free', free)
+            self.setGraphVal('php_apc_memory', 'fragmented', fragmented)
+
         if self.hasGraph('php_apc_items') and stats:
             self.setGraphVal('php_apc_items', 'filecache', 
                              stats['cache_sys']['num_entries'])
