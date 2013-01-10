@@ -112,6 +112,8 @@ setup(
     version=pymunin.__version__,
     author=pymunin.__author__,
     author_email=pymunin.__email__,
+    maintainer=pymunin.__author__,
+    maintainer_email=pymunin.__email__,
     packages=find_packages(),
     include_package_data=True,
     url='http://aouyar.github.com/PyMunin',
@@ -126,6 +128,6 @@ setup(
         'Development Status :: 4 - Beta',
         'Operating System :: OS Independent',
     ],
-    long_description=read_file('README.markdown'),
+    long_description=read_file('README.md'),
     entry_points={'console_scripts': console_scripts},
 )
