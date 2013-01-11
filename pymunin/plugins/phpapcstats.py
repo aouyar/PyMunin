@@ -108,7 +108,8 @@ class MuninPHPapcPlugin(MuninPlugin):
             graph = MuninGraph('PHP APC - Shared memory fragmentation', self._category,
                 info='PHP APC Shared memory fragmentation (SHM block less than 5MB)',
                 vlabel='Percent', args='--base 1000 --upper-limit 100 --rigid')
-            graph.addField('fragment_percentage', 'Fragmentation', draw='LINE2', warning='50', min=0)
+            graph.addField('fragment_percentage', 'Fragmentation', draw='LINE2', warning='50',
+                           type='GAUGE', min=0)
             self.appendGraph('php_apc_mem_fragmentation', graph)
         
         if self.graphEnabled('php_apc_items'):
