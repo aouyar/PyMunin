@@ -98,6 +98,16 @@ class MuninVarnishPlugin(MuninPlugin):
                            min=0, info=self._desc.get('client_drop'))
             graph.addField('client_req', 'reqs', draw='LINE2', type='DERIVE',
                            min=0, info=self._desc.get('client_req'))
+            graph.addField('cache_hit', 'reqs', draw='LINE2', type='DERIVE',
+                           min=0, info=self._desc.get('cache_hit'))
+            graph.addField('cache_hitpass', 'reqs', draw='LINE2', type='DERIVE',
+                           min=0, info=self._desc.get('cache_hitpass'))
+            graph.addField('cache_miss', 'reqs', draw='LINE2', type='DERIVE',
+                           colour='BB2222', min=0, info=self._desc.get('cache_miss'))
+            graph.addField('s_pipe', 'reqs', draw='LINE2', type='DERIVE',
+                           min=0, info=self._desc.get('s_pipe'))
+            graph.addField('s_pass', 'reqs', draw='LINE2', type='DERIVE',
+                           min=0, info=self._desc.get('s_pass'))
             self.appendGraph(graph_name, graph)
 
         graph_name = 'varnish_backend_conn'
@@ -112,6 +122,8 @@ class MuninVarnishPlugin(MuninPlugin):
                            min=0, info=self._desc.get('backend_fail'))
             graph.addField('backend_reuse', 'reuse', draw='LINE2', type='DERIVE',
                            min=0, info=self._desc.get('backend_reuse'))
+            graph.addField('backend_unhealthy', 'reuse', draw='LINE2', type='DERIVE',
+                           min=0, info=self._desc.get('backend_unhealthy'))
             self.appendGraph(graph_name, graph)
 
         graph_name = 'varnish_objects'
