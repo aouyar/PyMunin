@@ -92,21 +92,23 @@ class MuninVarnishPlugin(MuninPlugin):
                 self._category,
                 info='Client connections per second for Varnish Cache.',
                 args='--base 1000 --lower-limit 0')
-            graph.addField('client_conn', 'conn', draw='AREASTACK', type='DERIVE',
+            graph.addField('client_conn', 'client_conn', draw='AREASTACK', type='DERIVE',
                            min=0, info=self._desc.get('client_conn'))
-            graph.addField('client_drop', 'drop', draw='AREASTACK', type='DERIVE',
+            graph.addField('client_drop', 'client_drop', draw='AREASTACK', type='DERIVE',
                            min=0, info=self._desc.get('client_drop'))
-            graph.addField('client_req', 'reqs', draw='LINE2', type='DERIVE',
+            graph.addField('client_req', 'client_req', draw='LINE2', type='DERIVE',
                            min=0, info=self._desc.get('client_req'))
-            graph.addField('cache_hit', 'reqs', draw='LINE2', type='DERIVE',
+            graph.addField('cache_hit', 'cache_hit', draw='LINE2', type='DERIVE',
                            min=0, info=self._desc.get('cache_hit'))
-            graph.addField('cache_hitpass', 'reqs', draw='LINE2', type='DERIVE',
+            graph.addField('cache_hitpass', 'cache_hitpass', draw='LINE2', type='DERIVE',
                            min=0, info=self._desc.get('cache_hitpass'))
-            graph.addField('cache_miss', 'reqs', draw='LINE2', type='DERIVE',
+            graph.addField('cache_miss', 'cache_miss', draw='LINE1', type='DERIVE',
                            colour='BB2222', min=0, info=self._desc.get('cache_miss'))
-            graph.addField('s_pipe', 'reqs', draw='LINE2', type='DERIVE',
+            graph.addField('s_pipe', 's_pipe', draw='LINE1', type='DERIVE',
+                            colour='88AA22', 
                            min=0, info=self._desc.get('s_pipe'))
-            graph.addField('s_pass', 'reqs', draw='LINE2', type='DERIVE',
+            graph.addField('s_pass', 's_pass', draw='LINE1', type='DERIVE',
+                            colour='8822AA', 
                            min=0, info=self._desc.get('s_pass'))
             self.appendGraph(graph_name, graph)
 
