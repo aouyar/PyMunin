@@ -8,7 +8,14 @@
 # __email__ = "aouyar at gmail.com"
 # __status__ = "Development"
 
-header("Content-type: text/plain");
+$date_now = gmdate('D, d M Y H:i:s \G\M\T');
+
+header('Content-type: text/plain');
+header("Expires: " . $date_now);
+header('Last-Modified: ' . $date_now);
+header('Cache-Control: max-age=0, no-cache, '
+        . 'must-revalidate, proxy-revalidate, '
+        . 'pre-check=0, post-check=0');
 
 $cache_sys = apc_cache_info('', true);
 $cache_user = apc_cache_info('user', true);  
