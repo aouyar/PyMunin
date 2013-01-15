@@ -97,7 +97,7 @@ class MuninPHPapcPlugin(MuninPlugin):
         if self.graphEnabled('php_apc_memory'):
             graph = MuninGraph('PHP APC Cache - Memory Utilization (bytes)', self._category,
                 info='Memory Utilization of PHP APC Cache in bytes.',
-                args='--base 1000 --lower-limit 0')
+                args='--base 1024 --lower-limit 0')
             graph.addField('filecache', 'File Cache', draw='AREASTACK', 
                            type='GAUGE')
             graph.addField('usercache', 'User Cache', draw='AREASTACK', 
@@ -111,9 +111,9 @@ class MuninPHPapcPlugin(MuninPlugin):
             graph = MuninGraph('PHP APC Cache - Cached Items', self._category,
                 info='Number of items (files, user data) in PHP APC Cache.',
                 args='--base 1000 --lower-limit 0')
-            graph.addField('filecache', 'File Cache', draw='AREASTACK', 
+            graph.addField('filecache', 'File Items', draw='AREASTACK', 
                            type='GAUGE')
-            graph.addField('usercache', 'User Cache', draw='AREASTACK', 
+            graph.addField('usercache', 'User Items', draw='AREASTACK', 
                            type='GAUGE')
             self.appendGraph('php_apc_items', graph)
         

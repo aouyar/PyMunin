@@ -311,7 +311,7 @@ class MuninMySQLplugin(MuninPlugin):
             graph = MuninGraph('MySQL - Query Cache - Memory Use (bytes)', 
                 self._category,
                 info='Memory utilization for MySQL Server Query Cache.',
-                args='--base 1000 --lower-limit 0')
+                args='--base 1024 --lower-limit 0')
             graph.addField('used', 'used', draw='AREASTACK', type='GAUGE', 
                 info="Used space (bytes) in Query Cache.")
             graph.addField('free', 'free', draw='AREASTACK', type='GAUGE', 
