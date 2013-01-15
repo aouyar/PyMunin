@@ -12,15 +12,17 @@ Wild Card Plugin - No
 
 Multigraph Plugin - Graph Structure
 
+    - varnish_requests
+    - varnish_hits
     - varnish_client_conn
-    - varnish_client_requests
     - varnish_backend_conn
-    - varnish_backend_requests
     - varnish_traffic
     - varnish_workers
-    - varnish_hits
+    - varnish_work_queue
+    - varnish_memory
+    - varnish_expire_purge
 
-   
+
 Environment Variables
 
   instance:       Name  of the Varnish Cache instance.
@@ -86,26 +88,44 @@ class MuninVarnishPlugin(MuninPlugin):
         self._stats = varnish_info.getStats()
         self._desc = varnish_info.getDescDict()
         
+        graph_name = 'varnish_requests'
+        if self.graphEnabled(graph_name):
+            graph = MuninGraph('Varnish - Client/Backend Requests / sec', 
+                self._category,
+                info='Number of client and backend requests per second for Varnish Cache.',
+                args='--base 1000 --lower-limit 0')
+            for flabel in ('client', 'backend',):
+                fname = '%s_req' % flabel
+                finfo = self._desc.get(fname, '')
+                graph.addField(fname, flabel, draw='LINE2', type='DERIVE', 
+                               min=0, info=finfo)
+            self.appendGraph(graph_name, graph)
+        
+        graph_name = 'varnish_hits'
+        if self.graphEnabled(graph_name):
+            graph = MuninGraph('Varnish - Cache Hits vs. Misses (%)', 
+                self._category,
+                info='Number of Cache Hits and Misses per second.',
+                args='--base 1000 --lower-limit 0')
+            for flabel, fname in (('hit', 'cache_hit'), 
+                                  ('pass', 'cache_hitpass'),
+                                  ('miss', 'cache_miss')):
+                finfo = self._desc.get(fname, '')
+                graph.addField(fname, flabel, draw='AREASTACK', type='DERIVE', 
+                               min=0, info=finfo)
+            self.appendGraph(graph_name, graph)
+        
         graph_name = 'varnish_client_conn'
         if self.graphEnabled(graph_name):
             graph = MuninGraph('Varnish - Client Connections / sec', 
                 self._category,
                 info='Client connections per second for Varnish Cache.',
                 args='--base 1000 --lower-limit 0')
-            graph.addField('client_conn', 'conn', draw='LINE2', type='DERIVE', 
-                           min=0, info=self._desc.get('client_conn'))
-            graph.addField('client_drop', 'drop', draw='LINE2', type='DERIVE', 
-                           min=0, info=self._desc.get('client_drop'))
-            self.appendGraph(graph_name, graph)
-        
-        graph_name = 'varnish_client_requests'
-        if self.graphEnabled(graph_name):
-            graph = MuninGraph('Varnish - Client Requests / sec', 
-                self._category,
-                info='Requests per second to Varnish Cache.',
-                args='--base 1000 --lower-limit 0')
-            graph.addField('client_req', 'reqs', draw='LINE2', type='DERIVE', 
-                           min=0, info=self._desc.get('client_req'))
+            for flabel in ('conn', 'drop',):
+                fname = 'client_%s' % flabel
+                finfo = self._desc.get(fname, '') 
+                graph.addField(fname, flabel, draw='AREASTACK', type='DERIVE', 
+                               min=0, info=finfo)
             self.appendGraph(graph_name, graph)
         
         graph_name = 'varnish_backend_conn'
@@ -114,18 +134,11 @@ class MuninVarnishPlugin(MuninPlugin):
                 self._category,
                 info='Connections per second from Varnish Cache to backends.',
                 args='--base 1000 --lower-limit 0')
-            graph.addField('backend_conn', 'conn', draw='LINE2', type='DERIVE', 
-                           min=0, info=self._desc.get('backend_conn'))
-            self.appendGraph(graph_name, graph)
-        
-        graph_name = 'varnish_backend_requests'
-        if self.graphEnabled(graph_name):
-            graph = MuninGraph('Varnish - Backend Requests / sec', 
-                self._category,
-                info='Requests per second from Varnish Cache to backends.',
-                args='--base 1000 --lower-limit 0')
-            graph.addField('backend_req', 'reqs', draw='LINE2', type='DERIVE', 
-                           min=0, info=self._desc.get('backend_req'))
+            for flabel in ('conn', 'reuse', 'busy', 'fail', 'retry', 'unhealthy',):
+                fname = 'backend_%s' % flabel
+                finfo = self._desc.get(fname, '')
+                graph.addField(fname, flabel, draw='AREASTACK', type='DERIVE', 
+                               min=0, info=finfo)
             self.appendGraph(graph_name, graph)
             
         graph_name = 'varnish_traffic'
@@ -134,37 +147,64 @@ class MuninVarnishPlugin(MuninPlugin):
                 self._category,
                 info='HTTP Header and Body traffic. '
                      '(TCP/IP overhead not included.)',
-                args='--base 1000 --lower-limit 0')
-            graph.addField('s_hdrbytes', 'header', draw='AREASTACK', type='DERIVE', 
+                args='--base 1024 --lower-limit 0')
+            for flabel, fname in (('header', 's_hdrbytes'), 
+                                  ('body', 's_bodybytes'),):
+                finfo = self._desc.get(fname, '')
+                graph.addField(fname, flabel, draw='AREASTACK', type='DERIVE', 
                            min=0, info=self._desc.get('s_hdrbytes'))
-            graph.addField('s_bodybytes', 'body', draw='AREASTACK', type='DERIVE', 
-                           min=0, info=self._desc.get('s_bodybytes'))
             self.appendGraph(graph_name, graph)
-            
+
         graph_name = 'varnish_workers'
         if self.graphEnabled(graph_name):
             graph = MuninGraph('Varnish - Worker Threads', 
                 self._category,
                 info='Number of worker threads.',
                 args='--base 1000 --lower-limit 0')
-            graph.addField('cache_hit', 'hit', draw='AREASTACK', type='DERIVE', 
-                           min=0, info=self._desc.get('cache_hit'))
-            graph.addField('cache_hitpass', 'pass', draw='AREASTACK', type='DERIVE', 
-                           min=0, info=self._desc.get('cache_hitpass'))
-            graph.addField('cache_miss', 'miss', draw='AREASTACK', type='DERIVE', 
-                           min=0, info=self._desc.get('cache_miss'))
-            self.appendGraph(graph_name, graph)
-            
-        graph_name = 'varnish_hits'
-        if self.graphEnabled(graph_name):
-            graph = MuninGraph('Varnish - Cache Hits vs. Misses', 
-                self._category,
-                info='Number of Cache Hits and Misses por second.',
-                args='--base 1000 --lower-limit 0')
-            graph.addField('n_wrk', 'req', draw='AREASTACK', type='DERIVE', 
+            graph.addField('n_wrk', 'req', draw='LINE2', type='GAUGE', 
                            min=0, info=self._desc.get('n_wrk'))
             self.appendGraph(graph_name, graph)
             
+        graph_name = 'varnish_work_queue'
+        if self.graphEnabled(graph_name):
+            graph = MuninGraph('Varnish - Queued/Dropped Work Requests / sec', 
+                self._category,
+                info='Requests queued for waiting for a worker thread to become '
+                     'available and requests dropped because of overflow of queue.',
+                args='--base 1000 --lower-limit 0')
+            for flabel, fname in (('queued', 'n_wrk_queued'), 
+                                  ('dropped', 'n_wrk_drop')):
+                finfo = self._desc.get(fname, '')
+                graph.addField(fname, flabel, draw='LINE2', type='DERIVE', 
+                               min=0, info=finfo)
+            self.appendGraph(graph_name, graph)
+            
+        graph_name = 'varnish_memory'
+        if self.graphEnabled(graph_name):
+            graph = MuninGraph('Varnish - Cache Memory Usage (bytes)', 
+                self._category,
+                info='Varnish cache memory usage in bytes.',
+                args='--base 1000 --lower-limit 0')
+            for flabel, fname in (('used', 'SMA.s0.g_bytes'), 
+                                  ('free', 'SMA.s0.g_space')):
+                finfo = self._desc.get(fname, '')
+                graph.addField(fname, flabel, draw='AREASTACK', type='GAUGE', 
+                               min=0, info=finfo)
+            self.appendGraph(graph_name, graph)
+            
+        graph_name = 'varnish_expire_purge'
+        if self.graphEnabled(graph_name):
+            graph = MuninGraph('Varnish - Expired/Purged Objects / sec', 
+                self._category,
+                info='Expired objects and LRU purged objects per second.',
+                args='--base 1000 --lower-limit 0')
+            for flabel, fname in (('expire', 'n_expired'), 
+                                  ('purge', 'n_lru_nuked')):
+                finfo = self._desc.get(fname, '')
+                graph.addField(fname, flabel, draw='LINE2', type='DERIVE', 
+                               min=0, info=finfo)
+            self.appendGraph(graph_name, graph)
+        
     def retrieveVals(self):
         """Retrieve values for graphs."""
         for graph_name in  self.getGraphList():
