@@ -13,11 +13,10 @@ Wild Card Plugin - No
 Multigraph Plugin - Graph Structure
 
     - varnish_client_conn
-    - varnish_client_requests
     - varnish_backend_conn
-    - varnish_backend_requests
+    - varnish_objects
     - varnish_traffic
-    - varnish_workers
+    - varnish_threads
     - varnish_hits
 
 
