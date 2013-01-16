@@ -1,9 +1,9 @@
 <?php
 # __author__ = "Ali Onur Uyar"
 # __copyright__ = "Copyright 2011, Ali Onur Uyar"
-# __credits__ = []
+# __credits__ = ["Preston Mason (https://github.com/pentie)",]
 # __license__ = "GPL"
-# __version__ = "0.9"
+# __version__ = "0.9.22"
 # __maintainer__ = "Ali Onur Uyar"
 # __email__ = "aouyar at gmail.com"
 # __status__ = "Development"
