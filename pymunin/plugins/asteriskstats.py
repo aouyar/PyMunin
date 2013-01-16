@@ -82,7 +82,7 @@ from pysysinfo.asterisk import AsteriskInfo
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
-__credits__ = []
+__credits__ = ["Santiago Rojo (https://github.com/arpagon)",]
 __license__ = "GPL"
 __version__ = "0.9.20"
 __maintainer__ = "Ali Onur Uyar"
