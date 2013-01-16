@@ -14,6 +14,7 @@ Wild Card Plugin - No
 Multigraph Plugin - Graph Structure
 
    - php_apc_memory
+   - php_apc_mem_fragmentation
    - php_apc_items
    - php_apc_reqs_filecache
    - php_apc_reqs_usercache
