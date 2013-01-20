@@ -16,11 +16,18 @@ header('Last-Modified: ' . $date_now);
 header('Cache-Control: max-age=0, no-cache, '
         . 'must-revalidate, proxy-revalidate, '
         . 'pre-check=0, post-check=0');
+		
+if ($_GET['detail']) {
+	$detail = TRUE;
+}
+else {
+	$detail = FALSE;
+}
 
 $cache_sys = apc_cache_info('', true);
 $cache_user = apc_cache_info('user', true);  
-$mem_limited = apc_sma_info(true);
-$mem = apc_sma_info();
+$mem = apc_sma_info(true);
+$mem_detail = apc_sma_info();
 
 foreach ($cache_sys as $key => $val) {
   printf("%s:%s:%s\n",'cache_sys', $key, $val); 
@@ -28,30 +35,40 @@ foreach ($cache_sys as $key => $val) {
 foreach ($cache_user as $key => $val) {
   printf("%s:%s:%s\n",'cache_user', $key, $val); 
 }
-foreach ($mem_limited as $key => $val) {
+foreach ($mem as $key => $val) {
   printf("%s:%s:%s\n",'memory', $key, $val); 
 }
 
-// Fragementation: (freeseg - 1) / total_seg
-$nseg = $freeseg = $fragsize = $freetotal = 0;
-for($i=0; $i<$mem['num_seg']; $i++) {
-        $ptr = 0;
-        foreach($mem['block_lists'][$i] as $block) {
-                if ($block['offset'] != $ptr) {
-                        ++$nseg;
-                }
-                $ptr = $block['offset'] + $block['size'];
-                /* Only consider blocks <5M for the fragmentation % */
-                if($block['size']<(5*1024*1024)) $fragsize+=$block['size'];
-                $freetotal+=$block['size'];
-        }
-        $freeseg += count($mem['block_lists'][$i]);
+if ($detail) {
+	// Fragmentation: 1 - (Largest Block of Free Memory / Total Free Memory)
+	$num_seg = $mem_detail['num_seg'];
+	$total_num_frag = 0;
+	$total_frag = 0;
+	$total_free = 0;
+	for($i=0; $i < $num_seg; $i++) {
+		$seg_free_max = 0; $seg_free_total = 0; $seg_num_frag = 0;
+		foreach($mem_detail['block_lists'][$i] as $block) {
+			$seg_num_frag += 1;
+        	if ($block['size'] > $seg_free_max) {
+				$seg_free_max = $block['size'];
+			}
+			$seg_free_total += $block['size'];
+		}
+		if ($seg_num_frag > 1) {
+        	$total_num_frag += $seg_num_frag - 1;
+			$total_frag += $seg_free_total - $seg_free_max;
+		}
+		$total_free += $seg_free_total;
+	}
+	$frag_ratio = ($total_free > 0) ? (float) $total_frag / $total_free : 0;
+	$frag_count = $total_num_frag;
+	$frag_avg_size = ($frag_count > 0) ? (float )$total_frag / $frag_count: 0;	
+	printf("%s:%s:%s\n", 'memory', 'fragmentation_ratio', $frag_ratio);
+	printf("%s:%s:%s\n", 'memory', 'fragment_count', $frag_count);
+	printf("%s:%s:%s\n", 'memory', 'fragment_avg_size', $frag_avg_size);
 }
 
-$frag = $freeseg > 1 ? $fragsize/$freetotal : 0;
 
-printf("%s:%s:%s\n",'memory', 'fragmented', $fragsize); 
-printf("%s:%s:%f\n",'memory', 'fragment_percentage', $frag * 100); 
 
 
 ?>

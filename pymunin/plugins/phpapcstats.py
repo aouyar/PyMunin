@@ -18,6 +18,9 @@ Multigraph Plugin - Graph Structure
    - php_apc_reqs_filecache
    - php_apc_reqs_usercache
    - php_apc_expunge
+   - php_apc_fragment_ratio
+   - php_apc_fragment_count
+   - php_apc_fragment_avgsize
 
    
 Environment Variables
@@ -93,8 +96,10 @@ class MuninPHPapcPlugin(MuninPlugin):
         self._password = self.envGet('password')
         self._ssl = self.envCheckFlag('ssl', False)
         self._category = 'PHP'
+        self._extras = False
         
-        if self.graphEnabled('php_apc_memory'):
+        graph_name = 'php_apc_memory'
+        if self.graphEnabled(graph_name):
             graph = MuninGraph('PHP APC Cache - Memory Utilization (bytes)', self._category,
                 info='Memory Utilization of PHP APC Cache in bytes.',
                 args='--base 1024 --lower-limit 0')
@@ -105,9 +110,10 @@ class MuninPHPapcPlugin(MuninPlugin):
             graph.addField('other', 'Other', draw='AREASTACK', 
                            type='GAUGE')
             graph.addField('free', 'Free', draw='AREASTACK', type='GAUGE')
-            self.appendGraph('php_apc_memory', graph)
+            self.appendGraph(graph_name, graph)
         
-        if self.graphEnabled('php_apc_items'):
+        graph_name = 'php_apc_items'
+        if self.graphEnabled(graph_name):
             graph = MuninGraph('PHP APC Cache - Cached Items', self._category,
                 info='Number of items (files, user data) in PHP APC Cache.',
                 args='--base 1000 --lower-limit 0')
@@ -115,9 +121,10 @@ class MuninPHPapcPlugin(MuninPlugin):
                            type='GAUGE')
             graph.addField('usercache', 'User Items', draw='AREASTACK', 
                            type='GAUGE')
-            self.appendGraph('php_apc_items', graph)
+            self.appendGraph(graph_name, graph)
         
-        if self.graphEnabled('php_apc_reqs_filecache'):
+        graph_name = 'php_apc_reqs_filecache'
+        if self.graphEnabled(graph_name):
             graph = MuninGraph('PHP APC - File Cache Requests per second', self._category,
                 info='PHP APC File Cache Requests (Hits and Misses) per second.',
                 args='--base 1000 --lower-limit 0')
@@ -127,9 +134,10 @@ class MuninPHPapcPlugin(MuninPlugin):
                            type='DERIVE', min=0)
             graph.addField('inserts', 'inserts', draw='LINE2',
                            type='DERIVE', min=0)
-            self.appendGraph('php_apc_reqs_filecache', graph)
+            self.appendGraph(graph_name, graph)
         
-        if self.graphEnabled('php_apc_reqs_usercache'):
+        graph_name = 'php_apc_reqs_usercache'
+        if self.graphEnabled(graph_name):
             graph = MuninGraph('PHP APC - User Cache Requests per second', self._category,
                 info='PHP APC User Cache Requests (Hits and Misses) per second.',
                 args='--base 1000 --lower-limit 0')
@@ -139,9 +147,10 @@ class MuninPHPapcPlugin(MuninPlugin):
                            type='DERIVE', min=0)
             graph.addField('inserts', 'inserts', draw='LINE2',
                            type='DERIVE', min=0)
-            self.appendGraph('php_apc_reqs_usercache', graph)
+            self.appendGraph(graph_name, graph)
             
-        if self.graphEnabled('php_apc_expunge'):
+        graph_name = 'php_apc_expunge'
+        if self.graphEnabled(graph_name):
             graph = MuninGraph('PHP APC - Cache Expunge Runs per second', self._category,
                 info='PHP APC File and User Cache Expunge Runs per second.',
                 args='--base 1000 --lower-limit 0')
@@ -149,12 +158,42 @@ class MuninPHPapcPlugin(MuninPlugin):
                            type='DERIVE', min=0)
             graph.addField('usercache', 'User Cache', draw='LINE2', 
                            type='DERIVE', min=0)
-            self.appendGraph('php_apc_expunge', graph)
+            self.appendGraph(graph_name, graph)
+        
+        graph_name = 'php_apc_fragment_ratio'
+        if self.graphEnabled(graph_name):
+            self._extras = True
+            graph = MuninGraph('PHP APC Cache - Fragmentation Ratio (%)', 
+                self._category,
+                info='Memory fragmentation ratio ratio for PHP APC Cache.',
+                args='--base 1000 --lower-limit 0')
+            graph.addField('ratio', 'ratio', draw='LINE2', type='GAUGE')
+            self.appendGraph(graph_name, graph)
+        
+        graph_name = 'php_apc_fragment_count'
+        if self.graphEnabled(graph_name):
+            self._extras = True
+            graph = MuninGraph('PHP APC Cache - Fragment Count', 
+                self._category,
+                info='Number of memory fragments for PHP APC Cache.',
+                args='--base 1000 --lower-limit 0')
+            graph.addField('num', 'num', draw='LINE2', type='GAUGE')
+            self.appendGraph(graph_name, graph)
+        
+        graph_name = 'php_apc_fragment_avgsize'
+        if self.graphEnabled(graph_name):
+            self._extras = True
+            graph = MuninGraph('PHP APC Cache - Avg. Fragment Size (bytes)', 
+                self._category,
+                info='Average memory fragment size in bytes for PHP APC Cache.',
+                args='--base 1000 --lower-limit 0')
+            graph.addField('size', 'size', draw='LINE2', type='GAUGE')
+            self.appendGraph(graph_name, graph)
         
     def retrieveVals(self):
         """Retrieve values for graphs."""
         apcinfo = APCinfo(self._host, self._port, self._user, self._password, 
-                          self._monpath, self._ssl)
+                          self._monpath, self._ssl, self._extras)
         stats = apcinfo.getAllStats()
         
         if self.hasGraph('php_apc_memory') and stats:
@@ -191,6 +230,15 @@ class MuninPHPapcPlugin(MuninPlugin):
                              stats['cache_sys']['expunges'])
             self.setGraphVal('php_apc_expunge', 'usercache', 
                              stats['cache_user']['expunges'])
+        if self.hasGraph('php_apc_fragment_ratio'):
+            self.setGraphVal('php_apc_fragment_ratio', 'ratio', 
+                             stats['memory']['fragmentation_ratio'] * 100)
+        if self.hasGraph('php_apc_fragment_count'):
+            self.setGraphVal('php_apc_fragment_count', 'num',
+                             stats['memory']['fragment_count'])
+        if self.hasGraph('php_apc_fragment_avgsize'):
+            self.setGraphVal('php_apc_fragment_avgsize', 'size',
+                             stats['memory']['fragment_avg_size'])
     
     def autoconf(self):
         """Implements Munin Plugin Auto-Configuration Option.

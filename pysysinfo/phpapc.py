@@ -25,7 +25,7 @@ class APCinfo:
     """Class to retrieve stats from APC from Web Server."""
 
     def __init__(self, host=None, port=None, user=None, password=None,
-                 monpath=None, ssl=False, autoInit=True):
+                 monpath=None, ssl=False, extras=False, autoInit=True):
         """Initialize URL for APC stats access.
         
         @param host:     Web Server Host. (Default: 127.0.0.1)
@@ -37,6 +37,8 @@ class APCinfo:
         @param monpath:  APC status script path relative to Document Root.
                          (Default: apcinfo.php)
         @param ssl:      Use SSL if True. (Default: False)
+        @param extras:   Include extra metrics, which can be computationally more 
+                         expensive.
         @param autoInit: If True connect to Web Server on instantiation.
             
         """
@@ -61,16 +63,26 @@ class APCinfo:
             self._monpath = monpath
         else:
             self._monpath = 'apcinfo.php'
-        self._statusDict = None 
+        self._extras = extras
+        self._statusDict = None
         if autoInit:
             self.initStats()
 
-    def initStats(self):
+    def initStats(self, extras=None):
         """Query and parse Web Server Status Page.
         
+        @param extras: Include extra metrics, which can be computationally more 
+                       expensive.
+        
         """
-        url = "%s://%s:%d/%s" % (self._proto, self._host, self._port, 
-                                 self._monpath)
+        if extras is not None:
+            self._extras = extras
+        if self._extras:
+            detail = 1
+        else:
+            detail = 0
+        url = "%s://%s:%d/%s?detail=%s" % (self._proto, self._host, self._port, 
+                                           self._monpath, detail)
         response = util.get_url(url, self._user, self._password)
         self._statusDict = {}
         for line in response.splitlines():
@@ -109,6 +121,4 @@ class APCinfo:
         @return: Nested dictionary of stats.
         
         """
-        return self._statusDict;    
-
-        
+        return self._statusDict;
