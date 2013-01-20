@@ -8,7 +8,7 @@ About
 Python Module for developing Munin Multigraph Monitoring Plugins.
 
 More detailed documentation for the project and sample graphs for plugins are 
-published in the [PyMunin Project Web Page](http://aouyar.github.com/PyMunin/)
+published in the [PyMunin Project Web Page](http://aouyar.github.com/PyMunin/).
 
 Regular Munin Plugins employ one-plugin one-graph logic and require the 
 execution of a script for data retrieval for each graph.
@@ -77,13 +77,6 @@ yet for the following:
 * Squid Web Proxy
 
 
-Documentation
--------------
-
-The documentation for the project and sample graphs for plugins will be 
-published in the [PyMunin Project Web Page](http://aouyar.github.com/PyMunin/).
-
-
 Licensing
 ---------
 
@@ -91,6 +84,60 @@ _PyMunin_ is copyrighted free software made available under the terms of the
 _GPL License Version 3_ or later.
 
 See the _COPYING_ file that acompanies the code for full licensing information.
+
+
+Download
+--------
+
+New versions of the code are be published for download 
+at [PyPI - the Python Package Index](http://pypi.python.org/pypi/PyMunin) 
+periodically.
+
+You can download the latest development version of this code that is hosted 
+at [GitHub](https://github.com/{{ site.user }}/{{ page.prjname }}) either
+in [ZIP](https://github.com/aouyar/PyMunin/zipball/master)
+or [TAR](https://github.com/aouyar/PyMunin/tarball/master) 
+format.
+
+You can also get the latest development version of the code by cloning  
+the [Git](http://git-scm.com) repository for the project by running:
+
+	git clone git://github.com/aouyar/PyMunin
+
+
+Installation
+------------
+
+The easiest way to install the code is to use [pip](http://www.pip-installer.org/).
+
+Install the newest version from [PyPI](http://pypi.python.org/pypi/PyMunin):
+
+	pip install PyMunin
+	
+Install the latest development version:
+
+	pip install git+https://github.com/aouyar/PyMunin.git#egg=PyMunin
+	
+The other option is to download and uncompress the code manually and execute the 
+included _setup.py_ script for installation:
+
+	./setup.py install
+
+
+Collaboration
+-------------
+
+I would be happy to receive suggestions on improving the code for developing 
+Munin Plugins. Alternatively you can use the _Issues_ functionality of _GitHub_ 
+to document problems and to propose improvements. You can use the internal 
+messaging system of _GitHub_ or my e-mail address in case you prefer to 
+contact me directly.
+
+I hope that by sharing the code, the existing plugins will get more testing and 
+receive improvements, and many more Multigraph plugins will be developed 
+collaboratively.
+
+I would be glad to receive some sample graphs from anyone using the plugins.
 
 
 Credits
@@ -123,47 +170,3 @@ the Varnish Cache and PHP APC Cache Plugins.
 
 I hope that more people will be using PyMunin for developing plugins in the 
 future.
-
-
-Installation
-------------
-
-The easiest way to install the code is to use [pip](http://www.pip-installer.org/):
-
-* Install the newest version from [PyPI](http://pypi.python.org):
-	pip install PyMunin
-* Install the latest development versión:
-	pip install git+https://github.com/aouyar/PyMunin.git#egg=PyMunin
-
-The other option is to download and uncompress the code and execute the included
-_setup.py_ script for installation:
-	./setup.py install
-
-For detailed instructions on the installation process please check the 
-project documentation at
- [PyMunin Project Web Page](http://aouyar.github.com/PyMunin/).
-
-
-Troubleshooting
----------------
-
-On error plugins return short error messages by default. Plugin debugging must
-be enabled to return full trace for exceptions.
-
-To enable plugin debugging in _munin-run_ use the _--pidebug_ option. 
-
-
-Collaboration
--------------
-
-I would be happy to receive suggestions on improving the code for developing 
-Munin Plugins. Alternatively you can use the _Issues_ functionality of _GitHub_ 
-to document problems and to propose improvements. You can use the internal 
-messaging system of _GitHub_ or my e-mail address in case you prefer to 
-contact me directly.
-
-I hope that by sharing the code, the existing plugins will get more testing and 
-receive improvements, and many more Multigraph plugins will be developed 
-collaboratively.
-
-I would be glad to receive some sample graphs from anyone using the plugins.
