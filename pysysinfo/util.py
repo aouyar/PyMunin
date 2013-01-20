@@ -32,16 +32,20 @@ def parse_value(val, parsebool=False):
     @return:          Value of type int, float or str.
         
     """
-    if re.match('-{0,1}\d+$',  str(val)):
-            return int(val)
-    elif re.match('-{0,1}\d*\.\d+$',  str(val)):
+    try:
+        return int(val)
+    except ValueError:
+        pass
+    try:
         return float(val)
-    elif parsebool and re.match('yes|on', str(val), re.IGNORECASE):
-        return True
-    elif parsebool and re.match('no|off', str(val), re.IGNORECASE):
-        return False
-    else:
-        return val
+    except:
+        pass
+    if parsebool:
+        if re.match('yes|on', str(val), re.IGNORECASE):
+            return True
+        elif re.match('no|off', str(val), re.IGNORECASE):
+            return False
+    return val
     
 
 def safe_sum(seq):
@@ -209,7 +213,7 @@ class SoftwareVersion(tuple):
                                 " of integers.")
         
     def __str__(self):
-        """
+        """Returns string representation of version.
         
         """
         return self._versionstr
