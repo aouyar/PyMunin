@@ -53,7 +53,7 @@ class VarnishInfo:
             mobj = re.match('(\S+)\s+(\d+)\s+(\d+\.\d+|\.)\s+(\S.*\S)\s*$', 
                             line)
             if mobj:
-                info_dict[mobj.group(1)] = util.parse_value(mobj.group(2))
+                info_dict[mobj.group(1).replace('.', '_')] = util.parse_value(mobj.group(2))
                 self._descDict[mobj.group(1)] = mobj.group(4)
         return info_dict
         return info_dict
@@ -78,3 +78,4 @@ class VarnishInfo:
         if len(self._descDict) == 0:
             self.getStats()
         return self._descDict.get(entry)
+
