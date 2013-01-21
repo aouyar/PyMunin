@@ -151,8 +151,8 @@ class MuninVarnishPlugin(MuninPlugin):
             for flabel, fname in (('header', 's_hdrbytes'), 
                                   ('body', 's_bodybytes'),):
                 finfo = self._desc.get(fname, '')
-                graph.addField(fname, flabel, draw='AREASTACK', type='COUNTER',
-                           min=0, info=self._desc.get(fname, ''))
+                graph.addField(fname, flabel, draw='AREASTACK', type='DERIVE',
+                           min=0, info=finfo)
             self.appendGraph(graph_name, graph)
 
         graph_name = 'varnish_workers'
@@ -161,8 +161,11 @@ class MuninVarnishPlugin(MuninPlugin):
                 self._category,
                 info='Number of worker threads.',
                 args='--base 1000 --lower-limit 0')
-            graph.addField('n_wrk', 'req', draw='LINE2', type='GAUGE', 
-                           min=0, info=self._desc.get('n_wrk'))
+            fname = 'n_wrk'
+            flabel = 'req'
+            finfo = self._desc.get(fname, '')
+            graph.addField(fname, flabel, draw='LINE2', type='GAUGE', 
+                           min=0, info=finfo)
             self.appendGraph(graph_name, graph)
             
         graph_name = 'varnish_work_queue'
