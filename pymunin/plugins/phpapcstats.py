@@ -18,9 +18,9 @@ Multigraph Plugin - Graph Structure
    - php_apc_reqs_filecache
    - php_apc_reqs_usercache
    - php_apc_expunge
-   - php_apc_fragment_ratio
-   - php_apc_fragment_count
-   - php_apc_fragment_avgsize
+   - php_apc_mem_util_frag
+   - php_apc_mem_frag_count
+   - php_apc_mem_frag_avgsize
 
    
 Environment Variables
@@ -100,8 +100,8 @@ class MuninPHPapcPlugin(MuninPlugin):
         
         graph_name = 'php_apc_memory'
         if self.graphEnabled(graph_name):
-            graph = MuninGraph('PHP APC Cache - Memory Utilization (bytes)', self._category,
-                info='Memory Utilization of PHP APC Cache in bytes.',
+            graph = MuninGraph('PHP APC Cache - Memory Usage (bytes)', self._category,
+                info='Memory usage of PHP APC Cache in bytes.',
                 args='--base 1024 --lower-limit 0')
             graph.addField('filecache', 'File Cache', draw='AREASTACK', 
                            type='GAUGE')
@@ -160,17 +160,20 @@ class MuninPHPapcPlugin(MuninPlugin):
                            type='DERIVE', min=0)
             self.appendGraph(graph_name, graph)
         
-        graph_name = 'php_apc_fragment_ratio'
+        graph_name = 'php_apc_mem_util_frag'
         if self.graphEnabled(graph_name):
             self._extras = True
-            graph = MuninGraph('PHP APC Cache - Fragmentation Ratio (%)', 
+            graph = MuninGraph('PHP APC Cache - Memory Util. vs. Fragmentation (%)', 
                 self._category,
-                info='Memory fragmentation ratio ratio for PHP APC Cache.',
-                args='--base 1000 --lower-limit 0')
-            graph.addField('ratio', 'ratio', draw='LINE2', type='GAUGE')
+                info='PHP APC Cache Memory utilization and fragmentation.',
+                args='--base 1000 --lower-limit 0', scale=False,)
+            graph.addField('util', 'util', draw='LINE2', type='GAUGE', 
+                           min=0, max=100)
+            graph.addField('frag', 'frag', draw='LINE2', type='GAUGE',
+                           min=0, max=100)
             self.appendGraph(graph_name, graph)
         
-        graph_name = 'php_apc_fragment_count'
+        graph_name = 'php_apc_mem_frag_count'
         if self.graphEnabled(graph_name):
             self._extras = True
             graph = MuninGraph('PHP APC Cache - Fragment Count', 
@@ -180,7 +183,7 @@ class MuninPHPapcPlugin(MuninPlugin):
             graph.addField('num', 'num', draw='LINE2', type='GAUGE')
             self.appendGraph(graph_name, graph)
         
-        graph_name = 'php_apc_fragment_avgsize'
+        graph_name = 'php_apc_mem_frag_avgsize'
         if self.graphEnabled(graph_name):
             self._extras = True
             graph = MuninGraph('PHP APC Cache - Avg. Fragment Size (bytes)', 
@@ -230,14 +233,16 @@ class MuninPHPapcPlugin(MuninPlugin):
                              stats['cache_sys']['expunges'])
             self.setGraphVal('php_apc_expunge', 'usercache', 
                              stats['cache_user']['expunges'])
-        if self.hasGraph('php_apc_fragment_ratio'):
-            self.setGraphVal('php_apc_fragment_ratio', 'ratio', 
+        if self.hasGraph('php_apc_mem_util_frag'):
+            self.setGraphVal('php_apc_mem_util_frag', 'util', 
+                             stats['memory']['utilization_ratio'] * 100)
+            self.setGraphVal('php_apc_mem_util_frag', 'frag', 
                              stats['memory']['fragmentation_ratio'] * 100)
-        if self.hasGraph('php_apc_fragment_count'):
-            self.setGraphVal('php_apc_fragment_count', 'num',
+        if self.hasGraph('php_apc_mem_frag_count'):
+            self.setGraphVal('php_apc_mem_frag_count', 'num',
                              stats['memory']['fragment_count'])
-        if self.hasGraph('php_apc_fragment_avgsize'):
-            self.setGraphVal('php_apc_fragment_avgsize', 'size',
+        if self.hasGraph('php_apc_mem_frag_avgsize'):
+            self.setGraphVal('php_apc_mem_frag_avgsize', 'size',
                              stats['memory']['fragment_avg_size'])
     
     def autoconf(self):
