@@ -151,8 +151,8 @@ class MuninVarnishPlugin(MuninPlugin):
             for flabel, fname in (('header', 's_hdrbytes'), 
                                   ('body', 's_bodybytes'),):
                 finfo = self._desc.get(fname, '')
-                graph.addField(fname, flabel, draw='AREASTACK', type='DERIVE', 
-                           min=0, info=self._desc.get('s_hdrbytes'))
+                graph.addField(fname, flabel, draw='AREASTACK', type='COUNTER',
+                           min=0, info=self._desc.get(fname, ''))
             self.appendGraph(graph_name, graph)
 
         graph_name = 'varnish_workers'
@@ -184,9 +184,9 @@ class MuninVarnishPlugin(MuninPlugin):
             graph = MuninGraph('Varnish - Cache Memory Usage (bytes)', 
                 self._category,
                 info='Varnish cache memory usage in bytes.',
-                args='--base 1000 --lower-limit 0')
-            for flabel, fname in (('used', 'SMA.s0.g_bytes'), 
-                                  ('free', 'SMA.s0.g_space')):
+                args='--base 1024 --lower-limit 0')
+            for flabel, fname in (('used', 'SMA_s0_g_bytes'),
+                                  ('free', 'SMA_s0_g_space')):
                 finfo = self._desc.get(fname, '')
                 graph.addField(fname, flabel, draw='AREASTACK', type='GAUGE', 
                                min=0, info=finfo)
@@ -227,3 +227,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
