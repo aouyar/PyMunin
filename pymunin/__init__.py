@@ -16,7 +16,7 @@ __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = ["Samuel Stauffer (https://github.com/samuel)",
                "Mark Lavin (https://github.com/mlavin)"]
 __license__ = "GPL"
-__version__ = "0.9.23"
+__version__ = "0.9.24"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
@@ -960,8 +960,8 @@ def muninMain(pluginClass, argv=None, env=None, debug=False):
             return 0
         else:
             return 1
-    except Exception, e:
-        print >> sys.stderr, "EXCEPTION: %s" % str(e)
+    except Exception:
+        print >> sys.stderr, "ERROR: %s" % repr(sys.exc_info()[1])
         if autoconf:
             print "no"
         if debug:
