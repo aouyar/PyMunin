@@ -11,7 +11,7 @@ __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = []
 __license__ = "GPL"
-__version__ = "0.8"
+__version__ = "0.9.24"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
@@ -53,9 +53,9 @@ class VarnishInfo:
             mobj = re.match('(\S+)\s+(\d+)\s+(\d+\.\d+|\.)\s+(\S.*\S)\s*$', 
                             line)
             if mobj:
-                info_dict[mobj.group(1).replace('.', '_')] = util.parse_value(mobj.group(2))
-                self._descDict[mobj.group(1)] = mobj.group(4)
-        return info_dict
+                fname = mobj.group(1).replace('.', '_')
+                info_dict[fname] = util.parse_value(mobj.group(2))
+                self._descDict[fname] = mobj.group(4)
         return info_dict
     
     def getDescDict(self):
