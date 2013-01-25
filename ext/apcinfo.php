@@ -3,7 +3,7 @@
 # __copyright__ = "Copyright 2011, Ali Onur Uyar"
 # __credits__ = ["Preston Mason (https://github.com/pentie)",]
 # __license__ = "GPL"
-# __version__ = "0.9.25"
+# __version__ = "0.9.26"
 # __maintainer__ = "Ali Onur Uyar"
 # __email__ = "aouyar at gmail.com"
 # __status__ = "Development"
@@ -24,9 +24,9 @@ header('Cache-Control: max-age=0, no-cache, '
         . 'pre-check=0, post-check=0');
 
 # Process query parameters.
-if ($_GET['detail']) {
+if (isset($_GET) && isset($_GET['detail']) && $_GET['detail']) {
 	$detail = TRUE;
-	if ($_GET['algorithm']) {
+	if (isset($_GET['algorithm'])) {
 		$algorithm = $_GET['algorithm'];
 	}
 	else {
@@ -63,6 +63,7 @@ if ($detail) {
 	$total_num_frag = 0;
 	$total_frag = 0;
 	$total_free = 0;
+	$total_free_small = 0;
 	for($i=0; $i < $num_seg; $i++) {
 		$seg_free_max = 0; $seg_free_total = 0; $seg_num_frag = 0;
 		$seg_free_small = 0;
@@ -103,6 +104,5 @@ if ($detail) {
 foreach ($mem as $key => $val) {
   printf("%s:%s:%s\n",'memory', $key, $val); 
 }
-
 
 ?>
