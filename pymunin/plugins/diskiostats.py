@@ -106,10 +106,9 @@ class MuninDiskIOplugin(MuninPlugin):
         else:
             self._partList = None
             
-        devlist = self._info.getLVlist()
-        if devlist:
-            devlist.sort()
-            self._lvList = ["-".join(x) for x in devlist]
+        self._lvList = self._info.getLVnameList()
+        if self._lvList:
+            self._lvList.sort()
             self._configDevRequests('lv', 'LV', self._lvList)
             self._configDevBytes('lv', 'LV', self._lvList)
             self._configDevActive('lv', 'LV', self._lvList)

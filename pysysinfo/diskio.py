@@ -4,6 +4,7 @@
 
 import re
 import os
+import stat
 from filesystem import FilesystemInfo
 from system import SystemInfo
 
@@ -35,10 +36,10 @@ class DiskIOinfo:
         
         """
         self._diskStats = None
+        self._mapMajorMinor2dev = None
         self._mapMajorDevclass = None
-        self._mapMinorLV = None
-        self._mapLVminor = None
-        self._mapMinorDmName = None
+        self._mapLVtuple2dm = None
+        self._mapLVname2dm = None
         self._mapDevType = None
         self._mapFSpathDev = None
         self._dmMajorNum = None
@@ -47,6 +48,40 @@ class DiskIOinfo:
         self._vgTree = None
         self._partList = None
         self._swapList = None
+        self._initDiskStats()
+    
+    def _getDevMajorMinor(self, devpath):
+        """Return major and minor device number for block device path devpath.
+        @param devpath: Full path for block device.
+        @return:        Tuple (major, minor).
+        
+        """
+        fstat = os.stat(devpath)
+        if stat.S_ISBLK(fstat.st_mode):
+            return(os.major(fstat.st_rdev), os.minor(fstat.st_rdev))
+        else:
+            raise ValueError("The file %s is not a valid block device." % devpath)
+    
+    def _getUniqueDev(self, devpath):
+        """Return unique device for any block device path.
+        
+        @param devpath: Full path for block device.
+        @return:        Unique device string without the /dev prefix.
+        
+        """
+        realpath = os.path.realpath(devpath)
+        mobj = re.match('\/dev\/(.*)$', realpath)
+        if mobj:
+            dev = mobj.group(1)
+            if dev in self._diskStats:
+                return dev
+            else:
+                try:
+                    (major, minor) = self._getDevMajorMinor(realpath)
+                except:
+                    return None
+                return self._mapMajorMinor2dev.get((major, minor))
+        return None
 
     def _initBlockMajorMap(self):
         """Parses /proc/devices to initialize device class - major number map
@@ -59,7 +94,7 @@ class DiskIOinfo:
             data = fp.read()
             fp.close()
         except:
-            raise IOError('Failed reading interface stats from file: %s'
+            raise IOError('Failed reading device information from file: %s'
                           % devicesFile)
         skip = True
         for line in data.splitlines():
@@ -81,41 +116,35 @@ class DiskIOinfo:
         and LVs.
         
         """
-        self._mapMinorDmName = {}
-        self._mapMinorLV = {}
-        self._mapLVminor = {}
+        self._mapLVtuple2dm = {}
+        self._mapLVname2dm = {}
         self._vgTree = {}
         if self._dmMajorNum is None:
             self._initBlockMajorMap()
         for file in os.listdir(devmapperDir):
-            path = os.path.join(devmapperDir, file)
-            fstat = os.stat(path)
-            major = os.major(fstat.st_rdev)
-            minor = os.minor(fstat.st_rdev)
-            if major == self._dmMajorNum:
-                self._mapMinorDmName[minor] = file
-            mobj = re.match('(.*[^!])-([^!].*)$', file)
+            mobj = re.match('([a-zA-Z0-9+_.\-]*[a-zA-Z0-9+_.])-([a-zA-Z0-9+_.][a-zA-Z0-9+_.\-]*)$', file)
             if mobj:
-                vg = mobj.group(1)
-                lv = mobj.group(2)
-                self._mapMinorLV[minor] = (vg,lv)
-                self._mapLVminor["-".join((vg,lv))] = minor
-                if not self._vgTree.has_key(vg):
-                    self._vgTree[vg] = []
-                self._vgTree[vg].append(lv)
+                path = os.path.join(devmapperDir, file)
+                (major, minor) = self._getDevMajorMinor(path)
+                if major == self._dmMajorNum:
+                    vg = mobj.group(1).replace('--', '-')
+                    lv = mobj.group(2).replace('--', '-')
+                    dmdev = "dm-%d" % minor
+                    self._mapLVtuple2dm[(vg,lv)] = dmdev
+                    self._mapLVname2dm[file] = dmdev
+                    if not vg in self._vgTree:
+                        self._vgTree[vg] = []
+                    self._vgTree[vg].append(lv)
                 
     def _initFilesystemInfo(self):
         """Initialize filesystem to device mappings."""
         self._mapFSpathDev = {}
         fsinfo = FilesystemInfo()
-        if self._diskStats is None:
-            self._initDiskStats()
         for fs in fsinfo.getFSlist():
             devpath = fsinfo.getFSdev(fs)
-            if re.match('\/dev\/', devpath):
-                mobj = re.match('\/dev\/(.*)$', os.path.realpath(devpath))
-                if mobj:
-                    self._mapFSpathDev[fs] = mobj.group(1)
+            dev = self._getUniqueDev(devpath)
+            if dev is not None:
+                self._mapFSpathDev[fs] = dev
     
     def _initSwapInfo(self):
         """Initialize swap partition to device mappings."""
@@ -123,19 +152,20 @@ class DiskIOinfo:
         sysinfo = SystemInfo()
         for (swap,attrs) in sysinfo.getSwapStats().iteritems():
             if attrs['type'] == 'partition':
-                mobj = re.match('\/dev\/(.*)$', os.path.realpath(swap))
-                if mobj:
-                    self._swapList.append(mobj.group(1))
+                dev = self._getUniqueDev(swap)
+                if dev is not None:
+                    self._swapList.append(dev)
     
     def _initDiskStats(self):
         """Parse and initialize block device I/O stats in /proc/diskstats."""
         self._diskStats = {}
+        self._mapMajorMinor2dev = {}
         try:
             fp = open(diskStatsFile, 'r')
             data = fp.read()
             fp.close()
         except:
-            raise IOError('Failed reading interface stats from file: %s'
+            raise IOError('Failed reading disk stats from file: %s'
                           % diskStatsFile)
         for line in data.splitlines():
             cols = line.split()
@@ -158,7 +188,8 @@ class DiskIOinfo:
             self._diskStats[dev]['rbytes'] = (
                 self._diskStats[dev]['rsect'] * sectorSize)
             self._diskStats[dev]['wbytes'] = (
-                self._diskStats[dev]['wsect'] * sectorSize) 
+                self._diskStats[dev]['wsect'] * sectorSize)
+            self._mapMajorMinor2dev[(int(cols[0]), int(cols[1]))] = dev
                     
     def _initDevClasses(self):
         """Sort block devices into lists depending on device class and 
@@ -170,8 +201,6 @@ class DiskIOinfo:
         otherdevs = []
         if self._mapMajorDevclass is None:
             self._initBlockMajorMap()
-        if self._diskStats is None:
-            self._initDiskStats()
         for dev in self._diskStats:
             stats = self._diskStats[dev]
             devclass = self._mapMajorDevclass.get(stats['major'])
@@ -214,8 +243,6 @@ class DiskIOinfo:
         @return: List of device names.
         
         """
-        if self._diskStats is None:
-            self._initDiskStats()
         return self._diskStats.keys()
     
     def getDiskList(self):
@@ -289,7 +316,7 @@ class DiskIOinfo:
         """
         return self.getVGdict().keys()
         
-    def getLVlist(self):
+    def getLVtupleList(self):
         """Returns list of LV Devices.
         
         @return: List of (vg,lv) pairs.
@@ -297,7 +324,17 @@ class DiskIOinfo:
         """
         if self._vgTree is None:
             self._initDMinfo()
-        return self._mapMinorLV.values()
+        return self._mapLVtuple2dm.keys()
+    
+    def getLVnameList(self):
+        """Returns list of LV Devices.
+        
+        @return: List of LV Names in vg-lv format.
+        
+        """
+        if self._vgTree is None:
+            self._initDMinfo()
+        return self._mapLVname2dm.keys()
 
     def getFilesystemDict(self):
         """Returns map of filesystems to disk devices.
@@ -335,8 +372,6 @@ class DiskIOinfo:
         @return:        Dict of stats.
         
         """
-        if self._diskStats is None:
-            self._initDiskStats()
         if devtype is not None:
             if self._devClassTree is None:
                 self._initDevClasses()
@@ -399,22 +434,21 @@ class DiskIOinfo:
         
         @param args: Two calling conventions are implemented:
                      - Passing two parameters vg and lv.
-                     - Passing only one parameter in vg-lv format.  
+                     - Passing only one parameter in 'vg-lv' format.  
         @return:     Dict of stats.
         
         """
-        if len(args) == 1:
-            lvdev = args[0]
-        elif len(args) == 2:
-            lvdev = '-'.join(args)
-        else:
-            raise AttributeError("The getLVstats must be called with either "
-                                 "one or two arguments.")
-        if self._mapLVminor is None:
+        if not len(args) in (1, 2):
+            raise TypeError("The getLVstats must be called with either "
+                            "one or two arguments.")
+        if self._vgTree is None:
             self._initDMinfo()
-        minor = self._mapLVminor.get(lvdev)
-        if minor is not None:
-            return self.getDevStats("dm-%d" % minor)
+        if len(args) == 1:
+            dmdev = self._mapLVname2dm.get(args[0])
+        else:
+            dmdev = self._mapLVtuple2dm.get(args)
+        if dmdev is not None:
+            return self.getDevStats(dmdev)
         else:
             return None
     
@@ -425,8 +459,6 @@ class DiskIOinfo:
         @return: Dict of stats.
         
         """
-        if self._diskStats is None:
-            self._initDiskStats()
         if self._mapFSpathDev is None:
             self._initFilesystemInfo()
         return self._diskStats.get(self._mapFSpathDev.get(fs))
