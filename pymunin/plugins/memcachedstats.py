@@ -424,7 +424,7 @@ class MuninMemcachedPlugin(MuninPlugin):
                     ('incr',  'incr_hits',  'incr_misses'), 
                     ('decr',  'decr_hits',  'decr_misses')
                 ):
-                val = float(100)
+                val = float(0)
                 if prev_stats:
                     if (stats.has_key(field_hits) 
                         and prev_stats.has_key(field_hits)
