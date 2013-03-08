@@ -396,17 +396,17 @@ class MuninAsteriskPlugin(MuninPlugin):
                     total_answer += stats.get('calls_completed')
                 if self.hasGraph('asterisk_queue_abandon_pcent'):
                     prev_stats = self._queues_prev.get(queue)
-                    val = 0
                     if prev_stats is not None:
                         abandon = (stats.get('calls_abandoned', 0) -
                                    prev_stats.get('calls_abandoned', 0))
                         answer = (stats.get('calls_completed', 0) -
                                   prev_stats.get('calls_completed', 0))
-                        if answer >= 0 and abandon >= 0:
-                            total = abandon + answer
-                            if total > 0:
-                                val = 100.0 * float(abandon) / float(total)
-                    self.setGraphVal('asterisk_queue_abandon_pcent', 
+                        total = abandon + answer    
+                        if total > 0:
+                            val = 100.0 * float(abandon) / float(total)
+                        else:
+                            val = 0
+                        self.setGraphVal('asterisk_queue_abandon_pcent', 
                                      queue, val)
             if self.hasGraph('asterisk_queue_calls'):
                     self.setGraphVal('asterisk_queue_calls', 'abandon', 

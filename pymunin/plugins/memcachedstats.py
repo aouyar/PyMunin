@@ -424,7 +424,6 @@ class MuninMemcachedPlugin(MuninPlugin):
                     ('incr',  'incr_hits',  'incr_misses'), 
                     ('decr',  'decr_hits',  'decr_misses')
                 ):
-                val = float(0)
                 if prev_stats:
                     if (stats.has_key(field_hits) 
                         and prev_stats.has_key(field_hits)
@@ -435,6 +434,8 @@ class MuninMemcachedPlugin(MuninPlugin):
                         total = hits + misses
                         if total > 0:
                             val = 100.0 * hits / total
+                        else:
+                            val = 0
                         self.setGraphVal('memcached_hitpct',  field_name, 
                                          round(val,  2))
                         
