@@ -16,7 +16,7 @@ __copyright__ = "Copyright 2011, Ali Onur Uyar"
 __credits__ = ["Samuel Stauffer (https://github.com/samuel)",
                "Mark Lavin (https://github.com/mlavin)"]
 __license__ = "GPL"
-__version__ = "0.9.27"
+__version__ = "0.9.28"
 __maintainer__ = "Ali Onur Uyar"
 __email__ = "aouyar at gmail.com"
 __status__ = "Development"
@@ -798,7 +798,7 @@ class MuninGraph:
 
     def __init__(self, title, category = None, vlabel=None, info=None, 
                  args =None, period=None, scale=None,  total=None, order=None, 
-                 printf=None, witdh=None, height=None,
+                 printf=None, width=None, height=None,
                  autoFixNames = False):
         """Initialize Munin Graph.
         
