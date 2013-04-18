@@ -45,7 +45,7 @@ Environment Variables for Multiple Instances of Plugin (Omitted by default.)
 
   Example:
     [phpzopstats]
-        env.exclude_graphs php_zop_key
+        env.exclude_graphs php_zop_key_status,php_zop_opcache_statistics
 
 """
 # Munin  - Magic Markers
@@ -102,7 +102,7 @@ class MuninPHPZopPlugin(MuninPlugin):
             graph.addField('wasted_memory', 'Wasted Memory', draw='AREASTACK', 
                            type='GAUGE')
             graph.addField('free_memory', 'Free Memory', draw='AREASTACK', type='GAUGE')
-            graph.addField('total', 'total', draw='LINE2', type='GAUGE', colour='000000')
+            graph.addField('total', 'Total Memory', draw='LINE2', type='GAUGE', colour='000000')
 
             self.appendGraph(graph_name, graph)
         
@@ -112,9 +112,9 @@ class MuninPHPZopPlugin(MuninPlugin):
                 info='Hits and Misses of Zend Optimizer+ Opcache.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('hits', 'hits', draw='AREASTACK', 
-                           type='DERIVE', min=0)
+                           type='GAUGE', min=0)
             graph.addField('misses', 'misses', draw='AREASTACK',
-                           type='DERIVE', min=0)
+                           type='GAUGE', min=0)
             self.appendGraph(graph_name, graph)
 
         graph_name = 'php_zop_key_status'
@@ -123,9 +123,9 @@ class MuninPHPZopPlugin(MuninPlugin):
                 info='Key usage of Zend Optimizer+ Opcache.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('max_cached_keys', 'Max Cached Keys', draw='AREASTACK', 
-                           type='DERIVE', min=0)
+                           type='GAUGE', min=0)
             graph.addField('num_cached_keys', 'Cached Keys', draw='AREASTACK',
-                           type='DERIVE', min=0)
+                           type='GAUGE', min=0)
             self.appendGraph(graph_name, graph)
         
     def retrieveVals(self):
