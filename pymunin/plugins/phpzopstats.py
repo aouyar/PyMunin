@@ -122,9 +122,9 @@ class MuninPHPZopPlugin(MuninPlugin):
             graph = MuninGraph('PHP Zend Optimizer+ - Key Statistics', self._category,
                 info='Key usage of Zend Optimizer+ Opcache.',
                 args='--base 1000 --lower-limit 0')
-            graph.addField('max_cached_keys', 'Max Cached Keys', draw='AREASTACK', 
+            graph.addField('max_cached_keys', 'Max Cached Keys', draw='AREA',
                            type='GAUGE', min=0)
-            graph.addField('num_cached_keys', 'Cached Keys', draw='AREASTACK',
+            graph.addField('num_cached_keys', 'Cached Keys', draw='STACK',
                            type='GAUGE', min=0)
             self.appendGraph(graph_name, graph)
         
