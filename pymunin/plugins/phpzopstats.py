@@ -137,7 +137,7 @@ class MuninPHPZopPlugin(MuninPlugin):
                 args='--base 1000 --lower-limit 0')
             graph.addField('max_cached_keys', 'Max Cached Keys', draw='AREA',
                            type='GAUGE', min=0)
-            graph.addField('num_cached_keys', 'Cached Keys', draw='STACK',
+            graph.addField('num_cached_keys', 'Cached Keys', draw='AREA',
                            type='GAUGE', min=0)
             self.appendGraph(graph_name, graph)
         
