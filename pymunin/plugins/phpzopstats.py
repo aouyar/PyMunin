@@ -14,8 +14,9 @@ Wild Card Plugin - No
 Multigraph Plugin - Graph Structure
 
    - php_zop_memory
-   - php_zop_opcache_statistics
    - php_zop_key_status
+   - php_zop_opcache_statistics
+   - php_zop_opcache_hitrate
 
    
 Environment Variables
@@ -117,6 +118,18 @@ class MuninPHPZopPlugin(MuninPlugin):
                            type='GAUGE', min=0)
             self.appendGraph(graph_name, graph)
 
+        graph_name = 'php_zop_opcache_hitrate'
+        if self.graphEnabled(graph_name):
+            graph = MuninGraph('PHP Zend Optimizer+ - Hit Percent', self._category,
+                info='Hit percent for PHP Zend Optimizer+.',
+                vlabel='%', args='--base 1000 --lower-limit 0')
+
+            graph.addField('opcache_hit_rate', 'Hit Percentage', draw='LINE2', type='GAUGE',
+                           info='Hit Percentage', min=0)
+
+            self.appendGraph(graph_name, graph)
+
+
         graph_name = 'php_zop_key_status'
         if self.graphEnabled(graph_name):
             graph = MuninGraph('PHP Zend Optimizer+ - Key Statistics', self._category,
@@ -136,12 +149,9 @@ class MuninPHPZopPlugin(MuninPlugin):
         
         if self.hasGraph('php_zop_memory') and stats:
             mem = stats['memory_usage']
-            self.setGraphVal('php_zop_memory', 'used_memory', mem['used_memory'])
-            self.setGraphVal('php_zop_memory', 'wasted_memory', mem['wasted_memory'])
-            self.setGraphVal('php_zop_memory', 'free_memory', mem['free_memory'])
-
-            self.setGraphVal('php_zop_memory', 'total',
-                    sum((mem['used_memory'], mem['wasted_memory'], mem['free_memory'])))
+            keys = ('used_memory', 'wasted_memory', 'free_memory')
+            map(lambda k:self.setGraphVal('php_zop_memory',k,mem[k]), keys)
+            self.setGraphVal('php_zop_memory', 'total', sum(map(lambda k:mem[k], keys)))
 
         if self.hasGraph('php_zop_opcache_statistics') and stats:
             st = stats['opcache_statistics']
@@ -149,6 +159,11 @@ class MuninPHPZopPlugin(MuninPlugin):
                              st['hits'])
             self.setGraphVal('php_zop_opcache_statistics', 'misses', 
                              st['misses'])
+
+        if self.hasGraph('php_zop_opcache_hitrate') and stats:
+            st = stats['opcache_statistics']
+            self.setGraphVal('php_zop_opcache_hitrate', 'opcache_hit_rate',
+                             st['opcache_hit_rate'])
 
         if self.hasGraph('php_zop_key_status') and stats:
             st = stats['opcache_statistics']
