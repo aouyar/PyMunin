@@ -94,8 +94,8 @@ class MuninPHPZopPlugin(MuninPlugin):
         
         graph_name = 'php_zop_memory'
         if self.graphEnabled(graph_name):
-            graph = MuninGraph('PHP Zend Optimizor+ - Memory Usage (bytes)', self._category,
-                info='Memory usage of Zend Optimizor+ in bytes.',
+            graph = MuninGraph('PHP Zend Optimizer+ - Memory Usage (bytes)', self._category,
+                info='Memory usage of Zend Optimizer+ in bytes.',
                 args='--base 1024 --lower-limit 0')
             graph.addField('used_memory', 'Used Memory', draw='AREASTACK', 
                            type='GAUGE')
@@ -108,8 +108,8 @@ class MuninPHPZopPlugin(MuninPlugin):
         
         graph_name = 'php_zop_opcache_statistics'
         if self.graphEnabled(graph_name):
-            graph = MuninGraph('PHP Zend Optimizor+ - Opcache Statistics', self._category,
-                info='Hits and Misses of Zend Optimizor+ Opcache.',
+            graph = MuninGraph('PHP Zend Optimizer+ - Opcache Statistics', self._category,
+                info='Hits and Misses of Zend Optimizer+ Opcache.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('hits', 'hits', draw='AREASTACK', 
                            type='DERIVE', min=0)
@@ -119,8 +119,8 @@ class MuninPHPZopPlugin(MuninPlugin):
 
         graph_name = 'php_zop_key_status'
         if self.graphEnabled(graph_name):
-            graph = MuninGraph('PHP Zend Optimizor+ - Key Statistics', self._category,
-                info='Key usage of Zend Optimizor+ Opcache.',
+            graph = MuninGraph('PHP Zend Optimizer+ - Key Statistics', self._category,
+                info='Key usage of Zend Optimizer+ Opcache.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('max_cached_keys', 'Max Cached Keys', draw='AREASTACK', 
                            type='DERIVE', min=0)
