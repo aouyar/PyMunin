@@ -97,13 +97,13 @@ class MuninPHPZopPlugin(MuninPlugin):
         if self.graphEnabled(graph_name):
             graph = MuninGraph('PHP Zend Optimizer+ - Memory Usage (bytes)', self._category,
                 info='Memory usage of Zend Optimizer+ in bytes.',
+                total='Free Memory',
                 args='--base 1024 --lower-limit 0')
             graph.addField('used_memory', 'Used Memory', draw='AREASTACK', 
                            type='GAUGE')
             graph.addField('wasted_memory', 'Wasted Memory', draw='AREASTACK', 
                            type='GAUGE')
             graph.addField('free_memory', 'Free Memory', draw='AREASTACK', type='GAUGE')
-            graph.addField('total', 'Total Memory', draw='LINE2', type='GAUGE', colour='000000')
 
             self.appendGraph(graph_name, graph)
         
@@ -123,7 +123,6 @@ class MuninPHPZopPlugin(MuninPlugin):
             graph = MuninGraph('PHP Zend Optimizer+ - Hit Percent', self._category,
                 info='Hit percent for PHP Zend Optimizer+.',
                 vlabel='%', args='--base 1000 --lower-limit 0')
-
             graph.addField('opcache_hit_rate', 'Hit Percentage', draw='LINE2', type='GAUGE',
                            info='Hit Percentage', min=0)
 
@@ -135,9 +134,9 @@ class MuninPHPZopPlugin(MuninPlugin):
             graph = MuninGraph('PHP Zend Optimizer+ - Key Statistics', self._category,
                 info='Key usage of Zend Optimizer+ Opcache.',
                 args='--base 1000 --lower-limit 0')
-            graph.addField('max_cached_keys', 'Max Cached Keys', draw='AREA',
-                           type='GAUGE', min=0)
             graph.addField('num_cached_keys', 'Cached Keys', draw='AREA',
+                           type='GAUGE', min=0)
+            graph.addField('max_cached_keys', 'Max Cached Keys', draw='AREA',
                            type='GAUGE', min=0)
             self.appendGraph(graph_name, graph)
         
@@ -151,7 +150,6 @@ class MuninPHPZopPlugin(MuninPlugin):
             mem = stats['memory_usage']
             keys = ('used_memory', 'wasted_memory', 'free_memory')
             map(lambda k:self.setGraphVal('php_zop_memory',k,mem[k]), keys)
-            self.setGraphVal('php_zop_memory', 'total', sum(map(lambda k:mem[k], keys)))
 
         if self.hasGraph('php_zop_opcache_statistics') and stats:
             st = stats['opcache_statistics']
