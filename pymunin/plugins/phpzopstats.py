@@ -97,7 +97,7 @@ class MuninPHPZopPlugin(MuninPlugin):
         if self.graphEnabled(graph_name):
             graph = MuninGraph('PHP Zend Optimizer+ - Memory Usage (bytes)', self._category,
                 info='Memory usage of Zend Optimizer+ in bytes.',
-                total='Free Memory',
+                total='Total Memory',
                 args='--base 1024 --lower-limit 0')
             graph.addField('used_memory', 'Used Memory', draw='AREASTACK', 
                            type='GAUGE')
