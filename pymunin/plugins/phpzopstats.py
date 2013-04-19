@@ -100,10 +100,11 @@ class MuninPHPZopPlugin(MuninPlugin):
                 total='Total Memory',
                 args='--base 1024 --lower-limit 0')
             graph.addField('used_memory', 'Used Memory', draw='AREASTACK', 
-                           type='GAUGE')
+                           type='GAUGE',colour='FFCC33')
             graph.addField('wasted_memory', 'Wasted Memory', draw='AREASTACK', 
-                           type='GAUGE')
-            graph.addField('free_memory', 'Free Memory', draw='AREASTACK', type='GAUGE')
+                           type='GAUGE', colour='FF3333')
+            graph.addField('free_memory', 'Free Memory', draw='AREASTACK',
+                            type='GAUGE', colour='66FF33')
 
             self.appendGraph(graph_name, graph)
         
@@ -113,9 +114,9 @@ class MuninPHPZopPlugin(MuninPlugin):
                 info='Hits and Misses of Zend Optimizer+ Opcache.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('hits', 'hits', draw='AREASTACK', 
-                           type='GAUGE', min=0)
+                           type='GAUGE', min=0, colour='66FF33')
             graph.addField('misses', 'misses', draw='AREASTACK',
-                           type='GAUGE', min=0)
+                           type='GAUGE', min=0, colour='99CCFF')
             self.appendGraph(graph_name, graph)
 
         graph_name = 'php_zop_opcache_hitrate'
@@ -134,10 +135,10 @@ class MuninPHPZopPlugin(MuninPlugin):
             graph = MuninGraph('PHP Zend Optimizer+ - Key Statistics', self._category,
                 info='Key usage of Zend Optimizer+ Opcache.',
                 args='--base 1000 --lower-limit 0')
-            graph.addField('num_cached_keys', 'Cached Keys', draw='AREA',
-                           type='GAUGE', min=0)
             graph.addField('max_cached_keys', 'Max Cached Keys', draw='AREA',
-                           type='GAUGE', min=0)
+                           type='GAUGE', min=0, colour='99CCFF')
+            graph.addField('num_cached_keys', 'Cached Keys', draw='AREA',
+                           type='GAUGE', min=0, colour='FFCC33')
             self.appendGraph(graph_name, graph)
         
     def retrieveVals(self):
