@@ -104,7 +104,7 @@ class MuninPHPZopPlugin(MuninPlugin):
             graph.addField('wasted_memory', 'Wasted Memory', draw='AREASTACK', 
                            type='GAUGE', colour='FF3333')
             graph.addField('free_memory', 'Free Memory', draw='AREASTACK',
-                            type='GAUGE', colour='66FF33')
+                            type='GAUGE', colour='339933')
 
             self.appendGraph(graph_name, graph)
         
@@ -116,7 +116,7 @@ class MuninPHPZopPlugin(MuninPlugin):
             graph.addField('hits', 'hits', draw='AREASTACK', 
                            type='GAUGE', min=0, colour='66FF33')
             graph.addField('misses', 'misses', draw='AREASTACK',
-                           type='GAUGE', min=0, colour='99CCFF')
+                           type='GAUGE', min=0, colour='0066FF')
             self.appendGraph(graph_name, graph)
 
         graph_name = 'php_zop_opcache_hitrate'
@@ -136,9 +136,9 @@ class MuninPHPZopPlugin(MuninPlugin):
                 info='Key usage of Zend Optimizer+ Opcache.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('max_cached_keys', 'Max Cached Keys', draw='AREA',
-                           type='GAUGE', min=0, colour='99CCFF')
+                           type='GAUGE', min=0, colour='0066FF')
             graph.addField('num_cached_keys', 'Cached Keys', draw='AREA',
-                           type='GAUGE', min=0, colour='FFCC33')
+                           type='GAUGE', min=0, colour='FFFF33')
             self.appendGraph(graph_name, graph)
         
     def retrieveVals(self):
