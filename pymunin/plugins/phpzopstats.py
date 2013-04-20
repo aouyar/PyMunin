@@ -114,9 +114,9 @@ class MuninPHPZopPlugin(MuninPlugin):
                 info='Hits and Misses of Zend Optimizer+ Opcache.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('hits', 'hits', draw='AREASTACK', 
-                           type='GAUGE', min=0, colour='3790E8')
+                           type='DERIVE', min=0, colour='3790E8')
             graph.addField('misses', 'misses', draw='AREASTACK',
-                           type='GAUGE', min=0, colour='FF3333')
+                           type='DERIVE', min=0, colour='FF3333')
             self.appendGraph(graph_name, graph)
 
         graph_name = 'php_zop_opcache_hitrate'
