@@ -134,11 +134,15 @@ class MuninPHPZopPlugin(MuninPlugin):
         if self.graphEnabled(graph_name):
             graph = MuninGraph('PHP Zend Optimizer+ - Key Statistics', self._category,
                 info='Key usage of Zend Optimizer+ Opcache.',
+                total='Total Keys',
                 args='--base 1000 --lower-limit 0')
-            graph.addField('max_cached_keys', 'Max Cached Keys', draw='AREA',
-                           type='GAUGE', min=0, colour='3790E8')
-            graph.addField('num_cached_keys', 'Cached Keys', draw='AREA',
+            graph.addField('num_cached_scripts', 'Used Key (for scripts)', draw='AREASTACK',
                            type='GAUGE', min=0, colour='FFCC33')
+            graph.addField('num_wasted_keys', 'Wasted Key', draw='AREASTACK',
+                           type='GAUGE', colour='FF3333')
+            graph.addField('num_free_keys', 'Free Key', draw='AREASTACK',
+                            type='GAUGE', colour='3790E8')
+
             self.appendGraph(graph_name, graph)
         
     def retrieveVals(self):
@@ -166,10 +170,11 @@ class MuninPHPZopPlugin(MuninPlugin):
 
         if self.hasGraph('php_zop_key_status') and stats:
             st = stats['opcache_statistics']
-            self.setGraphVal('php_zop_key_status', 'max_cached_keys', 
-                             st['max_cached_keys'])
-            self.setGraphVal('php_zop_key_status', 'num_cached_keys', 
-                             st['num_cached_keys'])
+            wasted = st['num_cached_keys'] - st['num_cached_scripts']
+            free = st['max_cached_keys'] - st['num_cached_keys']
+            self.setGraphVal('php_zop_key_status', 'num_cached_scripts', st['num_cached_scripts'])
+            self.setGraphVal('php_zop_key_status', 'num_wasted_keys', wasted)
+            self.setGraphVal('php_zop_key_status', 'num_free_keys', free)
     
     def autoconf(self):
         """Implements Munin Plugin Auto-Configuration Option.
