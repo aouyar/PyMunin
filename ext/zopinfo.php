@@ -4,7 +4,7 @@
 $date_now = gmdate('D, d M Y H:i:s \G\M\T');
 
 # Send Headers
-header('Content-type: text/plain');
+header('Content-Type: application/json');
 header("Expires: " . $date_now);
 header('Last-Modified: ' . $date_now);
 header('Cache-Control: max-age=0, no-cache, '
