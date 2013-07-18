@@ -274,7 +274,7 @@ class MuninMemcachedPlugin(MuninPlugin):
             
         if (self.graphEnabled('memcached_statauth')
             and stats.has_key('auth_cmds')):
-            graph = MuninGraph('Memcached - Stats - Autentication', 
+            graph = MuninGraph('Memcached - Stats - Authentication', 
                 self._category,
                 info='Autentication requests per second.',
                 vlabel='reqs / sec', args='--base 1000 --lower-limit 0')
