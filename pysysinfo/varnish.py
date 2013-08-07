@@ -17,9 +17,6 @@ __email__ = "aouyar at gmail.com"
 __status__ = "Development"
 
 
-# Defaults
-varnishstatCmd = "varnishstat"
-
 
 
 class VarnishInfo:
@@ -27,7 +24,7 @@ class VarnishInfo:
     
     _descDict = {}
     
-    def __init__(self, instance=None):
+    def __init__(self, instance=None, statCmd=None):
         """Initialization for monitoring Varnish Cache instance.
         
         @param instance: Name  of the Varnish Cache instance.
@@ -35,6 +32,7 @@ class VarnishInfo:
         """
         self._instance = instance
         
+        self._statCmd = statCmd or 'varnishstat' 
 
     def getStats(self):
         """Runs varnishstats command to get stats from Varnish Cache.
@@ -43,7 +41,7 @@ class VarnishInfo:
 
         """
         info_dict = {}
-        args = [varnishstatCmd, '-1']
+        args = [self._statCmd, '-1']
         if self._instance is not None:
             args.extend(['-n', self._instance])
         output = util.exec_command(args)
