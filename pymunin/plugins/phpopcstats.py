@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-"""phpzopstats - Munin Plugin for monitoring PHP APC Cache.
+"""phpopcstats - Munin Plugin for monitoring PHP Zend-OPCache.
 
 
 Requirements
 
-  - The PHP script zopinfo.php must be placed in the document root and have 
+  - The PHP script opcinfo.php must be placed in the document root and have 
     access permissions from localhost.
 
 
@@ -13,10 +13,10 @@ Wild Card Plugin - No
 
 Multigraph Plugin - Graph Structure
 
-   - php_zop_memory
-   - php_zop_key_status
-   - php_zop_opcache_statistics
-   - php_zop_opcache_hitrate
+   - php_opc_memory
+   - php_opc_key_status
+   - php_opc_opcache_statistics
+   - php_opc_opcache_hitrate
 
    
 Environment Variables
@@ -28,7 +28,7 @@ Environment Variables
   password:       Password in case authentication is required for access to 
                   APC Status page.
   monpath:        APC status script path relative to Document Root.
-                  (Default: zopinfo.php)
+                  (Default: opcinfo.php)
   ssl:            Use SSL if yes. (Default: no)
   include_graphs: Comma separated list of enabled graphs. 
                   (All graphs enabled by default.)
@@ -45,8 +45,8 @@ Environment Variables for Multiple Instances of Plugin (Omitted by default.)
                          - none 
 
   Example:
-    [phpzopstats]
-        env.exclude_graphs php_zop_key_status,php_zop_opcache_statistics
+    [phpopcstats]
+        env.exclude_graphs php_opc_key_status,php_opc_opcache_statistics
 
 """
 # Munin  - Magic Markers
@@ -55,7 +55,7 @@ Environment Variables for Multiple Instances of Plugin (Omitted by default.)
 
 import sys
 from pymunin import MuninGraph, MuninPlugin, muninMain
-from pysysinfo.phpzop import ZOPinfo
+from pysysinfo.phpopc import OPCinfo
 
 __author__ = "Preston M."
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
@@ -71,7 +71,7 @@ class MuninPHPZopPlugin(MuninPlugin):
     """Multigraph Munin Plugin for monitoring APC PHP Cache.
 
     """
-    plugin_name = 'phpzopstats'
+    plugin_name = 'phpopcstats'
     isMultigraph = True
     isMultiInstance = True
 
@@ -93,10 +93,10 @@ class MuninPHPZopPlugin(MuninPlugin):
         self._ssl = self.envCheckFlag('ssl', False)
         self._category = 'PHP'
         
-        graph_name = 'php_zop_memory'
+        graph_name = 'php_opc_memory'
         if self.graphEnabled(graph_name):
-            graph = MuninGraph('PHP Zend Optimizer+ - Memory Usage (bytes)', self._category,
-                info='Memory usage of Zend Optimizer+ in bytes.',
+            graph = MuninGraph('PHP Zend OPCache - Memory Usage (bytes)', self._category,
+                info='Memory usage of Zend OPCache in bytes.',
                 total='Total Memory',
                 args='--base 1024 --lower-limit 0')
             graph.addField('used_memory', 'Used Memory', draw='AREASTACK', 
@@ -108,10 +108,10 @@ class MuninPHPZopPlugin(MuninPlugin):
 
             self.appendGraph(graph_name, graph)
         
-        graph_name = 'php_zop_opcache_statistics'
+        graph_name = 'php_opc_opcache_statistics'
         if self.graphEnabled(graph_name):
-            graph = MuninGraph('PHP Zend Optimizer+ - Opcache Statistics', self._category,
-                info='Hits and Misses of Zend Optimizer+ Opcache.',
+            graph = MuninGraph('PHP Zend OPCache - Opcache Statistics', self._category,
+                info='Hits and Misses of Zend OPCache Opcache.',
                 args='--base 1000 --lower-limit 0')
             graph.addField('hits', 'hits', draw='AREASTACK', 
                            type='DERIVE', min=0, colour='3790E8')
@@ -119,10 +119,10 @@ class MuninPHPZopPlugin(MuninPlugin):
                            type='DERIVE', min=0, colour='FF3333')
             self.appendGraph(graph_name, graph)
 
-        graph_name = 'php_zop_opcache_hitrate'
+        graph_name = 'php_opc_opcache_hitrate'
         if self.graphEnabled(graph_name):
-            graph = MuninGraph('PHP Zend Optimizer+ - Hit Percent', self._category,
-                info='Hit percent for PHP Zend Optimizer+.',
+            graph = MuninGraph('PHP Zend OPCache - Hit Percent', self._category,
+                info='Hit percent for PHP Zend OPCache.',
                 vlabel='%', args='--base 1000 --lower-limit 0')
             graph.addField('opcache_hit_rate', 'Hit Percentage', draw='LINE2', type='GAUGE',
                            info='Hit Percentage', min=0)
@@ -130,10 +130,10 @@ class MuninPHPZopPlugin(MuninPlugin):
             self.appendGraph(graph_name, graph)
 
 
-        graph_name = 'php_zop_key_status'
+        graph_name = 'php_opc_key_status'
         if self.graphEnabled(graph_name):
-            graph = MuninGraph('PHP Zend Optimizer+ - Key Statistics', self._category,
-                info='Key usage of Zend Optimizer+ Opcache.',
+            graph = MuninGraph('PHP Zend OPCache - Key Statistics', self._category,
+                info='Key usage of Zend OPCache Opcache.',
                 total='Total Keys',
                 args='--base 1000 --lower-limit 0')
             graph.addField('num_cached_scripts', 'Used Key (for scripts)', draw='AREASTACK',
@@ -147,34 +147,34 @@ class MuninPHPZopPlugin(MuninPlugin):
         
     def retrieveVals(self):
         """Retrieve values for graphs."""
-        zopinfo = ZOPinfo(self._host, self._port, self._user, self._password, 
+        opcinfo = OPCinfo(self._host, self._port, self._user, self._password, 
                           self._monpath, self._ssl)
-        stats = zopinfo.getAllStats()
+        stats = opcinfo.getAllStats()
         
-        if self.hasGraph('php_zop_memory') and stats:
+        if self.hasGraph('php_opc_memory') and stats:
             mem = stats['memory_usage']
             keys = ('used_memory', 'wasted_memory', 'free_memory')
-            map(lambda k:self.setGraphVal('php_zop_memory',k,mem[k]), keys)
+            map(lambda k:self.setGraphVal('php_opc_memory',k,mem[k]), keys)
 
-        if self.hasGraph('php_zop_opcache_statistics') and stats:
+        if self.hasGraph('php_opc_opcache_statistics') and stats:
             st = stats['opcache_statistics']
-            self.setGraphVal('php_zop_opcache_statistics', 'hits', 
+            self.setGraphVal('php_opc_opcache_statistics', 'hits', 
                              st['hits'])
-            self.setGraphVal('php_zop_opcache_statistics', 'misses', 
+            self.setGraphVal('php_opc_opcache_statistics', 'misses', 
                              st['misses'])
 
-        if self.hasGraph('php_zop_opcache_hitrate') and stats:
+        if self.hasGraph('php_opc_opcache_hitrate') and stats:
             st = stats['opcache_statistics']
-            self.setGraphVal('php_zop_opcache_hitrate', 'opcache_hit_rate',
+            self.setGraphVal('php_opc_opcache_hitrate', 'opcache_hit_rate',
                              st['opcache_hit_rate'])
 
-        if self.hasGraph('php_zop_key_status') and stats:
+        if self.hasGraph('php_opc_key_status') and stats:
             st = stats['opcache_statistics']
             wasted = st['num_cached_keys'] - st['num_cached_scripts']
             free = st['max_cached_keys'] - st['num_cached_keys']
-            self.setGraphVal('php_zop_key_status', 'num_cached_scripts', st['num_cached_scripts'])
-            self.setGraphVal('php_zop_key_status', 'num_wasted_keys', wasted)
-            self.setGraphVal('php_zop_key_status', 'num_free_keys', free)
+            self.setGraphVal('php_opc_key_status', 'num_cached_scripts', st['num_cached_scripts'])
+            self.setGraphVal('php_opc_key_status', 'num_wasted_keys', wasted)
+            self.setGraphVal('php_opc_key_status', 'num_free_keys', free)
     
     def autoconf(self):
         """Implements Munin Plugin Auto-Configuration Option.
@@ -182,9 +182,9 @@ class MuninPHPZopPlugin(MuninPlugin):
         @return: True if plugin can be  auto-configured, False otherwise.
                  
         """
-        zopinfo = ZOPinfo(self._host, self._port, self._user, self._password, 
+        opcinfo = OPCinfo(self._host, self._port, self._user, self._password, 
                           self._monpath, self._ssl)
-        return zopinfo is not None
+        return opcinfo is not None
 
             
 def main():
