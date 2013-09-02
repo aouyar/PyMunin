@@ -12,9 +12,9 @@ header('Cache-Control: max-age=0, no-cache, '
         . 'pre-check=0, post-check=0');
 
 if(function_exists('opcache_get_status')) {
-    $zopinfo = opcache_get_status();
-    unset($zopinfo['scripts']);
-    echo json_encode($zopinfo);
+    $opcinfo = opcache_get_status();
+    unset($opcinfo['scripts']);
+    echo json_encode($opcinfo);
 }
 
 ?>

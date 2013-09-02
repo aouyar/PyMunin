@@ -67,7 +67,7 @@ __email__ = "pentie at gmail.com"
 __status__ = "Development"
 
 
-class MuninPHPZopPlugin(MuninPlugin):
+class MuninPHPOPCPlugin(MuninPlugin):
     """Multigraph Munin Plugin for monitoring APC PHP Cache.
 
     """
@@ -188,7 +188,7 @@ class MuninPHPZopPlugin(MuninPlugin):
 
             
 def main():
-    sys.exit(muninMain(MuninPHPZopPlugin))
+    sys.exit(muninMain(MuninPHPOPCPlugin))
 
 
 if __name__ == "__main__":
