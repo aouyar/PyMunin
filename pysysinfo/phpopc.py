@@ -1,6 +1,6 @@
-"""Implements ZOPinfo Class for gathering stats from Zend Optimizor +.
+"""Implements OPCinfo Class for gathering stats from Zend Optimizor +.
 
-The statistics are obtained through a request to custom zopinfo.php script
+The statistics are obtained through a request to custom opcinfo.php script
 that must be placed in the Web Server Document Root Directory.
 
 """
@@ -22,7 +22,7 @@ defaultHTTPport = 80
 defaultHTTPSport = 443
 
 
-class ZOPinfo:
+class OPCinfo:
     """Class to retrieve stats from APC from Web Server."""
 
     def __init__(self, host=None, port=None, user=None, password=None,
@@ -63,7 +63,7 @@ class ZOPinfo:
         if monpath:
             self._monpath = monpath
         else:
-            self._monpath = 'zopinfo.php'
+            self._monpath = 'opcinfo.php'
         self._extras = extras
         self._statusDict = None
         if autoInit:
@@ -78,7 +78,7 @@ class ZOPinfo:
         """
         url = "%s://%s:%d/%s" % (self._proto, self._host, self._port, self._monpath)
         response = util.get_url(url, self._user, self._password)
-        #with open('/tmp/zopinfo.json') as f:
+        #with open('/tmp/opcinfo.json') as f:
         #    response = f.read()
         self._statusDict = json.loads(response)
     
@@ -89,3 +89,4 @@ class ZOPinfo:
         
         """
         return self._statusDict;
+
