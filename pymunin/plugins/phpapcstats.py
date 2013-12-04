@@ -216,28 +216,54 @@ class MuninPHPapcPlugin(MuninPlugin):
                 self.setGraphVal('php_apc_items', 'filecache',
                                  cache_sys['num_entries'])
 
-            self.setGraphVal('php_apc_items', 'usercache', 
-                             cache_user['num_entries'])
+            #APC
+            if cache_user and 'num_entries' in cache_user:
+                self.setGraphVal('php_apc_items', 'usercache', 
+                                 cache_user['num_entries'])
+
+            #APCu
+            if cache_user and 'nentries' in cache_user:
+                self.setGraphVal('php_apc_items', 'usercache', 
+                                 cache_user['nentries'])
+
         if self.hasGraph('php_apc_reqs_filecache') and cache_sys is not None:
-            self.setGraphVal('php_apc_reqs_filecache', 'hits', 
-                             cache_sys['num_hits'])
-            self.setGraphVal('php_apc_reqs_filecache', 'misses', 
-                             cache_sys['num_misses'])
-            self.setGraphVal('php_apc_reqs_filecache', 'inserts', 
-                             cache_sys['num_inserts'])
+            if cache_sys is not None:
+                self.setGraphVal('php_apc_reqs_filecache', 'hits', 
+                                 cache_sys['num_hits'])
+                self.setGraphVal('php_apc_reqs_filecache', 'misses', 
+                                 cache_sys['num_misses'])
+                self.setGraphVal('php_apc_reqs_filecache', 'inserts', 
+                                 cache_sys['num_inserts'])
+
         if self.hasGraph('php_apc_reqs_usercache') and stats:
-            self.setGraphVal('php_apc_reqs_usercache', 'hits', 
-                             cache_user['num_hits'])
-            self.setGraphVal('php_apc_reqs_usercache', 'misses', 
-                             cache_user['num_misses'])
-            self.setGraphVal('php_apc_reqs_usercache', 'inserts', 
-                             cache_user['num_inserts'])
+            if 'num_hits' in cache_user:
+                self.setGraphVal('php_apc_reqs_usercache', 'hits', 
+                                 cache_user['num_hits'])
+                self.setGraphVal('php_apc_reqs_usercache', 'misses', 
+                                 cache_user['num_misses'])
+                self.setGraphVal('php_apc_reqs_usercache', 'inserts', 
+                                 cache_user['num_inserts'])
+
+            elif 'nhits' in cache_user:
+                self.setGraphVal('php_apc_reqs_usercache', 'hits', 
+                                 cache_user['nhits'])
+                self.setGraphVal('php_apc_reqs_usercache', 'misses', 
+                                 cache_user['nmisses'])
+                self.setGraphVal('php_apc_reqs_usercache', 'inserts', 
+                                 cache_user['ninserts'])
+
         if self.hasGraph('php_apc_expunge') and stats:
             if cache_sys is not None:
                 self.setGraphVal('php_apc_expunge', 'filecache', 
                                  cache_sys['expunges'])
-            self.setGraphVal('php_apc_expunge', 'usercache', 
-                             cache_user['expunges'])
+
+            if 'expunges' in cache_user:
+                self.setGraphVal('php_apc_expunge', 'usercache', 
+                                 cache_user['expunges'])
+            elif 'nexpunges' in cache_user:
+                self.setGraphVal('php_apc_expunge', 'usercache', 
+                                 cache_user['nexpunges'])
+
         if self.hasGraph('php_apc_mem_util_frag'):
             self.setGraphVal('php_apc_mem_util_frag', 'util', 
                              stats['memory']['utilization_ratio'] * 100)

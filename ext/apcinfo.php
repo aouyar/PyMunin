@@ -49,10 +49,6 @@ if(function_exists('apcu_cache_info')) {
     die('Neither APC nor APCu installed.');
 }
 
-if (array_key_exists('cache_list', $cache_user)) {
-    unset($cache_user['cache_list']);
-}
-
 $mem = apc_sma_info(true);
 $mem_detail = apc_sma_info();
 
@@ -61,6 +57,7 @@ foreach ($cache_sys as $key => $val) {
 }
 
 foreach ($cache_user as $key => $val) {
+  if(is_array($val)) continue;
   printf("%s:%s:%s\n",'cache_user', $key, $val); 
 }
 
