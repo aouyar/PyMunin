@@ -159,7 +159,7 @@ PyMunin is installable pip / easy_install thanks to Mark. :-)
 by [Samuel Stauffer](https://github.com/samuel).
 * The Rackspace Cloud plugin was initially developed
   by [Brian Welsh](https://github.com/palewire).
-* [Santiago Rojo](https://github.com/arpagon) has contributed
+* [Sebastian Rojo](https://github.com/arpagon) has contributed
 many improvements to the Asterisk Plugin.
 * [Preston Mason](https://github.com/pentie) has made significant contributions to 
 the Varnish Cache and PHP APC Cache Plugins.
