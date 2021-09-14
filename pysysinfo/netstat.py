@@ -45,8 +45,8 @@ class NetstatInfo:
                         resolve_users=True):
         """Execute netstat command and return result as a nested dictionary.
         
-        @param tcp:            Include TCP ports in ouput if True.
-        @param udp:            Include UDP ports in ouput if True.
+        @param tcp:            Include TCP ports in output if True.
+        @param udp:            Include UDP ports in output if True.
         @param ipv4:           Include IPv4 ports in output if True.
         @param ipv6:           Include IPv6 ports in output if True.
         @param include_listen: Include listening ports in output if True.
@@ -123,8 +123,8 @@ class NetstatInfo:
                  **kwargs):
         """Execute netstat command and return result as a nested dictionary.
         
-        @param tcp:            Include TCP ports in ouput if True.
-        @param udp:            Include UDP ports in ouput if True.
+        @param tcp:            Include TCP ports in output if True.
+        @param udp:            Include UDP ports in output if True.
         @param ipv4:           Include IPv4 ports in output if True.
         @param ipv6:           Include IPv6 ports in output if True.
         @param include_listen: Include listening ports in output if True.
