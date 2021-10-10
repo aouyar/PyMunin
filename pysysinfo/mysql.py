@@ -39,11 +39,14 @@ class MySQLinfo:
         self._conn = None
         self._connParams = {}
         if host is not None:
-            self._connParams['host'] = host
-            if port is not None:
-                self._connParams['port'] = port
+            if host[:1] == "/":
+                self._connParams['unix_socket'] = host
             else:
-                self._connParams['port'] = defaultMySQLport
+                self._connParams['host'] = host
+                if port is not None:
+                    self._connParams['port'] = port
+                else:
+                    self._connParams['port'] = defaultMySQLport
         elif port is not None:
             self._connParams['host'] = '127.0.0.1'
             self._connParams['port'] = port
