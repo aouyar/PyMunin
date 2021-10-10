@@ -123,6 +123,7 @@ class MuninPlugin:
         self._instanceName = None
         self._instanceLabel = None
         self._nestedGraphs = False
+        self._host_name = self.envGet('host_name')
         if (self.plugin_name is not None and argv is not None and len(argv) > 0 
             and re.search('_$', self.plugin_name)):
             mobj = re.match("%s(\S+)$" % self.plugin_name, 
@@ -715,6 +716,8 @@ class MuninPlugin:
         populated.
 
         """
+        if self._host_name is not None:
+            print "host_name %s" % self._host_name
         for parent_name in self._graphNames:
             graph = self._graphDict[parent_name]
             if self.isMultigraph:
