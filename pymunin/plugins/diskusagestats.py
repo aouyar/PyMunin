@@ -4,7 +4,7 @@ filesystems.
 
 Requirements
 
-  - Root user privileges may be requiered to access stats for filesystems 
+  - Root user privileges may be required to access stats for filesystems 
   without any read access for munin user.
 
 

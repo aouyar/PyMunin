@@ -308,7 +308,7 @@ class MuninPlugin:
     def envHasKey(self, name):
         """Return True if environment variable with name exists.  
         
-        @param name: Name of environtment variable.
+        @param name: Name of environment variable.
         @return:     True if environment variable is defined.
         
         """
@@ -446,7 +446,7 @@ class MuninPlugin:
         return not self.isMultigraph or self.envCheckFilter('graphs', graph_name)
         
     def saveState(self,  stateObj):
-        """Utility methos to save plugin state stored in stateObj to persistent 
+        """Utility methods to save plugin state stored in stateObj to persistent 
         storage to permit access to previous state in subsequent plugin runs.
         
         Any object that can be pickled and unpickled can be used to store the 

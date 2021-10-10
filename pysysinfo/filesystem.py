@@ -93,7 +93,7 @@ class FilesystemInfo:
     def getInodeUse(self):
         """Get disk space usage.
         
-        @return: Dictionary of filesysten inode utilization stats for filesystems.
+        @return: Dictionary of filesystem inode utilization stats for filesystems.
         
         """
         stats = {}

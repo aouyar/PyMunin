@@ -32,7 +32,7 @@ class DiskIOinfo:
     def __init__(self):
         """Initialization
         
-        @param autoInit: If True parse stats on initization.
+        @param autoInit: If True parse stats on initialization.
         
         """
         self._diskStats = None
