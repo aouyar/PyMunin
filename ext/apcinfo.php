@@ -37,16 +37,27 @@ else {
 	$detail = FALSE;
 }
 
+if(function_exists('apcu_cache_info')) {
+    //APCu
+    $cache_sys = array();
+    $cache_user = apcu_cache_info();
+} elseif (!function_exists('apcu_cache_info') && function_exists('apc_cache_info')) {
+    //APC
+    $cache_sys = apc_cache_info('', true);
+    $cache_user = apc_cache_info('user', true);
+} else {
+    die('Neither APC nor APCu installed.');
+}
 
-$cache_sys = apc_cache_info('', true);
-$cache_user = apc_cache_info('user', true);  
 $mem = apc_sma_info(true);
 $mem_detail = apc_sma_info();
 
 foreach ($cache_sys as $key => $val) {
   printf("%s:%s:%s\n",'cache_sys', $key, $val); 
 }
+
 foreach ($cache_user as $key => $val) {
+  if(is_array($val)) continue;
   printf("%s:%s:%s\n",'cache_user', $key, $val); 
 }
 
