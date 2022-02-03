@@ -5,6 +5,7 @@
 Requirements
 
   - Access to varnishstat executable for retrieving stats.
+    (if it's not in the PATH, provide it as environment variable)
 
 
 Wild Card Plugin - No
@@ -27,6 +28,8 @@ Environment Variables
 
   instance:       Name  of the Varnish Cache instance.
                   (Defaults to hostname.) 
+  stats_command   Path to varnishstat
+                  (Defaults to 'varnishstat')
   include_graphs: Comma separated list of enabled graphs. 
                   (All graphs enabled by default.)
   exclude_graphs: Comma separated list of disabled graphs.
@@ -83,8 +86,9 @@ class MuninVarnishPlugin(MuninPlugin):
         MuninPlugin.__init__(self, argv, env, debug)
         
         self._instance = self.envGet('instance')
+        self._varnishStatCmd = self.envGet('stats_command')
         self._category = 'Varnish'
-        varnish_info = VarnishInfo(self._instance)
+        varnish_info = VarnishInfo(self._instance, self._varnishStatCmd)
         self._stats = varnish_info.getStats()
         self._desc = varnish_info.getDescDict()
         
