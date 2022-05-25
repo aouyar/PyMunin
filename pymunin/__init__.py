@@ -9,7 +9,10 @@
 import os.path
 import sys
 import re
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2011, Ali Onur Uyar"
@@ -717,21 +720,21 @@ class MuninPlugin:
 
         """
         if self._host_name is not None:
-            print "host_name %s" % self._host_name
+            print("host_name %s" % self._host_name)
         for parent_name in self._graphNames:
             graph = self._graphDict[parent_name]
             if self.isMultigraph:
-                print "multigraph %s" % self._getMultigraphID(parent_name)
-            print self._formatConfig(graph.getConfig())
+                print("multigraph %s" % self._getMultigraphID(parent_name))
+            print(self._formatConfig(graph.getConfig()))
             print
         if (self.isMultigraph and self._nestedGraphs 
             and self._subgraphDict and self._subgraphNames):
             for (parent_name, subgraph_names) in self._subgraphNames.iteritems():
                 for graph_name in subgraph_names:
                     graph = self._subgraphDict[parent_name][graph_name]
-                    print "multigraph %s" % self.getMultigraphID(parent_name, 
-                                                                 graph_name)
-                    print self._formatConfig(graph.getConfig())
+                    print("multigraph %s" % self.getMultigraphID(parent_name, 
+                                                                 graph_name))
+                    print(self._formatConfig(graph.getConfig()))
                     print
         return True
 
@@ -754,17 +757,17 @@ class MuninPlugin:
         for parent_name in self._graphNames:
             graph = self._graphDict[parent_name]
             if self.isMultigraph:
-                print "multigraph %s" % self._getMultigraphID(parent_name)
-            print self._formatVals(graph.getVals())
+                print("multigraph %s" % self._getMultigraphID(parent_name))
+            print(self._formatVals(graph.getVals()))
             print
         if (self.isMultigraph and self._nestedGraphs 
             and self._subgraphDict and self._subgraphNames):
             for (parent_name, subgraph_names) in self._subgraphNames.iteritems():
                 for graph_name in subgraph_names:
                     graph = self._subgraphDict[parent_name][graph_name]
-                    print "multigraph %s" % self.getMultigraphID(parent_name, 
-                                                                 graph_name)
-                    print self._formatVals(graph.getVals())
+                    print("multigraph %s" % self.getMultigraphID(parent_name, 
+                                                                 graph_name))
+                    print(self._formatVals(graph.getVals()))
                     print
         return True
 
@@ -783,9 +786,9 @@ class MuninPlugin:
         elif oper == 'autoconf':
             ret = self.autoconf()
             if ret:
-                print "yes"
+                print("yes")
             else:
-                print "no"
+                print("no")
             ret = True
         elif oper == 'suggest':
             ret = self.suggest()
@@ -966,7 +969,7 @@ def muninMain(pluginClass, argv=None, env=None, debug=False):
     except Exception:
         print >> sys.stderr, "ERROR: %s" % repr(sys.exc_info()[1])
         if autoconf:
-            print "no"
+            print("no")
         if debug:
             raise
         else:
@@ -1005,6 +1008,3 @@ def fixLabel(label, maxlen, delim=None, repl='', truncend=True):
             return label[:maxlen] + repl
         else:
             return repl + label[-maxlen:]
-            
-            
-    
