@@ -62,7 +62,7 @@ class install(_install):
         _install.run(self)
         # Installing the plugins requires write permission to plugins directory
         # (/usr/share/munin/plugins) which is default owned by root.
-        print "Munin Plugin Directory: %s" % munin_plugin_dir
+        print("Munin Plugin Directory: %s" % munin_plugin_dir)
         if os.path.exists(munin_plugin_dir):
             try:
                 for name in plugin_names:
@@ -71,18 +71,18 @@ class install(_install):
                         u'%s-%s' % (PYMUNIN_SCRIPT_FILENAME_PREFIX, name)
                     )
                     destination = os.path.join(munin_plugin_dir, name)
-                    print "Installing %s to %s." % (name, munin_plugin_dir)
+                    print("Installing %s to %s." % (name, munin_plugin_dir))
                     shutil.copy(source, destination)
-            except IOError, e:
+            except IOError as e:
                 if e.errno in  (errno.EACCES, errno.ENOENT):
                     # Access denied or file/directory not found.
-                    print "*" * 78
+                    print("*" * 78)
                     if e.errno == errno.EACCES:
-                        print ("You do not have permission to install the plugins to %s." 
-                               % munin_plugin_dir)
+                        print("You do not have permission to install the plugins to %s." 
+                              % munin_plugin_dir)
                     if e.errno == errno.ENOENT:
-                        print ("Failed installing the plugins to %s. "
-                               "File or directory not found." % munin_plugin_dir)
+                        print("Failed installing the plugins to %s. "
+                              "File or directory not found." % munin_plugin_dir)
                     script = os.path.join(self.install_scripts, 'pymunin-install')
                     f = open(script, 'w')
                     try:
@@ -96,11 +96,11 @@ class install(_install):
                             f.write('cp %s %s\n' % (source, destination))
                     finally:
                         f.close()
-                    os.chmod(script, 0755)
-                    print ("You will need to copy manually using the script: %s\n"
-                           "Example: sudo %s"
+                    os.chmod(script, 0o755)
+                    print("You will need to copy manually using the script: %s\n"
+                          "Example: sudo %s"
                            % (script, script))
-                    print "*" * 78
+                    print("*" * 78)
                 else:
                     # Raise original exception
                     raise
