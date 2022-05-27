@@ -726,7 +726,7 @@ class MuninPlugin:
             if self.isMultigraph:
                 print("multigraph %s" % self._getMultigraphID(parent_name))
             print(self._formatConfig(graph.getConfig()))
-            print
+            print()
         if (self.isMultigraph and self._nestedGraphs 
             and self._subgraphDict and self._subgraphNames):
             for (parent_name, subgraph_names) in self._subgraphNames.iteritems():
@@ -735,7 +735,7 @@ class MuninPlugin:
                     print("multigraph %s" % self.getMultigraphID(parent_name, 
                                                                  graph_name))
                     print(self._formatConfig(graph.getConfig()))
-                    print
+                    print()
         return True
 
     def suggest(self):
@@ -759,7 +759,7 @@ class MuninPlugin:
             if self.isMultigraph:
                 print("multigraph %s" % self._getMultigraphID(parent_name))
             print(self._formatVals(graph.getVals()))
-            print
+            print()
         if (self.isMultigraph and self._nestedGraphs 
             and self._subgraphDict and self._subgraphNames):
             for (parent_name, subgraph_names) in self._subgraphNames.iteritems():
@@ -768,7 +768,7 @@ class MuninPlugin:
                     print("multigraph %s" % self.getMultigraphID(parent_name, 
                                                                  graph_name))
                     print(self._formatVals(graph.getVals()))
-                    print
+                    print()
         return True
 
     def run(self):
@@ -967,7 +967,7 @@ def muninMain(pluginClass, argv=None, env=None, debug=False):
         else:
             return 1
     except Exception:
-        print >> sys.stderr, "ERROR: %s" % repr(sys.exc_info()[1])
+        print("ERROR: %s" % repr(sys.exc_info()[1]), file=sys.stderr)
         if autoconf:
             print("no")
         if debug:
