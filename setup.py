@@ -48,7 +48,7 @@ class install(_install):
     "Extend base install class to provide a post-install step."
 
     def run(self):
-        if os.environ.has_key('MUNIN_PLUGIN_DIR'):
+        if 'MUNIN_PLUGIN_DIR' in os.environ:
             munin_plugin_dir = os.environ.get('MUNIN_PLUGIN_DIR')
         elif self.root is None:
             munin_plugin_dir = os.path.normpath(
